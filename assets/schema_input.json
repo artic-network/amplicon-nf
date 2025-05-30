@@ -11,7 +11,44 @@
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "meta": ["id"]
+                "uniqueItems": true,
+                "meta": [
+                    "id"
+                ]
+            },
+            "platform": {
+                "type": "string",
+                "enum": [
+                    "illumina",
+                    "nanopore"
+                ],
+                "errorMessage": "Platform must be either 'illumina' or 'nanopore'",
+                "meta": [
+                    "platform"
+                ]
+            },
+            "scheme_name": {
+                "type": "string",
+                "pattern": "^\\S*\\/\\d{3,}\\/v\\d\\.\\d\\.\\d-{0,1}\\S*$",
+                "errorMessage": "Scheme name must be provided and follow the format 'scheme_name/scheme_length/vX.X.X' or 'scheme_name/scheme_length/vX.X.X-tag'. See 'https://labs.primalscheme.com/' for a list of schemes available in the ARTIC primerschemes repository.",
+                "meta": [
+                    "scheme"
+                ]
+            },
+            "custom_scheme_path": {
+                "type": "string",
+                "format": "directory-path",
+                "exists": true,
+                "errorMessage": "Custom scheme path must exist and cannot contain spaces.",
+                "meta": [
+                    "custom_scheme"
+                ]
+            },
+            "fastq_directory": {
+                "type": "string",
+                "format": "directory-path",
+                "exists": true,
+                "errorMessage": "FastQ directory must exist and cannot contain spaces. It should contain the FASTQ files for the nanopore sample. e.g. '/path/to/run/fastq_pass/Barcode01/'"
             },
             "fastq_1": {
                 "type": "string",
@@ -28,6 +65,9 @@
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": [
+            "sample",
+            "platform"
+        ]
     }
 }
