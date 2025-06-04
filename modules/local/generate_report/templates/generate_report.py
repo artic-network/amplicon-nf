@@ -240,35 +240,3 @@ def read_depth_plot(pileup_path: str, scheme_bed_path: str, min_depth: int = 20)
         figs[chrom].append(fig)
 
     return figs
-
-
-figs = read_depth_plot(
-    pileup_path="/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/modules/local/generate_report/nanopore.pileup",
-    scheme_bed_path="/Users/sam/bio_bulk/store_dir/fieldbioinformatics-nf/primer-schemes/artic-sars-cov-2/400/v3.0.0/primer.bed",
-)
-
-depth_figs = amplicon_depth_plot(
-    amplicon_depth_tsv_path="/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/modules/local/generate_report/illumina_amplicon_test.amplicon_depths.tsv",
-)
-
-# figs["depth"] = depth_figs["MN908947.3"]
-
-for chrom, fig_list in figs.items():
-    for fig in fig_list:
-        fig.show()
-
-# import jinja2
-# from jinja2 import Environment, FileSystemLoader
-# import os
-
-# templateLoader = jinja2.FileSystemLoader(
-#     searchpath=os.path.dirname(os.path.realpath(__file__))
-# )
-# templateEnv = jinja2.Environment(loader=templateLoader)
-
-# template = templateEnv.get_template("report_template.html")
-
-# body_html = template.render(page_title="test-sample QC Report", figs=figs)
-
-# with open("report.html", "w") as f:
-#     f.write(body_html)
