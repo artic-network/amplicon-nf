@@ -10,7 +10,6 @@ include { BCFTOOLS_NORM      } from '../../../modules/nf-core/bcftools/norm/main
 include { BCFTOOLS_CONSENSUS } from '../../../modules/nf-core/bcftools/consensus/main'
 
 include { ARTIC_GET_SCHEME   } from '../../../modules/local/artic/get_scheme/main'
-include { GET_CUSTOM_SCHEME  } from '../../../modules/local/get_custom_scheme/main'
 include { ARTIC_ALIGN_TRIM   } from '../../../modules/local/artic/align_trim/main'
 include { PROCESS_GVCF       } from '../../../modules/local/process_gvcf/main'
 
@@ -32,11 +31,10 @@ workflow ILLUMINA_ASSEMBLY {
 
     ch_branched_input.custom_scheme
         .map { meta, fastq_1, fastq_2 ->
-            [meta, fastq_1, fastq_2, meta.custom_scheme]
+            [meta, fastq_1, fastq_2, file("${meta.custom_scheme.toUriString()}/primer.bed"), file("${meta.custom_scheme.toUriString()}/reference.fasta")]
         }
         .set { ch_custom_scheme_input }
 
-    GET_CUSTOM_SCHEME(ch_custom_scheme_input)
 
     ARTIC_GET_SCHEME(
         ch_branched_input.remote_scheme,
@@ -45,7 +43,7 @@ workflow ILLUMINA_ASSEMBLY {
     ch_versions = ch_versions.mix(ARTIC_GET_SCHEME.out.versions.first())
 
     ARTIC_GET_SCHEME.out.reads_and_scheme
-        .mix(GET_CUSTOM_SCHEME.out.reads_and_scheme)
+        .mix(ch_custom_scheme_input)
         .set { ch_reads_and_scheme }
 
     ch_reads_and_scheme
