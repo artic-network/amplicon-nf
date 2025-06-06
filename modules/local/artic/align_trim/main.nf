@@ -22,7 +22,7 @@ process ARTIC_ALIGN_TRIM {
     def args = task.ext.args ?: ""
     prefix = task.ext.prefix ?: "${meta.id}"
 
-    incorrect_pair_string = params.remove_incorrect_primer_pairs ? "--remove-incorrect-pairs" : ""
+    incorrect_pair_string = params.allow_mismatched_primers ? "" : "--remove-incorrect-pairs"
     endedness_string = meta.single_end ? "" : "--paired"
 
     """
