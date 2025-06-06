@@ -119,10 +119,10 @@
                     "description": "Skip filtering of ONT read lengths.",
                     "help_text": "Set this to true if you want to skip filtering of ONT read lengths. If you are providing barcode dirs from a 'fastq_pass' directory this should be set to true."
                 },
-                "remove_incorrect_primer_pairs": {
+                "allow_mismatched_primers": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Remove read pairs where the primer assigned to the forward read does not match the primer assigned to the reverse read."
+                    "description": "Do not remove reads which appear to have mismatched primers."
                 },
                 "manual_clair3_model": {
                     "type": "string",

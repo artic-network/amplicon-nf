@@ -309,6 +309,28 @@ with open("${amp_depth_tsv}", "rt") as f:
         for row in reader
     ]
 
+    for x in primer_pairs:
+        if (
+            len(
+                [
+                    y
+                    for y in amplicon_depths
+                    if y["chrom"] == str(x.chrom)
+                    and y["amplicon"] == str(x.amplicon_number)
+                ]
+            )
+            == 0
+        ):
+            amplicon_depths.append(
+                {
+                    "chrom": str(x.chrom),
+                    "amplicon": str(x.amplicon_number),
+                    "mean_depth": 0.0,
+                }
+            )
+
+amplicon_depths.sort(key=lambda x: (x["chrom"], int(x["amplicon"])))
+
 plot = read_depth_plot(
     depth_df=depth_df,
     scheme_df=scheme_df,
@@ -354,18 +376,18 @@ for chrom, fig in plot.items():
     total_bases = depth_df[depth_df["chrom"] == chrom].shape[0]
     percent_coverage = (bases_above_min_depth / total_bases) * 100
 
+    amplicon_dropouts = [
+        str(x["amplicon"])
+        for x in amplicon_depths
+        if x["chrom"] == chrom and x["mean_depth"] < int("${params.min_coverage_depth}")
+    ]
+
     payload["contigs"].append(
         {
             "name": chrom,
             "percent_coverage": round(percent_coverage, 2),
-            "amplicon_dropouts": len(
-                [
-                    str(x["amplicon"])
-                    for x in amplicon_depths
-                    if x["chrom"] == chrom
-                    and x["mean_depth"] < int("${params.min_coverage_depth}")
-                ]
-            ),
+            "amplicon_dropouts": amplicon_dropouts,
+            "total_amplicon_dropouts": len(amplicon_dropouts),
             "amplicon_mean_depths": {
                 x["amplicon"]: round(x["mean_depth"], 2)
                 for x in amplicon_depths
