@@ -333,7 +333,7 @@ payload = {
     "citation_link": "https://github.com/artic-network/amplicon-nf",
     "contact_email": "",
     "funder_statement": "ARTIC2 is funded by the Wellcome Trust Award (313694/Z/24/).",
-    "timestamp": datetime.now().isoformat(),
+    "timestamp": datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
     "contigs": [],
 }
 
@@ -358,12 +358,14 @@ for chrom, fig in plot.items():
         {
             "name": chrom,
             "percent_coverage": round(percent_coverage, 2),
-            "amplicon_dropouts": [
-                str(x["amplicon"])
-                for x in amplicon_depths
-                if x["chrom"] == chrom
-                and x["mean_depth"] < int("${params.min_coverage_depth}")
-            ],
+            "amplicon_dropouts": len(
+                [
+                    str(x["amplicon"])
+                    for x in amplicon_depths
+                    if x["chrom"] == chrom
+                    and x["mean_depth"] < int("${params.min_coverage_depth}")
+                ]
+            ),
             "amplicon_mean_depths": {
                 x["amplicon"]: round(x["mean_depth"], 2)
                 for x in amplicon_depths
@@ -392,7 +394,7 @@ for chrom, fig in plot.items():
 render_qc_report(
     payload=payload,
     template_path=Path("${report_template}"),
-    output_path=Path(f"{payload['timestamp']}_amplicon-nf_report.html"),
+    output_path=Path(f"{payload['timestamp']}_{"${meta.id}"}_amplicon-nf-report.html"),
     bootstrap_css_path=Path("${bootstrap_bundle_min_css}"),
     bootstrap_bundle_js_path=Path("${bootstrap_bundle_min_js}"),
     plotly_js_path=Path("${plotly_js}"),

@@ -211,7 +211,7 @@
         <h5 class="mt-3">QC Summary</h5>
         <ul class="list-unstyled">
           <li><strong>Percent Coverage:</strong> {{ contig.percent_coverage }}%</li>
-          <li><strong>Amplicon Dropouts:</strong> {{ contig.amplicon_dropouts | join(", ") }}</li>
+          <li><strong>Number of Amplicon Dropouts:</strong> {{ contig.amplicon_dropouts }}</li>
           <li>
             <strong>QC Status:</strong>
             {% if contig.qc_status == 'pass' %}
