@@ -7,7 +7,7 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_fieldbioinformatics-nf_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 
 include { ONT_ASSEMBLY           } from '../subworkflows/local/ont_assembly/main'
 include { ILLUMINA_ASSEMBLY      } from '../subworkflows/local/illumina_assembly/main'
@@ -23,7 +23,7 @@ include { GENERATE_SAMPLE_REPORT } from '../modules/local/generate_sample_report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow FIELDBIOINFORMATICS_NF {
+workflow AMPLICON_NF {
     take:
     ch_samplesheet     // channel: samplesheet read in from --input
     ch_store_directory // channel: store directory read in from --store_dir
@@ -141,7 +141,7 @@ workflow FIELDBIOINFORMATICS_NF {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'fieldbioinformatics-nf_software_' + 'mqc_' + 'versions.yml',
+            name: 'amplicon-nf_software_' + 'mqc_' + 'versions.yml',
             sort: true,
             newLine: true,
         )

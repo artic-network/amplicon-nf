@@ -32,14 +32,14 @@ process ARTIC_MINION {
     scheme_split = meta.scheme ? meta.scheme.split("/") : ["", "", ""]
     scheme_string = custom_scheme_directory ? "--bed ${custom_scheme_directory}/primer.bed --ref ${custom_scheme_directory}/reference.fasta" : "--scheme-name ${scheme_split[0]} --scheme-length ${scheme_split[1]} --scheme-version ${scheme_split[2]}"
     model_str = params.manual_clair3_model ? "--model ${params.manual_clair3_model}" : ""
-    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed primer.bed && cp ${custom_scheme_directory}/reference.fasta reference.fasta" : "cp ${store_directory}/fieldbioinformatics-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed primer.bed && cp ${store_directory}/fieldbioinformatics-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta reference.fasta"
+    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed primer.bed && cp ${custom_scheme_directory}/reference.fasta reference.fasta" : "cp ${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed primer.bed && cp ${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta reference.fasta"
 
     """
     artic \\
         minion \\
         ${args} \\
-        --model-dir ${store_directory}/fieldbioinformatics-nf/clair3-models/ \\
-        --scheme-directory ${store_directory}/fieldbioinformatics-nf/primer-schemes/ \\
+        --model-dir ${store_directory}/amplicon-nf/clair3-models/ \\
+        --scheme-directory ${store_directory}/amplicon-nf/primer-schemes/ \\
         --threads ${task.cpus} \\
         --read-file ${fastq} \\
         ${model_str} \\

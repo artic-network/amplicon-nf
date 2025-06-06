@@ -17,7 +17,7 @@ process GENERATE_SAMPLE_REPORT {
     path plotly_js
 
     output:
-    path "*_fieldbioinformatics-nf_report.html", emit: sample_report_html
+    path "*_amplicon-nf_report.html", emit: sample_report_html
     path "versions.yml", emit: versions
 
     when:

@@ -7,9 +7,9 @@ lint:
     - .github/CONTRIBUTING.md
     - .github/CONTRIBUTING.md
     - CODE_OF_CONDUCT.md
-    - assets/nf-core-fieldbioinformatics-nf_logo_light.png
-    - docs/images/nf-core-fieldbioinformatics-nf_logo_light.png
-    - docs/images/nf-core-fieldbioinformatics-nf_logo_dark.png
+    - assets/nf-core-amplicon-nf_logo_light.png
+    - docs/images/nf-core-amplicon-nf_logo_light.png
+    - docs/images/nf-core-amplicon-nf_logo_dark.png
     - .github/ISSUE_TEMPLATE/bug_report.yml
     - .github/CONTRIBUTING.md
     - .github/PULL_REQUEST_TEMPLATE.md
@@ -30,16 +30,18 @@ lint:
     - conf/igenomes.config
     - conf/igenomes_ignored.config
     - CODE_OF_CONDUCT.md
-    - assets/nf-core-fieldbioinformatics-nf_logo_light.png
-    - docs/images/nf-core-fieldbioinformatics-nf_logo_light.png
-    - docs/images/nf-core-fieldbioinformatics-nf_logo_dark.png
+    - assets/nf-core-amplicon-nf_logo_light.png
+    - docs/images/nf-core-amplicon-nf_logo_light.png
+    - docs/images/nf-core-amplicon-nf_logo_dark.png
     - .github/ISSUE_TEMPLATE/config.yml
     - .github/workflows/awstest.yml
     - .github/workflows/awsfulltest.yml
+  template_strings:
+    - assets/sample_report_template.html
 
 template:
   org: artic-network
-  name: fieldbioinformatics-nf
+  name: amplicon-nf
   description: Amplicon genome assembly which doesn't suck
   author: Sam Wilkinson
   version: 1.0.0dev

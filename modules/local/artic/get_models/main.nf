@@ -19,7 +19,7 @@ process ARTIC_GET_MODELS {
     script:
     """
     artic_get_models \\
-        --model-dir ${store_directory}/fieldbioinformatics-nf/clair3-models/
+        --model-dir ${store_directory}/amplicon-nf/clair3-models/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

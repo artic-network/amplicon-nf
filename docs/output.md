@@ -1,4 +1,4 @@
-# artic-network/fieldbioinformatics-nf: Output
+# artic-network/amplicon-nf: Output
 
 ## Introduction
 

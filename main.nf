@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    artic-network/fieldbioinformatics-nf
+    artic-network/amplicon-nf
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/artic-network/fieldbioinformatics-nf
+    Github : https://github.com/artic-network/amplicon-nf
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,9 +13,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FIELDBIOINFORMATICS_NF  } from './workflows/fieldbioinformatics-nf'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_fieldbioinformatics-nf_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_fieldbioinformatics-nf_pipeline'
+include { AMPLICON_NF             } from './workflows/amplicon-nf'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -25,7 +25,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_fiel
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow ARTICNETWORK_FIELDBIOINFORMATICS_NF {
+workflow ARTICNETWORK_AMPLICON_NF {
     take:
     samplesheet // channel: samplesheet read in from --input
 
@@ -36,13 +36,13 @@ workflow ARTICNETWORK_FIELDBIOINFORMATICS_NF {
     //
     // WORKFLOW: Run pipeline
     //
-    FIELDBIOINFORMATICS_NF(
+    AMPLICON_NF(
         samplesheet,
         ch_store_dir,
     )
 
     emit:
-    multiqc_report = FIELDBIOINFORMATICS_NF.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = AMPLICON_NF.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,7 +66,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    ARTICNETWORK_FIELDBIOINFORMATICS_NF(
+    ARTICNETWORK_AMPLICON_NF(
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
@@ -79,6 +79,6 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        ARTICNETWORK_FIELDBIOINFORMATICS_NF.out.multiqc_report,
+        ARTICNETWORK_AMPLICON_NF.out.multiqc_report,
     )
 }

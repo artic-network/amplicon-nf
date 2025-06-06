@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/artic-network/fieldbioinformatics-nf/master/nextflow_schema.json",
-    "title": "artic-network/fieldbioinformatics-nf pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/artic-network/amplicon-nf/master/nextflow_schema.json",
+    "title": "artic-network/amplicon-nf pipeline parameters",
     "description": "Amplicon genome assembly which doesn\\'t suck",
     "type": "object",
     "$defs": {
@@ -38,13 +38,7 @@
                     "title": "Store directory name",
                     "description": "Where to downloaded primer schemes for future use.",
                     "help_text": "Any downloaded primer schemes will be stored in this directory for future use. If not set when running from the command line, the schemes will be stored in the current working directory/store_dir. If this is run via epi2me by default they will be stored in your `epi2melabs/data/` directory.",
-                    "default": "store_dir"
-                },
-                "custom_scheme_name": {
-                    "type": "string",
-                    "description": "Name of custom primer scheme to use.",
-                    "help_text": "If you are using a custom primer scheme, you can specify its name here.",
-                    "fa_icon": "fas fa-microscope"
+                    "default": "./store_dir/"
                 },
                 "email": {
                     "type": "string",
@@ -94,7 +88,7 @@
                 "qc_pass_min_coverage": {
                     "type": "integer",
                     "default": 80,
-                    "description": "Minimum coverage of reference above `minimum_coverage_depth` to be consodered a QC pass.",
+                    "description": "Minimum coverage of reference above `minimum_coverage_depth` to be consodered a QC pass."
                 },
                 "min_mapping_quality": {
                     "type": "integer",
@@ -128,7 +122,7 @@
                 "remove_incorrect_primer_pairs": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Remove read pairs where the primer assigned to the forward read does not match the primer assigned to the reverse read.",
+                    "description": "Remove read pairs where the primer assigned to the forward read does not match the primer assigned to the reverse read."
                 },
                 "manual_clair3_model": {
                     "type": "string",

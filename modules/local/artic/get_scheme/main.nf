@@ -11,7 +11,7 @@ process ARTIC_GET_SCHEME {
     path store_directory
 
     output:
-    tuple val(meta), path(fastq_1), path(fastq_2), path("${store_directory}/fieldbioinformatics-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed"), path("${store_directory}/fieldbioinformatics-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta"), emit: reads_and_scheme
+    tuple val(meta), path(fastq_1), path(fastq_2), path("${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed"), path("${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta"), emit: reads_and_scheme
     path "versions.yml", emit: versions
 
     when:
@@ -22,7 +22,7 @@ process ARTIC_GET_SCHEME {
 
     """
     artic_get_scheme \\
-        --scheme-directory ${store_directory}/fieldbioinformatics-nf/primer-schemes/ \\
+        --scheme-directory ${store_directory}/amplicon-nf/primer-schemes/ \\
         --scheme-name ${scheme_split[0]} \\
         --scheme-length ${scheme_split[1]} \\
         --scheme-version ${scheme_split[2]} \\

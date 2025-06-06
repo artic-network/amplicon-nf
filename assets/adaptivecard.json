@@ -17,7 +17,7 @@
                         "size": "Large",
                         "weight": "Bolder",
                         "color": "<% if (success) { %>Good<% } else { %>Attention<%} %>",
-                        "text": "artic-network/fieldbioinformatics-nf v${version} - ${runName}",
+                        "text": "artic-network/amplicon-nf v${version} - ${runName}",
                         "wrap": true
                     },
                     {
@@ -54,7 +54,8 @@
                             "body": [
                                 {
                                     "type": "FactSet",
-                                    "facts": [<% out << summary.collect{ k,v -> "{\"title\": \"$k\", \"value\" : \"$v\"}"}.join(",\n") %>
+                                    "facts": [<% out << summary.collect{ k,v -> "{\"title\": \"$k\", \"value\" : \"$v\"}"
+                                        }.join(",\n") %>
                                     ]
                                 }
                             ]
