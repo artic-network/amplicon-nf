@@ -13,6 +13,9 @@ include { ONT_ASSEMBLY           } from '../subworkflows/local/ont_assembly/main
 include { ILLUMINA_ASSEMBLY      } from '../subworkflows/local/illumina_assembly/main'
 
 include { SAMTOOLS_DEPTH         } from '../modules/nf-core/samtools/depth/main'
+include { SAMTOOLS_COVERAGE      } from '../modules/nf-core/samtools/coverage/main'
+
+include { GENERATE_SAMPLE_REPORT } from '../modules/local/generate_sample_report/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,6 +40,9 @@ workflow FIELDBIOINFORMATICS_NF {
         }
         .set { ch_input }
 
+    //
+    // Generate virus assemblies
+    //
     ch_input.nanopore
         .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
             [meta, fastq_dir]
@@ -63,7 +69,71 @@ workflow FIELDBIOINFORMATICS_NF {
     )
     ch_versions = ch_versions.mix(ILLUMINA_ASSEMBLY.out.versions)
 
+    //
+    // Generate report for each sample
+    //
+    ch_primertrimmed_bam = ONT_ASSEMBLY.out.primertrimmed_normalised_bam.mix(
+        ILLUMINA_ASSEMBLY.out.primertrimmed_normalised_bam
+    )
 
+    ch_primer_scheme = ONT_ASSEMBLY.out.primer_scheme.mix(
+        ILLUMINA_ASSEMBLY.out.primer_scheme
+    )
+
+    ch_amp_depth_tsv = ONT_ASSEMBLY.out.amplicon_depths.mix(
+        ILLUMINA_ASSEMBLY.out.amplicon_depths
+    )
+
+    SAMTOOLS_COVERAGE(ch_primertrimmed_bam, [[:], []], [[:], []])
+    ch_versions = ch_versions.mix(SAMTOOLS_COVERAGE.out.versions.first())
+
+    ch_samtools_depth_input = ch_primertrimmed_bam.map { meta, bam, _bai ->
+        [meta, bam]
+    }
+
+    SAMTOOLS_DEPTH(ch_samtools_depth_input, [[:], []])
+    ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())
+
+    ch_sample_report_input = ch_primer_scheme
+        .map { meta, bed, _ref -> [meta, bed] }
+        .join(SAMTOOLS_DEPTH.out.tsv)
+        .join(ch_amp_depth_tsv)
+        .join(SAMTOOLS_COVERAGE.out.coverage)
+
+    ch_report_template = file(
+        "${projectDir}/assets/sample_report_template.html",
+        checkIfExists: true
+    )
+    ch_artic_logo_svg = file(
+        "${projectDir}/assets/artic-logo-small.svg",
+        checkIfExists: true
+    )
+    ch_bootstrap_bundle_min_js = file(
+        "${projectDir}/assets/bootstrap.bundle.min.js",
+        checkIfExists: true
+    )
+    ch_bootstrap_bundle_min_css = file(
+        "${projectDir}/assets/bootstrap.min.css",
+        checkIfExists: true
+    )
+    ch_plotly_js = file(
+        "${projectDir}/assets/plotly.min.js",
+        checkIfExists: true
+    )
+
+    GENERATE_SAMPLE_REPORT(
+        ch_sample_report_input,
+        ch_report_template,
+        ch_artic_logo_svg,
+        ch_bootstrap_bundle_min_js,
+        ch_bootstrap_bundle_min_css,
+        ch_plotly_js,
+    )
+    ch_versions = ch_versions.mix(GENERATE_SAMPLE_REPORT.out.versions.first())
+
+    ch_consensus_fasta = ONT_ASSEMBLY.out.consensus_fasta.mix(
+        ILLUMINA_ASSEMBLY.out.consensus_fasta
+    )
 
     //
     // Collate and save software versions
@@ -76,7 +146,6 @@ workflow FIELDBIOINFORMATICS_NF {
             newLine: true,
         )
         .set { ch_collated_versions }
-
 
     //
     // MODULE: MultiQC
@@ -125,6 +194,8 @@ workflow FIELDBIOINFORMATICS_NF {
     )
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions // channel: [ path(versions.yml) ]
+    consensus_fasta = ch_consensus_fasta // channel: consensus FASTA files
+    sample_report   = GENERATE_SAMPLE_REPORT.out.sample_report_html // channel: sample report files
+    multiqc_report  = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    versions        = ch_versions // channel: software versions used in the workflow
 }

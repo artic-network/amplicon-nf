@@ -44,6 +44,14 @@
                     "custom_scheme"
                 ]
             },
+            "custom_scheme_name": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Custom scheme name must be provided and cannot contain spaces.",
+                "meta": [
+                    "custom_scheme_name"
+                ]
+            },
             "fastq_directory": {
                 "type": "string",
                 "format": "directory-path",

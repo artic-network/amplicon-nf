@@ -18,6 +18,7 @@ process ARTIC_MINION {
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
+    tuple val(meta), path("primer.bed"), path("reference.fasta"), emit: primer_scheme
     tuple val(meta), path("${prefix}.minion.log.txt"), emit: minion_log
     path "versions.yml", emit: versions
 
@@ -30,8 +31,8 @@ process ARTIC_MINION {
 
     scheme_split = meta.scheme ? meta.scheme.split("/") : ["", "", ""]
     scheme_string = custom_scheme_directory ? "--bed ${custom_scheme_directory}/primer.bed --ref ${custom_scheme_directory}/reference.fasta" : "--scheme-name ${scheme_split[0]} --scheme-length ${scheme_split[1]} --scheme-version ${scheme_split[2]}"
-
     model_str = params.manual_clair3_model ? "--model ${params.manual_clair3_model}" : ""
+    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed primer.bed && cp ${custom_scheme_directory}/reference.fasta reference.fasta" : "cp ${store_directory}/fieldbioinformatics-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed primer.bed && cp ${store_directory}/fieldbioinformatics-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta reference.fasta"
 
     """
     artic \\
@@ -44,6 +45,8 @@ process ARTIC_MINION {
         ${model_str} \\
         ${scheme_string} \\
         ${prefix}
+
+    ${scheme_copy_string}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

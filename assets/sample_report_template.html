@@ -1,0 +1,333 @@
+{# Viral Amplicon QC Report — Jinja2 template (patched) #}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ sample_id }} QC Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    {{ bootstrap_css | safe }}
+  </style>
+
+  <style>
+    :root {
+      --color-teal-dark: #345c67;
+      --color-teal-light: #4f7c8a;
+      --color-cream: #f3edca;
+      --color-coral: #d3615e;
+      --color-orange: #f7b26f;
+      --color-tab-inactive: #e9e1b8;
+    }
+
+    body {
+      background-color: var(--color-cream);
+      color: #102a33;
+      font-family: "Roboto", sans-serif;
+    }
+
+    @page {
+      size: A4 portrait;
+    }
+
+    .header-bar,
+    .footer-bar {
+      background-color: var(--color-teal-dark);
+      color: var(--color-cream);
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+    }
+
+    .footer-bar a {
+      text-decoration: underline;
+      color: var(--color-cream);
+    }
+
+    .badge-pass {
+      background-color: var(--color-teal-light);
+    }
+
+    .badge-warning {
+      background-color: var(--color-orange);
+      color: #212529;
+    }
+
+    .badge-fail {
+      background-color: var(--color-coral);
+    }
+
+    .dropout-pass {
+      color: var(--color-teal-light);
+      font-weight: bold;
+    }
+
+    .dropout-fail {
+      color: var(--color-coral);
+      font-weight: bold;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      padding: 0.3rem;
+    }
+
+    .btn-outline-secondary {
+      border-color: var(--color-teal-dark);
+      color: var(--color-teal-dark);
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: var(--color-teal-dark);
+      color: var(--color-cream);
+    }
+
+    .logo-container {
+      height: 150px;
+      width: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-container svg {
+      height: 100%;
+      width: auto;
+    }
+
+    .footer-logo {
+      height: 100px;
+      width: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-logo svg {
+      height: 100%;
+      width: auto;
+    }
+
+    .plotly-graph-div {
+      width: 100% !important;
+      max-width: 100%;
+      height: 800px !important;
+    }
+
+    .tab-content {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      width: 100%;
+    }
+
+    .nav-tabs {
+      border-bottom: 1px solid var(--color-teal-dark);
+    }
+
+    .nav-tabs .nav-link {
+      background-color: var(--color-tab-inactive);
+      border: 1px solid var(--color-teal-dark);
+      border-bottom: none;
+      color: #102a33;
+      margin-right: 0.25rem;
+      border-radius: 0.5rem 0.5rem 0 0;
+      margin-bottom: -1px;
+    }
+
+    .nav-tabs .nav-link:hover:not(.active) {
+      background-color: var(--color-teal-light);
+      color: var(--color-cream);
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: white;
+      color: var(--color-teal-dark);
+      font-weight: bold;
+      border-bottom-color: white;
+    }
+  </style>
+
+  <script type="text/javascript">
+    {{ plotly_js | safe }}
+  </script>
+</head>
+
+<body>
+  <div class="container py-4">
+    <div class="header-bar d-flex align-items-center">
+      <div class="logo-container me-3">{{ embedded_logo_svg | safe }}</div>
+      <h1 class="h4 mb-0">QC Report for Sample {{ sample_id }}</h1>
+    </div>
+
+    <table class="table table-sm mt-3">
+      <tbody>
+        <tr>
+          <th scope="row">Sample ID</th>
+          <td>{{ sample_id }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Pipeline Version</th>
+          <td>{{ pipeline_version }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Primer Scheme</th>
+          <td>{{ primer_scheme_version }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Sequencing Platform</th>
+          <td>{{ sequencing_platform }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Timestamp</th>
+          <td>{{ timestamp }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ul class="nav nav-tabs" id="contigTabs" role="tablist">
+      {% for contig in contigs %}
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link {% if loop.first %}active{% endif %}"
+          id="tab-{{ loop.index0 }}"
+          data-bs-toggle="tab"
+          data-bs-target="#contig-{{ loop.index0 }}"
+          type="button"
+          role="tab"
+        >
+          {{ contig.name }}
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="tab-content border p-3 bg-white" id="contigTabsContent" style="border-top: none">
+      {% for contig in contigs %}
+      <div
+        class="tab-pane fade {% if loop.first %}show active{% endif %}"
+        id="contig-{{ loop.index0 }}"
+        role="tabpanel"
+      >
+        <h5 class="mt-3">QC Summary</h5>
+        <ul class="list-unstyled">
+          <li><strong>Percent Coverage:</strong> {{ contig.percent_coverage }}%</li>
+          <li><strong>Amplicon Dropouts:</strong> {{ contig.amplicon_dropouts | join(", ") }}</li>
+          <li>
+            <strong>QC Status:</strong>
+            {% if contig.qc_status == 'pass' %}
+              <span class="badge badge-pass">PASS</span>
+            {% elif contig.qc_status == 'warning' %}
+              <span class="badge badge-warning">WARNING</span>
+            {% elif contig.qc_status == 'fail' %}
+              <span class="badge badge-fail">FAIL</span>
+            {% else %}
+              <span class="badge bg-secondary">UNKNOWN</span>
+            {% endif %}
+          </li>
+          <li><span class="badge bg-info">Total Reads: {{ contig.total_reads }}</span></li>
+          <li><span class="badge bg-secondary">Average Depth: {{ contig.average_depth }}</span></li>
+        </ul>
+
+        {{ contig.plotly_html | safe }}
+
+        <button
+          class="btn btn-outline-secondary btn-sm mt-3"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseAmplicons-{{ loop.index0 }}"
+        >
+          Show Amplicon Table
+        </button>
+
+        <div class="collapse" id="collapseAmplicons-{{ loop.index0 }}">
+          <table class="table table-sm mt-2">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Pool</th>
+                <th>Mean Depth</th>
+                <th>Dropout</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for amp_id, depth in contig.amplicon_mean_depths.items() %}
+              <tr>
+                <td>{{ amp_id }}</td>
+                <td>{{ contig.amplicon_coords[amp_id].start }}</td>
+                <td>{{ contig.amplicon_coords[amp_id].end }}</td>
+                <td>{{ contig.amplicon_coords[amp_id].pool }}</td>
+                <td>{{ depth }}</td>
+                <td>
+                  {% if amp_id in contig.amplicon_dropouts %}
+                    <span class="dropout-fail">&#10006;</span>
+                  {% else %}
+                    <span class="dropout-pass">&#10004;</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <footer class="footer-bar d-flex justify-content-between align-items-center mt-4">
+      <div>
+        <p class="mb-0"><strong>{{ tool_name }} {{ tool_version }}</strong> | Generated on {{ timestamp }}</p>
+        <p class="mb-0">
+          <span class="badge bg-light text-dark">MIT</span> |
+          <a href="{{ citation_link }}">Citation</a> |
+          <a href="mailto:{{ contact_email }}">Contact</a>
+        </p>
+        <p class="mb-0">{{ funder_statement }}</p>
+      </div>
+      <div class="footer-logo ms-3">{{ embedded_logo_svg | safe }}</div>
+    </footer>
+  </div>
+
+  <script type="text/javascript">
+    {{ bootstrap_bundle_js | safe }}
+  </script>
+
+  <script type="text/javascript">
+    function waitForContainerWidth(el, cb, retries = 10) {
+      if (retries === 0) return;
+      if (el.offsetWidth > 100) return cb();
+      setTimeout(() => waitForContainerWidth(el, cb, retries - 1), 100);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle initial active tab
+      const initialTabPane = document.querySelector('.tab-pane.active');
+      if (initialTabPane) {
+        const plotDivs = initialTabPane.querySelectorAll('.plotly-graph-div');
+        plotDivs.forEach((div) => {
+          waitForContainerWidth(div, () => {
+            Plotly.Plots.resize(div);
+          });
+        });
+      }
+
+      // Existing tab switch handler
+      const tabElList = document.querySelectorAll('button[data-bs-toggle="tab"]');
+      tabElList.forEach(function(tabEl) {
+        tabEl.addEventListener('shown.bs.tab', function(event) {
+          const targetId = event.target.getAttribute('data-bs-target');
+          const tabPane = document.querySelector(targetId);
+          const plotDivs = tabPane.querySelectorAll('.plotly-graph-div');
+
+          plotDivs.forEach((div) => {
+            waitForContainerWidth(div, () => {
+              Plotly.Plots.resize(div);
+            });
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>

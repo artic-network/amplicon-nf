@@ -160,10 +160,20 @@ workflow ILLUMINA_ASSEMBLY {
     BCFTOOLS_CONSENSUS(ch_bcftools_consensus_input)
     ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS.out.versions.first())
 
+    // Join the primertrimmed bam with its index
+    ch_primertrimmed_bam = ARTIC_ALIGN_TRIM.out.primertrimmed_bam.join(
+        SAMTOOLS_INDEX.out.bai
+    )
+
+    ch_primer_scheme = ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, scheme_bed, scheme_ref ->
+        [meta, scheme_bed, scheme_ref]
+    }
+
     emit:
     consensus_fasta              = BCFTOOLS_CONSENSUS.out.fasta
     amplicon_depths              = ARTIC_ALIGN_TRIM.out.amplicon_depths
     sorted_bam                   = BWAMEM2_MEM.out.bam
-    primertrimmed_normalised_bam = ARTIC_ALIGN_TRIM.out.primertrimmed_bam
+    primertrimmed_normalised_bam = ch_primertrimmed_bam
+    primer_scheme                = ch_primer_scheme
     versions                     = ch_versions
 }

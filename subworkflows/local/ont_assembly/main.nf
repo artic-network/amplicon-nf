@@ -1,6 +1,5 @@
 include { ARTIC_GUPPYPLEX  } from '../../../modules/nf-core/artic/guppyplex/main'
 include { ARTIC_MINION     } from '../../../modules/local/artic/minion/main'
-// include { ARTIC_MINION as MINION_CUSTOM_SCHEME } from '../../../modules/local/artic/minion/main'
 include { ARTIC_GET_MODELS } from '../../../modules/local/artic/get_models/main'
 
 workflow ONT_ASSEMBLY {
@@ -37,5 +36,6 @@ workflow ONT_ASSEMBLY {
     amplicon_depths              = ARTIC_MINION.out.amplicon_depths
     sorted_bam                   = ARTIC_MINION.out.sorted_bam
     primertrimmed_normalised_bam = ARTIC_MINION.out.primertrimmed_normalised_bam
+    primer_scheme                = ARTIC_MINION.out.primer_scheme
     versions                     = ch_versions
 }
