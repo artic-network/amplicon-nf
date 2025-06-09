@@ -408,7 +408,9 @@ for chrom, fig in plot.items():
                 else "fail"
             ),  # Make this better later, do more checks
             "total_reads": reads[chrom],
-            "average_depth": depth_df[depth_df["chrom"] == chrom]["depth"].mean(),
+            "average_depth": round(
+                depth_df[depth_df["chrom"] == chrom]["depth"].mean(), 2
+            ),
             "plotly_html": contig_plot_html,
         }
     )
