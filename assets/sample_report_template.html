@@ -229,9 +229,9 @@
           <li>
             <strong>QC Status:</strong>
             {% if contig.qc_status == 'pass' %}
-              <span class="badge badge-pass">PASS</span>
+              <span class="badge badge-pass">HIGH PASS</span>
             {% elif contig.qc_status == 'warning' %}
-              <span class="badge badge-warning">WARNING</span>
+              <span class="badge badge-warning">LOW PASS</span>
             {% elif contig.qc_status == 'fail' %}
               <span class="badge badge-fail">FAIL</span>
             {% else %}
