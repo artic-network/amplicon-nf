@@ -18,6 +18,9 @@
       --color-coral: #d3615e;
       --color-orange: #f7b26f;
       --color-tab-inactive: #e9e1b8;
+      --color-qc-pass: #4caf50;
+      --color-qc-warning: #ffff00;
+      --color-qc-fail: #f44336;
     }
 
     body {
@@ -44,7 +47,18 @@
     }
 
     .badge-pass {
-      background-color: var(--color-teal-light);
+      background-color: var(--color-qc-pass);
+      color: #212529;
+    }
+
+    .badge-warning {
+      background-color: var(--color-qc-warning);
+      color: #212529;
+    }
+
+    .badge-fail {
+      background-color: var(--color-qc-fail);
+      color: #212529;
     }
 
     .badge-warning {
@@ -281,7 +295,7 @@
         <p class="mb-0">
           <span class="badge bg-light text-dark">MIT License</span> |
           <a href="{{ citation_link }}">Citation</a> |
-          <a href="https://github.com/artic-network/amplicon-nf">Github Repository</a>
+          <a href="https://github.com/artic-network/amplicon-nf">Github Repository</a> |
           <a href="https://github.com/artic-network/amplicon-nf/issues/new/choose">Have a problem? Report it here!</a>
         </p>
         <p class="mb-0">{{ funder_statement }}</p>

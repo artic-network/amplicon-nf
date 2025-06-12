@@ -382,38 +382,41 @@ for chrom, fig in plot.items():
         if x["chrom"] == chrom and x["mean_depth"] < int("${params.min_coverage_depth}")
     ]
 
-    payload["contigs"].append(
-        {
-            "name": chrom,
-            "percent_coverage": round(percent_coverage, 2),
-            "amplicon_dropouts": amplicon_dropouts,
-            "total_amplicon_dropouts": len(amplicon_dropouts),
-            "amplicon_mean_depths": {
-                x["amplicon"]: round(x["mean_depth"], 2)
-                for x in amplicon_depths
-                if x["chrom"] == chrom
-            },
-            "amplicon_coords": {
-                str(x.amplicon_number): {
-                    "start": str(x.amplicon_start),
-                    "end": str(x.amplicon_end),
-                    "pool": str(x.pool),
-                }
-                for x in primer_pairs
-                if x.chrom == chrom
-            },
-            "qc_status": (
-                "pass"
-                if percent_coverage >= int("${params.qc_pass_min_coverage}")
-                else "fail"
-            ),  # Make this better later, do more checks
-            "total_reads": reads[chrom],
-            "average_depth": round(
-                depth_df[depth_df["chrom"] == chrom]["depth"].mean(), 2
-            ),
-            "plotly_html": contig_plot_html,
-        }
-    )
+    # payload["contigs"].append(
+    contig_payload = {
+        "name": chrom,
+        "percent_coverage": round(percent_coverage, 2),
+        "amplicon_dropouts": amplicon_dropouts,
+        "total_amplicon_dropouts": len(amplicon_dropouts),
+        "amplicon_mean_depths": {
+            x["amplicon"]: round(x["mean_depth"], 2)
+            for x in amplicon_depths
+            if x["chrom"] == chrom
+        },
+        "amplicon_coords": {
+            str(x.amplicon_number): {
+                "start": str(x.amplicon_start),
+                "end": str(x.amplicon_end),
+                "pool": str(x.pool),
+            }
+            for x in primer_pairs
+            if x.chrom == chrom
+        },
+        "qc_status": "",
+        "total_reads": reads[chrom],
+        "average_depth": round(depth_df[depth_df["chrom"] == chrom]["depth"].mean(), 2),
+        "plotly_html": contig_plot_html,
+    }
+
+    if contig_payload["percent_coverage"] >= int("${params.qc_pass_high_coverage}"):
+        contig_payload["qc_status"] = "pass"
+    elif contig_payload["percent_coverage"] >= int("${params.qc_pass_min_coverage}"):
+        contig_payload["qc_status"] = "warning"
+    else:
+        contig_payload["qc_status"] = "fail"
+
+    payload["contigs"].append(contig_payload)
+
 
 render_qc_report(
     payload=payload,
