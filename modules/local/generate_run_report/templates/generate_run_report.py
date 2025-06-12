@@ -10,6 +10,7 @@ from importlib.metadata import version
 
 from primalbedtools.bedfiles import BedLine
 from primalbedtools.bedfiles import BedLineParser
+import primalbedtools.primerpairs
 
 from collections import Counter
 import pandas as pd
@@ -437,7 +438,9 @@ def render_qc_report(
     print(f"[✓] QC report written to: {output_path}")
 
 
-def amplicon_depth_heatmap(amplicon_depths: pd.DataFrame, scheme_str: str) -> str:
+def amplicon_depth_heatmap(
+    amplicon_depths: pd.DataFrame, scheme_str: str, chrom_name: str
+) -> str:
 
     # Hovertemplate string
     # if include_seqs:
@@ -486,10 +489,11 @@ def amplicon_depth_heatmap(amplicon_depths: pd.DataFrame, scheme_str: str) -> st
     fig.update_layout(
         font=dict(family="Roboto, monospace", size=16),
         hoverlabel=dict(font_family="Roboto, monospace"),
-        title_text=f"Amplicon Depths: {scheme_str}",
+        title_text=f"Amplicon Depths: {scheme_str} - {chrom_name}",
         coloraxis=dict(cmax=int("${params.min_coverage_depth}"), cmin=0),
     )
     # fig.update_yaxes(autorange="reversed")
+    fig.update_xaxes(type="category")
 
     # Remove unnecessary plot elements
     fig.update_layout(
@@ -675,7 +679,7 @@ def primer_mismatch_heatmap(
             z=scoremap,
             x=list(basename_to_line.keys()),
             y=[x for x in seqdict.keys()],
-            colorscale="Viridis",
+            colorscale="Viridis_r",
             text=textmap if include_seqs else None,  # only show text if not minimal
             hovertemplate=hovertemplatestr,
             xgap=0.1,
@@ -735,6 +739,10 @@ payload = {
 
 samples = set()
 
+header_lines, bed_lines = primalbedtools.bedfiles.BedLineParser.from_file("${bed}")
+
+primer_pairs = primalbedtools.primerpairs.create_primerpairs(bed_lines)
+
 depth_tsvs = glob("depth_tsvs/*.tsv")
 for tsv_path in depth_tsvs:
     sample_name = tsv_path.split("/")[-1].split(".")[0]
@@ -786,6 +794,27 @@ for tsv_path in amp_depth_tsvs:
 
         amplicon_depth_rows.extend(rows)
 
+        for x in primer_pairs:
+            if (
+                len(
+                    [
+                        y
+                        for y in amplicon_depth_rows
+                        if y["chrom"] == str(x.chrom)
+                        and y["amplicon"] == x.amplicon_number
+                    ]
+                )
+                == 0
+            ):
+                amplicon_depth_rows.append(
+                    {
+                        "sample": sample_name,
+                        "chrom": str(x.chrom),
+                        "amplicon": x.amplicon_number,
+                        "mean_depth": 0.0,
+                    }
+                )
+
     payload["qc_table_info"][sample_name]["total_amp_dropouts"] = len(
         [
             x
@@ -797,22 +826,27 @@ for tsv_path in amp_depth_tsvs:
 # amplicon_depth_rows.sort(key=lambda x: int(x["amplicon"].replace("Amplicon ", "")))
 amplicon_depth_df = pd.DataFrame(amplicon_depth_rows)
 
-payload["single_plots"].append(
-    {
-        "name": "Amplicon Depths",
-        "plot_html": amplicon_depth_heatmap(
-            amplicon_depths=amplicon_depth_df,
-            scheme_str=scheme_version_str,
-        ),
-    }
-)
+chroms = amplicon_depth_df.chrom.unique()
+amp_depth_heatmaps = {"name": "Amplicon Depths", "plots": []}
+for chrom in chroms:
+    chrom_df = amplicon_depth_df.loc[amplicon_depth_df["chrom"] == chrom]
+    amp_depth_heatmaps["plots"].append(
+        {
+            "name": chrom,
+            "plot_html": amplicon_depth_heatmap(
+                amplicon_depths=chrom_df,
+                scheme_str=scheme_version_str,
+                chrom_name=chrom,
+            ),
+        }
+    )
+payload["nested_plots"].append(amp_depth_heatmaps)
 
 primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
 msa_list = glob("msas/*.fa*")
 for msa_path in msa_list:
     msa, seqdict = parse_msa(msa_path)
-    print(seqdict)
-    contig_name = msa_path.split("/")[-1].split(".")[0]
+    contig_name = msa_path.split("/")[-1].replace(".aligned_chroms.fas", "")
 
     primer_mismatch_heatmaps["plots"].append(
         {

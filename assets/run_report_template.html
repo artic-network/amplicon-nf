@@ -251,7 +251,6 @@
       {% for plot_type in nested_plots %}
       <div class="tab-pane fade" id="nested-plot-{{ loop.index }}" role="tabpanel">
         {% for plot in plot_type.plots %}
-        <h5 class="mt-3">{{ plot.name }}</h5>
         {{ plot.plot_html | safe }}
         {% endfor %}
       </div>
@@ -266,6 +265,7 @@
           <span class="badge bg-light text-dark">MIT License</span> |
           <a href="{{ citation_link }}">Citation</a> |
           <a href="https://github.com/artic-network/amplicon-nf">Github Repository</a>
+          <a href="https://github.com/artic-network/amplicon-nf/issues/new/choose">Have a problem? Report it here!</a>
         </p>
         <p class="mb-0">{{ funder_statement }}</p>
       </div>
