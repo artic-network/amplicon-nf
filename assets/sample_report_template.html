@@ -156,7 +156,7 @@
   <div class="container py-4">
     <div class="header-bar d-flex align-items-center">
       <div class="logo-container me-3">{{ embedded_logo_svg | safe }}</div>
-      <h1 class="h4 mb-0">ARTIC-network amplicon-nf QC Report for: {{ sample_id }}</h1>
+      <h1 class="h4 mb-0">ARTIC-network/amplicon-nf QC Report for: <strong>{{ sample_id }}</strong></h1>
     </div>
 
     <table class="table table-sm mt-3">
@@ -279,7 +279,7 @@
       <div>
         <p class="mb-0"><strong>{{ tool_name }} {{ tool_version }}</strong> | Generated on {{ timestamp }}</p>
         <p class="mb-0">
-          <span class="badge bg-light text-dark">MIT</span> |
+          <span class="badge bg-light text-dark">MIT License</span> |
           <a href="{{ citation_link }}">Citation</a> |
           <a href="https://github.com/artic-network/amplicon-nf">Github Repository</a>
         </p>

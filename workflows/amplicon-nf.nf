@@ -3,19 +3,26 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { MULTIQC                                   } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                          } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                    } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 
-include { ONT_ASSEMBLY           } from '../subworkflows/local/ont_assembly/main'
-include { ILLUMINA_ASSEMBLY      } from '../subworkflows/local/illumina_assembly/main'
+include { ONT_ASSEMBLY                              } from '../subworkflows/local/ont_assembly/main'
+include { ILLUMINA_ASSEMBLY                         } from '../subworkflows/local/illumina_assembly/main'
 
-include { SAMTOOLS_DEPTH         } from '../modules/nf-core/samtools/depth/main'
-include { SAMTOOLS_COVERAGE      } from '../modules/nf-core/samtools/coverage/main'
+include { SAMTOOLS_DEPTH                            } from '../modules/nf-core/samtools/depth/main'
+include { SAMTOOLS_COVERAGE                         } from '../modules/nf-core/samtools/coverage/main'
+include { SEQKIT_REPLACE as SEQKIT_REPLACE_ONT      } from '../modules/nf-core/seqkit/replace/main'
+include { SEQKIT_REPLACE as SEQKIT_REPLACE_ILLUMINA } from '../modules/nf-core/seqkit/replace/main'
+include { MAFFT_ALIGN                               } from '../modules/nf-core/mafft/align/main'
+include { SEQKIT_GREP as SEQKIT_GREP_FASTAS         } from '../modules/nf-core/seqkit/grep/main'
+include { SEQKIT_GREP as SEQKIT_GREP_REFS           } from '../modules/nf-core/seqkit/grep/main'
+include { CAT_CAT                                   } from '../modules/nf-core/cat/cat/main'
 
-include { GENERATE_SAMPLE_REPORT } from '../modules/local/generate_sample_report/main'
+include { GENERATE_SAMPLE_REPORT                    } from '../modules/local/generate_sample_report/main'
+include { GENERATE_RUN_REPORT                       } from '../modules/local/generate_run_report/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,6 +63,9 @@ workflow AMPLICON_NF {
     )
     ch_versions = ch_versions.mix(ONT_ASSEMBLY.out.versions)
 
+    SEQKIT_REPLACE_ONT(ONT_ASSEMBLY.out.consensus_fasta)
+    ch_versions = ch_versions.mix(SEQKIT_REPLACE_ONT.out.versions.first())
+
     ch_input.illumina
         .map { meta, _fastq_dir, fastq_1, fastq_2 ->
             [meta, fastq_1, fastq_2]
@@ -68,6 +78,13 @@ workflow AMPLICON_NF {
         ch_versions,
     )
     ch_versions = ch_versions.mix(ILLUMINA_ASSEMBLY.out.versions)
+
+    SEQKIT_REPLACE_ILLUMINA(ILLUMINA_ASSEMBLY.out.consensus_fasta)
+    ch_versions = ch_versions.mix(SEQKIT_REPLACE_ILLUMINA.out.versions.first())
+
+    ch_reheadered_consensus_fasta = SEQKIT_REPLACE_ILLUMINA.out.fastx.mix(
+        SEQKIT_REPLACE_ONT.out.fastx
+    )
 
     //
     // Generate report for each sample
@@ -100,8 +117,12 @@ workflow AMPLICON_NF {
         .join(ch_amp_depth_tsv)
         .join(SAMTOOLS_COVERAGE.out.coverage)
 
-    ch_report_template = file(
+    ch_sample_report_template = file(
         "${projectDir}/assets/sample_report_template.html",
+        checkIfExists: true
+    )
+    ch_run_report_template = file(
+        "${projectDir}/assets/run_report_template.html",
         checkIfExists: true
     )
     ch_artic_logo_svg = file(
@@ -123,7 +144,7 @@ workflow AMPLICON_NF {
 
     GENERATE_SAMPLE_REPORT(
         ch_sample_report_input,
-        ch_report_template,
+        ch_sample_report_template,
         ch_artic_logo_svg,
         ch_bootstrap_bundle_min_js,
         ch_bootstrap_bundle_min_css,
@@ -131,9 +152,95 @@ workflow AMPLICON_NF {
     )
     ch_versions = ch_versions.mix(GENERATE_SAMPLE_REPORT.out.versions.first())
 
-    ch_consensus_fasta = ONT_ASSEMBLY.out.consensus_fasta.mix(
-        ILLUMINA_ASSEMBLY.out.consensus_fasta
+    ch_bed_by_scheme = ch_primer_scheme
+        .map { meta, bed, _ref ->
+            [
+                meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                bed,
+            ]
+        }
+        .unique()
+
+    ch_chroms = ch_bed_by_scheme
+        .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
+        .filter { bed_row ->
+            "${bed_row[0]}".startsWith('#') == false
+        }
+        .map { meta, bed_row -> [meta, bed_row[0]] }
+        .unique()
+
+    ch_consensus_by_chrom = ch_chroms
+        .combine(
+            ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
+            by: 0
+        )
+        .map { meta, chrom, fasta ->
+            [
+                meta + [chrom: chrom] + [id: chrom],
+                fasta,
+            ]
+        }
+        .groupTuple()
+
+    CAT_CAT(ch_consensus_by_chrom)
+    ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
+
+    SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
+    ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
+
+    ch_refs_per_chrom = ch_chroms
+        .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
+        .map { meta, chrom, ref -> [meta + [chrom: chrom, id: chrom], ref] }
+
+    SEQKIT_GREP_REFS(ch_refs_per_chrom, [])
+    ch_versions = ch_versions.mix(SEQKIT_GREP_REFS.out.versions.first())
+
+    ch_mafft_align_input = SEQKIT_GREP_FASTAS.out.filter
+        .join(SEQKIT_GREP_REFS.out.filter)
+        .multiMap { meta, fastas, reference ->
+            fastas: [meta, fastas]
+            reference: [meta, reference]
+        }
+
+    MAFFT_ALIGN(ch_mafft_align_input.reference, [[:], []], ch_mafft_align_input.fastas, [[:], []], [[:], []], [[:], []], false)
+    ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions.first())
+
+    ch_msas_by_scheme = MAFFT_ALIGN.out.fas
+        .map { meta, msa ->
+            [
+                meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                msa,
+            ]
+        }
+        .groupTuple()
+
+    ch_amp_depth_tsvs_by_scheme = ch_amp_depth_tsv
+        .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
+        .groupTuple()
+
+    ch_depth_tsvs_by_scheme = SAMTOOLS_DEPTH.out.tsv
+        .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
+        .groupTuple()
+
+    ch_coverage_tsvs_by_scheme = SAMTOOLS_COVERAGE.out.coverage
+        .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
+        .groupTuple()
+
+    ch_run_report_input = ch_bed_by_scheme
+        .join(ch_depth_tsvs_by_scheme)
+        .join(ch_amp_depth_tsvs_by_scheme)
+        .join(ch_coverage_tsvs_by_scheme)
+        .join(ch_msas_by_scheme)
+
+    GENERATE_RUN_REPORT(
+        ch_run_report_input,
+        ch_run_report_template,
+        ch_artic_logo_svg,
+        ch_bootstrap_bundle_min_js,
+        ch_bootstrap_bundle_min_css,
+        ch_plotly_js,
     )
+    ch_versions = ch_versions.mix(GENERATE_RUN_REPORT.out.versions.first())
 
     //
     // Collate and save software versions
@@ -194,7 +301,7 @@ workflow AMPLICON_NF {
     )
 
     emit:
-    consensus_fasta = ch_consensus_fasta // channel: consensus FASTA files
+    consensus_fasta = ch_reheadered_consensus_fasta // channel: consensus FASTA files
     sample_report   = GENERATE_SAMPLE_REPORT.out.sample_report_html // channel: sample report files
     multiqc_report  = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions        = ch_versions // channel: software versions used in the workflow

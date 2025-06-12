@@ -87,8 +87,13 @@
                 },
                 "qc_pass_min_coverage": {
                     "type": "integer",
-                    "default": 80,
-                    "description": "Minimum coverage of reference above `minimum_coverage_depth` to be consodered a QC pass."
+                    "default": 50,
+                    "description": "Coverage of reference above 'minimum_coverage_depth' to be considered a minimal QC pass"
+                },
+                "qc_pass_high_coverage": {
+                    "type": "integer",
+                    "default": 90,
+                    "description": "Coverage of reference above `minimum_coverage_depth` to be considered a high QC pass."
                 },
                 "min_mapping_quality": {
                     "type": "integer",

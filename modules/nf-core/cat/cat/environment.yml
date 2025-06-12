@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::artic=1.7.2
+  - conda-forge::pigz=2.3.4

@@ -1,0 +1,318 @@
+<!-- ... (same head section as before) -->
+{# Viral Amplicon QC Report — Jinja2 template (patched) #}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+<head>
+  <meta charset="UTF-8">
+  <title>artic-network/amplicon-nf QC Run Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    {{ bootstrap_css | safe }}
+  </style>
+
+  <style>
+    :root {
+      --color-teal-dark: #345c67;
+      --color-teal-light: #4f7c8a;
+      --color-cream: #f3edca;
+      --color-coral: #d3615e;
+      --color-orange: #f7b26f;
+      --color-tab-inactive: #e9e1b8;
+      --color-qc-pass: #4caf50;
+      --color-qc-warning: #ffff00;
+      --color-qc-fail: #f44336;
+
+    }
+
+    body {
+      background-color: var(--color-cream);
+      color: #102a33;
+      font-family: "Roboto", sans-serif;
+    }
+
+    @page {
+      size: A4 portrait;
+    }
+
+    .header-bar,
+    .footer-bar {
+      background-color: var(--color-teal-dark);
+      color: var(--color-cream);
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+    }
+
+    .footer-bar a {
+      text-decoration: underline;
+      color: var(--color-cream);
+    }
+
+    .badge-pass {
+      background-color: var(--color-qc-pass);
+      color: #212529;
+    }
+
+    .badge-warning {
+      background-color: var(--color-qc-warning);
+      color: #212529;
+    }
+
+    .badge-fail {
+      background-color: var(--color-qc-fail);
+      color: #212529;
+    }
+
+    .dropout-pass {
+      color: var(--color-teal-light);
+      font-weight: bold;
+    }
+
+    .qc-pass {
+      color: var(--color-qc-pass);
+      font-weight: bold;
+    }
+
+    .qc-warning {
+      color: var(--color-qc-warning);
+      font-weight: bold;
+    }
+
+    .qc-fail {
+      color: var(--color-qc-fail);
+      font-weight: bold;
+    }
+
+    .table-sm td,
+    .table-sm th {
+      padding: 0.3rem;
+    }
+
+    .btn-outline-secondary {
+      border-color: var(--color-teal-dark);
+      color: var(--color-teal-dark);
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: var(--color-teal-dark);
+      color: var(--color-cream);
+    }
+
+    .logo-container {
+      height: 150px;
+      width: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-container svg {
+      height: 100%;
+      width: auto;
+    }
+
+    .footer-logo {
+      height: 100px;
+      width: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-logo svg {
+      height: 100%;
+      width: auto;
+    }
+
+    .plotly-graph-div {
+      width: 100% !important;
+      max-width: 100%;
+      height: 800px !important;
+    }
+
+    .tab-content {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      width: 100%;
+    }
+
+    .nav-tabs {
+      border-bottom: 1px solid var(--color-teal-dark);
+    }
+
+    .nav-tabs .nav-link {
+      background-color: var(--color-tab-inactive);
+      border: 1px solid var(--color-teal-dark);
+      border-bottom: none;
+      color: #102a33;
+      margin-right: 0.25rem;
+      border-radius: 0.5rem 0.5rem 0 0;
+      margin-bottom: -1px;
+    }
+
+    .nav-tabs .nav-link:hover:not(.active) {
+      background-color: var(--color-teal-light);
+      color: var(--color-cream);
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: white;
+      color: var(--color-teal-dark);
+      font-weight: bold;
+      border-bottom-color: white;
+    }
+  </style>
+
+  <script type="text/javascript">
+    {{ plotly_js | safe }}
+  </script>
+</head>
+
+<body>
+  <div class="container py-4">
+    <div class="header-bar d-flex align-items-center">
+      <div class="logo-container me-3">{{ embedded_logo_svg | safe }}</div>
+      <h1 class="h4 mb-0">artic-network/amplicon-nf QC Run Report</h1>
+    </div>
+
+    <table class="table table-sm mt-3">
+      <tbody>
+        <tr><th scope="row">Pipeline Version</th><td>{{ pipeline_version }}</td></tr>
+        <tr><th scope="row">Primer Scheme</th><td>{{ primer_scheme_version }}</td></tr>
+        <tr><th scope="row">Timestamp</th><td>{{ timestamp }}</td></tr>
+      </tbody>
+    </table>
+
+    <ul class="nav nav-tabs" id="plotTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="qc-table-tab" data-bs-toggle="tab" data-bs-target="#qc-table" type="button" role="tab">QC Summary Table</button>
+      </li>
+      {% for plot in single_plots %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="single-plot-{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#single-plot-{{ loop.index }}" type="button" role="tab">{{ plot.name }}</button>
+      </li>
+      {% endfor %}
+      {% for plot_type in nested_plots %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="nested-plot-{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#nested-plot-{{ loop.index }}" type="button" role="tab">{{ plot_type.name }}</button>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="tab-content border p-3 bg-white" id="contigTabsContent" style="border-top: none">
+      <!-- QC Table Tab -->
+      <div class="tab-pane fade show active" id="qc-table" role="tabpanel">
+        <h5 class="mt-3">Run QC Summary</h5>
+        <table class="table table-sm mt-2">
+          <thead>
+            <tr>
+              <th><strong>Sample</strong></th>
+              <th><strong>Primer Scheme</strong></th>
+              <th><strong>Total Reads</strong></th>
+              <th><strong>Coverage Above {{minimum_coverage_depth}}x</strong></th>
+              <th><strong>Mean Depth</strong></th>
+              <th><strong>Total Amplicon Dropouts</strong></th>
+              <th><strong>QC Result</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sample, results in qc_table_info.items() %}
+            <tr>
+              <td>{{ sample }}</td>
+              <td>{{ results.primer_scheme }}</td>
+              <td>{{ results.total_reads }}</td>
+              <td>{{ results.coverage }}</td>
+              <td>{{ results.mean_depth }}</td>
+              <td>{{ results.total_amp_dropouts }}</td>
+              <td>
+                {% if results.qc_result == "pass" %}
+                  <span class="badge badge-pass">HIGH PASS</span>
+                {% elif results.qc_result == "warning" %}
+                  <span class="badge badge-warning">LOW PASS</span>
+                {% else %}
+                  <span class="badge badge-fail">FAIL</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Single Plots -->
+      {% for plot in single_plots %}
+      <div class="tab-pane fade" id="single-plot-{{ loop.index }}" role="tabpanel">
+        {{ plot.plot_html | safe }}
+      </div>
+      {% endfor %}
+
+      <!-- Nested Plots -->
+      {% for plot_type in nested_plots %}
+      <div class="tab-pane fade" id="nested-plot-{{ loop.index }}" role="tabpanel">
+        {% for plot in plot_type.plots %}
+        <h5 class="mt-3">{{ plot.name }}</h5>
+        {{ plot.plot_html | safe }}
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div> <!-- 🔥 This closes .tab-content correctly -->
+
+    <!-- ✅ Footer now OUTSIDE of .tab-content -->
+    <footer class="footer-bar d-flex justify-content-between align-items-center mt-4">
+      <div>
+        <p class="mb-0"><strong>{{ tool_name }} {{ tool_version }}</strong> | Generated on {{ timestamp }}</p>
+        <p class="mb-0">
+          <span class="badge bg-light text-dark">MIT License</span> |
+          <a href="{{ citation_link }}">Citation</a> |
+          <a href="https://github.com/artic-network/amplicon-nf">Github Repository</a>
+        </p>
+        <p class="mb-0">{{ funder_statement }}</p>
+      </div>
+      <div class="footer-logo ms-3">{{ embedded_logo_svg | safe }}</div>
+    </footer>
+  </div> <!-- .container -->
+
+  <!-- Bootstrap JS -->
+  <script type="text/javascript">{{ bootstrap_bundle_js | safe }}</script>
+
+  <!-- Enhanced Plotly resize logic -->
+  <script type="text/javascript">
+    function waitForContainerWidth(el, cb, retries = 10) {
+      if (retries === 0) return;
+      if (el.offsetWidth > 100) return cb();
+      setTimeout(() => waitForContainerWidth(el, cb, retries - 1), 100);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const tabElList = document.querySelectorAll('button[data-bs-toggle="tab"]');
+      tabElList.forEach(function (tabEl) {
+        tabEl.addEventListener('shown.bs.tab', function (event) {
+          const targetId = event.target.getAttribute('data-bs-target');
+          const tabPane = document.querySelector(targetId);
+          const plotDivs = tabPane.querySelectorAll('.plotly-graph-div');
+
+          setTimeout(() => {
+            plotDivs.forEach((div) => {
+              waitForContainerWidth(div, () => {
+                Plotly.Plots.resize(div);
+              });
+            });
+          }, 100); // <-- Wait to ensure layout stabilizes
+        });
+      });
+
+      // Initial tab
+      const initialTabPane = document.querySelector('.tab-pane.active');
+      if (initialTabPane) {
+        const plotDivs = initialTabPane.querySelectorAll('.plotly-graph-div');
+        plotDivs.forEach((div) => {
+          waitForContainerWidth(div, () => {
+            Plotly.Plots.resize(div);
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>

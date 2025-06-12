@@ -1,5 +1,4 @@
-process GENERATE_SAMPLE_REPORT {
-    tag "${meta.id}"
+process GENERATE_RUN_REPORT {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -9,7 +8,7 @@ process GENERATE_SAMPLE_REPORT {
         : 'community.wave.seqera.io/library/pip_jinja2_biopython_numpy_pruned:fbb9affc06c37839'}"
 
     input:
-    tuple val(meta), path(bed), path(depth_tsv), path(amp_depth_tsv), path(coverage_report)
+    tuple val(meta), path(bed), path(depth_tsvs, stageAs: "depth_tsvs/*"), path(amp_depth_tsvs, stageAs: "amplicon_depth_tsvs/*"), path(coverage_tsvs, stageAs: "coverage_tsvs/*"), path(msas, stageAs: "msas/*")
     path report_template
     path artic_logo_svg
     path bootstrap_bundle_min_js
@@ -17,12 +16,12 @@ process GENERATE_SAMPLE_REPORT {
     path plotly_js
 
     output:
-    path "*_amplicon-nf-report.html", emit: sample_report_html
+    path "*_amplicon-nf-report.html", emit: run_report_html
     path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    template("generate_sample_report.py")
+    template("generate_run_report.py")
 }

@@ -365,8 +365,8 @@ for chrom, fig in plot.items():
         fig,
         include_plotlyjs=False,
         full_html=False,
-        default_height="1200px",
-        default_width="130%",
+        default_height="1500px",
+        default_width="100%",
     )
 
     bases_above_min_depth = depth_df[
@@ -418,7 +418,9 @@ for chrom, fig in plot.items():
 render_qc_report(
     payload=payload,
     template_path=Path("${report_template}"),
-    output_path=Path(f"{payload['timestamp']}_{"${meta.id}"}_amplicon-nf-report.html"),
+    output_path=Path(
+        f"{payload['timestamp'].replace(":", "-")}_{"${meta.id}"}_amplicon-nf-report.html"
+    ),
     bootstrap_css_path=Path("${bootstrap_bundle_min_css}"),
     bootstrap_bundle_js_path=Path("${bootstrap_bundle_min_js}"),
     plotly_js_path=Path("${plotly_js}"),
