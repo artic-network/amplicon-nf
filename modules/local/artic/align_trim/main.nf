@@ -12,7 +12,7 @@ process ARTIC_ALIGN_TRIM {
     output:
     tuple val(meta), path("${prefix}.primertrimmed.sorted.bam"), emit: primertrimmed_bam
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
-    tuple val(meta), path("${prefix}.align_trim_report.tsv"), emit: alignreport
+    tuple val(meta), path("${prefix}.align_trim_report.csv"), emit: alignreport
     path "versions.yml", emit: versions
 
     when:
@@ -29,7 +29,7 @@ process ARTIC_ALIGN_TRIM {
     align_trim \\
         ${args} \\
         --normalise ${params.normalise_depth} \\
-        --report ${prefix}.align_trim_report.tsv \\
+        --report ${prefix}.align_trim_report.csv \\
         --amp-depth-report ${prefix}.amplicon_depths.tsv \\
         --trim-primers \\
         ${endedness_string} \\

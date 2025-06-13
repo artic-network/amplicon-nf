@@ -1,0 +1,25 @@
+{
+    "-profile test": {
+        "content": [
+            "*_artic-sars-cov-2-400-v3.0.0_amplicon-nf-report.html - minimum file size: false",
+            "*_test_custom_scheme_name_amplicon-nf-report.html - minimum file size: false",
+            "*_illumina_amplicon_test_amplicon-nf-report.html - minimum file size: false",
+            false,
+            false,
+            false,
+            false,
+            false,
+            "*_nanopore_amplicon_test_amplicon-nf-report.html - minimum file size: false",
+            false,
+            false,
+            false,
+            false,
+            false
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "24.10.4"
+        },
+        "timestamp": "2025-06-13T10:40:59.604993"
+    }
+}

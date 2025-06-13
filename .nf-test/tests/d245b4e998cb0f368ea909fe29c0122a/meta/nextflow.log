@@ -1,0 +1,280 @@
+Jun-13 10:51:54.049 [main] DEBUG nextflow.cli.Launcher - $> nextflow -quiet -log /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/meta/nextflow.log run /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/tests/../main.nf -c /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config -c /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/tests/nextflow.config -params-file /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/meta/params.json -ansi-log false -profile docker -with-trace /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/meta/trace.csv -w /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/work
+Jun-13 10:51:54.091 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 24.10.4
+Jun-13 10:51:54.107 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/Users/sam/.nextflow/plugins; core-plugins: nf-amazon@2.9.2,nf-azure@1.10.2,nf-cloudcache@0.4.2,nf-codecommit@0.2.2,nf-console@1.1.4,nf-google@1.15.3,nf-tower@1.9.3,nf-wave@1.7.4
+Jun-13 10:51:54.117 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jun-13 10:51:54.117 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jun-13 10:51:54.119 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Jun-13 10:51:54.127 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jun-13 10:51:54.142 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config
+Jun-13 10:51:54.144 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config
+Jun-13 10:51:54.145 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/tests/nextflow.config
+Jun-13 10:51:54.145 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config
+Jun-13 10:51:54.146 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config
+Jun-13 10:51:54.146 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/tests/nextflow.config
+Jun-13 10:51:54.161 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /Users/sam/.nextflow/secrets/store.json
+Jun-13 10:51:54.163 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@2b8bd14b] - activable => nextflow.secret.LocalSecretsProvider@2b8bd14b
+Jun-13 10:51:54.176 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker`
+Jun-13 10:51:55.327 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker`
+Jun-13 10:51:55.548 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker`
+Jun-13 10:51:55.555 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [bih, cfc_dev, uzl_omics, ifb_core, embl_hd, denbi_qbic, alice, mjolnir_globe, uppmax, giga, incliva, ilifu, ki_luria, uge, icr_alma, rosalind_uge, lugh, mccleary, unibe_ibu, vai, czbiohub_aws, jax, roslin, tes, scw, unc_longleaf, tigem, tubingen_apg, google, apollo, ipop_up, vsc_calcua, pdc_kth, googlels, ceci_nic5, ccga_cau, humantechnopole, stjude, daisybio, eddie, medair, biowulf, apptainer, bi, bigpurple, adcra, cedars, pawsey_setonix, vsc_kul_uhasselt, pawsey_nimbus, ucl_myriad, utd_ganymede, charliecloud, seattlechildrens, icr_davros, ceres, arm, munin, rosalind, hasta, cfc, uzh, shu_bmrc, ebi_codon_slurm, ebc, ccga_dx, crick, ku_sund_danhead, marvin, shifter, biohpc_gen, mana, mamba, york_viking, lower_resource, unc_lccc, wehi, awsbatch, wustl_htcf, arcc, ceci_dragon2, imperial, maestro, software_license, cannon, genotoul, nci_gadi, abims, janelia, nu_genomics, googlebatch, oist, sahmri, kaust, alliance_canada, mpcdf, leicester, vsc_ugent, create, sage, cambridge, jex, podman, ebi_codon, cheaha, xanadu, nyu_hpc, test, marjorie, computerome, ucd_sonic, seg_globe, mssm, sanger, dkfz, bluebear, pasteur, einstein, ethz_euler, m3c, test_full, imb, ucl_cscluster, tuos_stanage, azurebatch, hki, seadragon, crukmi, csiro_petrichor, qmul_apocrita, wave, docker, engaging, gis, hypatia, psmn, eva, unity, cropdiversityhpc, nygc, low_resource, fgcz, conda, crg, singularity, mpcdf_viper, pe2, self_hosted_runner, tufts, uw_hyak_pedslabs, binac2, debug, genouest, cbe, unsw_katana, phoenix, seawulf, uod_hpc, fub_curta, uct_hpc, aws_tower, binac, fsu_draco]
+Jun-13 10:51:55.581 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 by global default
+Jun-13 10:51:55.594 [main] INFO  nextflow.cli.CmdRun - Launching `/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/tests/../main.nf` [soggy_picasso] DSL2 - revision: cc7e6599e4
+Jun-13 10:51:55.594 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-schema@2.3.0]
+Jun-13 10:51:55.595 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jun-13 10:51:55.595 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-schema@2.3.0]
+Jun-13 10:51:55.595 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-schema version: 2.3.0
+Jun-13 10:51:55.600 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-schema@2.3.0' resolved
+Jun-13 10:51:55.600 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-schema@2.3.0'
+Jun-13 10:51:55.605 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-schema@2.3.0
+Jun-13 10:51:55.641 [main] DEBUG nextflow.Session - Session UUID: 67b6e5e9-5374-49f6-a737-ac0637bcf9f7
+Jun-13 10:51:55.641 [main] DEBUG nextflow.Session - Run name: soggy_picasso
+Jun-13 10:51:55.641 [main] DEBUG nextflow.Session - Executor pool size: 12
+Jun-13 10:51:55.646 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Jun-13 10:51:55.649 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Jun-13 10:52:00.671 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 24.10.4 build 5934
+  Created: 20-01-2025 16:47 UTC (16:47 BST)
+  System: Mac OS X 15.5
+  Runtime: Groovy 4.0.23 on OpenJDK 64-Bit Server VM 11.0.13+7-b1751.21
+  Encoding: UTF-8 (UTF-8)
+  Process: 58393@Sams-MacBook-Pro.local [192.168.178.123]
+  CPUs: 12 - Mem: 32 GB (575 MB) - Swap: 3 GB (1.2 GB)
+Jun-13 10:52:00.683 [main] DEBUG nextflow.Session - Work-dir: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/work [Mac OS X]
+Jun-13 10:52:00.683 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/bin
+Jun-13 10:52:00.692 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Jun-13 10:52:00.699 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jun-13 10:52:00.713 [main] DEBUG nextflow.Session - Observer factory: ValidationObserverFactory
+Jun-13 10:52:00.749 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jun-13 10:52:00.756 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
+Jun-13 10:52:00.801 [main] DEBUG nextflow.Session - Session start
+Jun-13 10:52:00.802 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/meta/trace.csv
+Jun-13 10:52:00.914 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jun-13 10:52:01.242 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-schema
+Jun-13 10:52:01.535 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog]; plugin Id: nf-schema
+Jun-13 10:52:01.536 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters]; plugin Id: nf-schema
+Jun-13 10:52:01.538 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-schema
+Jun-13 10:52:01.538 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [samplesheetToList:samplesheetToList]; plugin Id: nf-schema
+Jun-13 10:52:02.916 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog]; plugin Id: nf-schema
+Jun-13 10:52:02.916 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters]; plugin Id: nf-schema
+Jun-13 10:52:02.917 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-schema
+Jun-13 10:52:02.918 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [samplesheetToList:samplesheetToList]; plugin Id: nf-schema
+Jun-13 10:52:03.047 [main] INFO  nextflow.Nextflow - [1mInput/output options[0m
+  [0;34moutdir             : [0;32m/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/output[0m
+
+[1mGeneric options[0m
+  [0;34mtrace_report_suffix: [0;32m2025-06-13_10-51-55[0m
+
+[1mCore Nextflow options[0m
+  [0;34mrunName            : [0;32msoggy_picasso[0m
+  [0;34mcontainerEngine    : [0;32mdocker[0m
+  [0;34mlaunchDir          : [0;32m/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a[0m
+  [0;34mworkDir            : [0;32m/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/work[0m
+  [0;34mprojectDir         : [0;32m/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf[0m
+  [0;34muserName           : [0;32msam[0m
+  [0;34mprofile            : [0;32mdocker[0m
+  [0;34mconfigFiles        : [0;32m/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config, /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/nextflow.config, /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/tests/nextflow.config[0m
+
+!! Only displaying parameters that differ from the pipeline defaults !!
+-[2m----------------------------------------------------[0m-
+Jun-13 10:52:03.048 [main] DEBUG n.validation.ValidationExtension - Starting parameters validation
+Jun-13 10:52:03.064 [main] WARN  n.validation.ValidationExtension - The following invalid input values have been detected:
+
+* --modules_testdata_base_path: https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/
+
+
+Jun-13 10:52:03.121 [main] ERROR n.validation.ValidationExtension - Validation of pipeline parameters failed!
+Jun-13 10:52:03.124 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_5cdab9e6bf0553c2: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/mafft/align/main.nf
+  Script_09bfe10353b49793: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/ont_assembly/main.nf
+  Script_26f3f87f4318653c: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/samtools/coverage/main.nf
+  Script_215a636da7ab24a2: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/utils_nfcore_amplicon-nf_pipeline/../../nf-core/utils_nfschema_plugin/main.nf
+  Script_d0d4bac160075188: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/samtools/depth/main.nf
+  Script_84ae1bdd5092dda1: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/ont_assembly/../../../modules/local/artic/minion/main.nf
+  Script_5c4e8d4051efa81e: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./subworkflows/local/utils_nfcore_amplicon-nf_pipeline/../../nf-core/utils_nfcore_pipeline/main.nf
+  Script_3448e763138df75c: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/bcftools/view/main.nf
+  Script_de1c7c124fa4c7b4: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/samtools/sort/main.nf
+  Script_dedbba5968c49a0d: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/samtools/faidx/main.nf
+  Script_c6e2a7a2f61f22b1: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/seqkit/grep/main.nf
+  Script_77f909933407e417: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/main.nf
+  Script_f4a41b11dfaa96a5: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/local/artic/get_scheme/main.nf
+  Script_fcdd474ff0d3afa7: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/local/generate_run_report/main.nf
+  Script_22e28fb21b99bea7: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/ont_assembly/../../../modules/local/artic/get_models/main.nf
+  Script_fb7ad18a41e1446d: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/local/artic/align_trim/main.nf
+  Script_6deb43439613eab0: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/trimmomatic/main.nf
+  Script_aac680bc8b3a0fcc: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/seqkit/replace/main.nf
+  Script_bc6421efb5946ca1: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/local/generate_sample_report/main.nf
+  Script_7ccbcb11e28328a7: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/ont_assembly/../../../modules/nf-core/artic/guppyplex/main.nf
+  Script_ce136b267b048147: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/multiqc/main.nf
+  Script_4f612cfd8c52e8cd: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./subworkflows/local/utils_nfcore_amplicon-nf_pipeline/../../nf-core/utils_nextflow_pipeline/main.nf
+  Script_54a51df7a84c5300: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/bcftools/consensus/main.nf
+  Script_e3bc58084c78a738: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/tabix/bgziptabix/main.nf
+  Script_31f34e5f94501ae9: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/local/process_gvcf/main.nf
+  Script_a2aa0d1ede76c3e4: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../modules/nf-core/cat/cat/main.nf
+  Script_3fab926ec72861bc: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/main.nf
+  Script_075144c1ee6c7312: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/amplicon-nf.nf
+  Script_243b1b16397f0196: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/utils_nfcore_amplicon-nf_pipeline/main.nf
+  Script_1b79141a420e0974: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/bwamem2/index/main.nf
+  Script_13990282948b5904: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/samtools/index/main.nf
+  Script_fe34523cbd8db149: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/bcftools/norm/main.nf
+  Script_335f36ea7317a7f4: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/bwamem2/mem/main.nf
+  Script_2ac26580d526fcda: /Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/illumina_assembly/../../../modules/nf-core/freebayes/main.nf
+Jun-13 10:52:03.124 [main] DEBUG nextflow.Session - Session aborted -- Cause: [0;31mThe following invalid input values have been detected:
+
+* Missing required parameter(s): input
+[0m
+
+Jun-13 10:52:03.128 [main] DEBUG nextflow.Session - 
+Thread[Thread-1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2123)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingDeque.pollFirst(LinkedBlockingDeque.java:513)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingDeque.poll(LinkedBlockingDeque.java:675)
+  app//nextflow.util.SimpleAgent.run(SimpleAgent.groovy:89)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.13/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.13/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[main,5,main]
+  java.base@11.0.13/java.lang.Thread.dumpThreads(Native Method)
+  java.base@11.0.13/java.lang.Thread.getAllStackTraces(Thread.java:1653)
+  app//nextflow.util.SysHelper.dumpThreads(SysHelper.groovy:188)
+  app//nextflow.Session.abort(Session.groovy:800)
+  app//nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:149)
+  app//nextflow.cli.CmdRun.run(CmdRun.groovy:376)
+  app//nextflow.cli.Launcher.run(Launcher.groovy:503)
+  app//nextflow.cli.Launcher.main(Launcher.groovy:658)
+
+Thread[Signal Dispatcher,9,system]
+
+Thread[Finalizer,8,system]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.13/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:176)
+  java.base@11.0.13/java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:170)
+
+Thread[Reference Handler,10,system]
+  java.base@11.0.13/java.lang.ref.Reference.waitForReferencePendingList(Native Method)
+  java.base@11.0.13/java.lang.ref.Reference.processPendingReferences(Reference.java:241)
+  java.base@11.0.13/java.lang.ref.Reference$ReferenceHandler.run(Reference.java:213)
+
+Thread[Common-Cleaner,8,InnocuousThreadGroup]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.13/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:148)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+  java.base@11.0.13/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:134)
+
+Jun-13 10:52:03.133 [main] DEBUG nextflow.cli.Launcher - Operation aborted
+nextflow.validation.SchemaValidationException: [0;31mThe following invalid input values have been detected:
+
+* Missing required parameter(s): input
+[0m
+
+	at nextflow.validation.ValidationExtension.validateParameters(ValidationExtension.groovy:322)
+	at nextflow.validation.ValidationExtension.validateParameters(ValidationExtension.groovy)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at nextflow.script.FunctionDef.invoke_a(FunctionDef.groovy:64)
+	at nextflow.script.ComponentDef.invoke_o(ComponentDef.groovy:40)
+	at nextflow.script.WorkflowBinding.invokeMethod(WorkflowBinding.groovy:103)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokePogoMethod(InvokerHelper.java:651)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokeMethod(InvokerHelper.java:628)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeOnDelegationObjects(ClosureMetaClass.java:391)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:330)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_215a636da7ab24a2$_runScript_closure1$_closure2.doCall(Script_215a636da7ab24a2:39)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:279)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at nextflow.script.WorkflowDef.run0(WorkflowDef.groovy:204)
+	at nextflow.script.WorkflowDef.run(WorkflowDef.groovy:188)
+	at nextflow.script.BindableDef.invoke_a(BindableDef.groovy:51)
+	at nextflow.script.ComponentDef.invoke_o(ComponentDef.groovy:40)
+	at nextflow.script.WorkflowBinding.invokeMethod(WorkflowBinding.groovy:103)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokePogoMethod(InvokerHelper.java:651)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokeMethod(InvokerHelper.java:628)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeOnDelegationObjects(ClosureMetaClass.java:391)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:330)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_243b1b16397f0196$_runScript_closure3$_closure5.doCall(Script_243b1b16397f0196:52)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:279)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at nextflow.script.WorkflowDef.run0(WorkflowDef.groovy:204)
+	at nextflow.script.WorkflowDef.run(WorkflowDef.groovy:188)
+	at nextflow.script.BindableDef.invoke_a(BindableDef.groovy:51)
+	at nextflow.script.ComponentDef.invoke_o(ComponentDef.groovy:40)
+	at nextflow.script.WorkflowBinding.invokeMethod(WorkflowBinding.groovy:103)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokePogoMethod(InvokerHelper.java:651)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokeMethod(InvokerHelper.java:628)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeOnDelegationObjects(ClosureMetaClass.java:391)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:330)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at Script_77f909933407e417$_runScript_closure2$_closure4.doCall(Script_77f909933407e417:57)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:279)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at groovy.lang.Closure.call(Closure.java:433)
+	at groovy.lang.Closure.call(Closure.java:412)
+	at nextflow.script.WorkflowDef.run0(WorkflowDef.groovy:204)
+	at nextflow.script.WorkflowDef.run(WorkflowDef.groovy:188)
+	at nextflow.script.BindableDef.invoke_a(BindableDef.groovy:51)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.script.BaseScript.run0(BaseScript.groovy:198)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.script.BaseScript.run(BaseScript.groovy:209)
+	at nextflow.script.ScriptParser.runScript(ScriptParser.groovy:236)
+	at nextflow.script.ScriptRunner.run(ScriptRunner.groovy:243)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:138)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:376)
+	at nextflow.cli.Launcher.run(Launcher.groovy:503)
+	at nextflow.cli.Launcher.main(Launcher.groovy:658)

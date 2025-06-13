@@ -1,0 +1,40 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+
+    test("-profile test") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                        "*_artic-sars-cov-2-400-v3.0.0_amplicon-nf-report.html - minimum file size: ${file("$outputDir/*_artic-sars-cov-2-400-v3.0.0_amplicon-nf-report.html").length() >= 5000000}",
+                        "*_test_custom_scheme_name_amplicon-nf-report.html - minimum file size: ${file("$outputDir/*_test_custom_scheme_name_amplicon-nf-report.html").length() > 5000000}",
+                        "*_illumina_amplicon_test_amplicon-nf-report.html - minimum file size: ${file("$outputDir/*_illumina_amplicon_test_amplicon-nf-report.html").length() >= 5000000}",
+                        file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.align_trim_report.csv").exists(),
+                        file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.amplicon_depths.tsv").exists(),
+                        file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.consensus.fasta").exists(),
+                        file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.primertrimmed.sorted.bam").exists(),
+                        file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.vcf.gz").exists(),
+                        "*_nanopore_amplicon_test_amplicon-nf-report.html - minimum file size: ${file("$outputDir/*_nanopore_amplicon_test_amplicon-nf-report.html").length() >= 5000000}",
+                        file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.amplicon_depths.tsv").exists(),
+                        file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.consensus.fasta").exists(),
+                        file("$outputDir/nanopore_amplicon_test.normalised.vcf.gz").exists(),
+                        file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.rg.sorted.bam").exists(),
+                        file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.sorted.bam").exists(),
+                    ).match()
+                },
+                { assert new File("$outputDir/pipeline_info/amplicon-nf_software_mqc_versions.yml").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_report.html").exists() },
+            )
+        }
+    }
+}
