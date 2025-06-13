@@ -31,7 +31,6 @@ include { GENERATE_RUN_REPORT                       } from '../modules/local/gen
 */
 
 workflow AMPLICON_NF {
-    // Just adding to test the CI
     take:
     ch_samplesheet     // channel: samplesheet read in from --input
     ch_store_directory // channel: store directory read in from --store_dir

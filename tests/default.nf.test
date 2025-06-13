@@ -23,26 +23,24 @@ nextflow_pipeline {
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
-                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_amplicon-nf_software_mqc_versions.yml"),
+                    removeNextflowVersion("$outputDir/pipeline_info/amplicon-nf_software_mqc_versions.yml"),
                     // All stable path name, with a relative path
                     stable_name,
-                    // All files with stable contents
-                    stable_path,
-                    "*_artic-sars-cov-2-400-v3.0.0_amplicon-nf-report.html - minimum file size: ${file("$outputDir/artic-sars-cov-2_400_v3.0.0_amplicon-nf-report.html").size() >= 4000000}",
-                    "*_test_custom_scheme_name_amplicon-nf-report.html - minimum file size: ${file("$outputDir/test_custom_scheme_name_amplicon-nf-report.html").size() >= 4000000}",
-                    "illumina_amplicon_test/*_illumina_amplicon_test_amplicon-nf-report.html - minimum file size: ${file("$outputDir/illumina_amplicon_test/illumina_amplicon_test_amplicon-nf-report.html").size() >= 4000000}",
+                    "artic-sars-cov-2-400-v3.0.0_amplicon-nf-report.html - minimum file size: ${file("$outputDir/artic-sars-cov-2_400_v3.0.0_amplicon-nf-report.html").size() >= 4000000}",
+                    "test_custom_scheme_name_amplicon-nf-report.html - minimum file size: ${file("$outputDir/test_custom_scheme_name_amplicon-nf-report.html").size() >= 4000000}",
+                    "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf-report.html - minimum file size: ${file("$outputDir/illumina_amplicon_test/illumina_amplicon_test_amplicon-nf-report.html").size() >= 4000000}",
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.align_trim_report.csv").exists(),
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.amplicon_depths.tsv").exists(),
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.consensus.fasta").exists(),
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.primertrimmed.sorted.bam").exists(),
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.vcf.gz").exists(),
-                    "nanopore_amplicon_test/*_nanopore_amplicon_test_amplicon-nf-report.html - minimum file size: ${file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test_amplicon-nf-report.html").size() >= 4000000}",
+                    "nanopore_amplicon_test/nanopore_amplicon_test_amplicon-nf-report.html - minimum file size: ${file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test_amplicon-nf-report.html").size() >= 4000000}",
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.amplicon_depths.tsv").exists(),
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.consensus.fasta").exists(),
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.normalised.vcf.gz").exists(),
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.rg.sorted.bam").exists(),
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.sorted.bam").exists(),
-                ).match()
+                    ).match()
                 }
             )
         }
