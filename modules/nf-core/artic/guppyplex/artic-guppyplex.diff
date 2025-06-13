@@ -1,0 +1,42 @@
+Changes in component 'nf-core/artic/guppyplex'
+'modules/nf-core/artic/guppyplex/environment.yml' is unchanged
+'modules/nf-core/artic/guppyplex/meta.yml' is unchanged
+Changes in 'artic/guppyplex/main.nf':
+--- modules/nf-core/artic/guppyplex/main.nf
++++ modules/nf-core/artic/guppyplex/main.nf
+@@ -1,24 +1,24 @@
+ process ARTIC_GUPPYPLEX {
+-    tag "$meta.id"
+-    label 'process_high'
++    tag "${meta.id}"
++    label 'process_single'
+ 
+     conda "${moduleDir}/environment.yml"
+-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/5a/5a747cc579edfc0cb2176b749afc02550ab5de678ae6a40d2cfadeba6c0de25d/data' :
+-        'community.wave.seqera.io/library/artic:1.6.2--d4956cdc155b8612' }"
++    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
++        ? 'https://depot.galaxyproject.org/singularity/artic:1.7.3--pyhdfd78af_0'
++        : 'biocontainers/artic:1.7.3--pyhdfd78af_0'}"
+ 
+     input:
+     tuple val(meta), path(fastq_dir)
+ 
+     output:
+     tuple val(meta), path("*.fastq.gz"), emit: fastq
+-    path  "versions.yml"               , emit: versions
++    path "versions.yml", emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+ 
+     script:
+-    def args   = task.ext.args   ?: ''
++    def args = task.ext.args ?: ''
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     """
+     artic \\
+
+'modules/nf-core/artic/guppyplex/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/artic/guppyplex/tests/main.nf.test' is unchanged
+************************************************************

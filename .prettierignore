@@ -12,4 +12,4 @@ testing*
 bin/
 ro-crate-metadata.json
 **/*.html
-modules/nf-core/*
+modules/nf-core/**

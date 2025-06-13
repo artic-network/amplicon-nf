@@ -861,9 +861,7 @@ payload["nested_plots"].append(primer_mismatch_heatmaps)
 render_qc_report(
     payload=payload,
     template_path=Path("${report_template}"),
-    output_path=Path(
-        f"{payload['timestamp'].replace(":", "-")}_{scheme_version_str.replace("/", "-")}_amplicon-nf-report.html"
-    ),
+    output_path=Path(f"{scheme_version_str.replace("/", "_")}_amplicon-nf-report.html"),
     bootstrap_css_path=Path("${bootstrap_bundle_min_css}"),
     bootstrap_bundle_js_path=Path("${bootstrap_bundle_min_js}"),
     plotly_js_path=Path("${plotly_js}"),
