@@ -688,7 +688,7 @@ def primer_mismatch_heatmap(
         )
     )
     fig.update_layout(
-        font=dict(family="Roboto, monospace"),
+        font=dict(family="Roboto, monospace", size=16),
         hoverlabel=dict(font_family="Roboto, monospace"),
         title_text=f"Primer Mismatches: {list(primary_ref)[0]}",
         coloraxis=dict(cmax=10, cmin=0),
