@@ -2,4 +2,4 @@
 
 * Missing required parameter(s): input
 [0m
- -- Check script '/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./workflows/../subworkflows/local/utils_nfcore_amplicon-nf_pipeline/../../nf-core/utils_nfschema_plugin/main.nf' at line: 39 or see '/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/meta/nextflow.log' file for more details
+ -- Check script '/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/./subworkflows/local/utils_nfcore_amplicon-nf_pipeline/../../nf-core/utils_nfschema_plugin/main.nf' at line: 39 or see '/Users/sam/Library/CloudStorage/OneDrive-SharedLibraries-onedrive/bioinformatics/artic-repos/artic-network-fieldbioinformatics-nf/.nf-test/tests/d245b4e998cb0f368ea909fe29c0122a/meta/nextflow.log' file for more details
