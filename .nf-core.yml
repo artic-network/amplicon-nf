@@ -43,7 +43,7 @@ lint:
 template:
   org: artic-network
   name: amplicon-nf
-  description: Amplicon genome assembly which doesn't suck
+  description: Amplicon genome assembly which tries not to suck.
   author: Sam Wilkinson
   version: 1.0.0dev
   force: true
