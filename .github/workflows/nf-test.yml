@@ -1,4 +1,4 @@
-name: CI Tests
+name: nf-test action
 
 on: [push, pull_request]
 
