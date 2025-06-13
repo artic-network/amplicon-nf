@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the artic-network/fieldbioinformatics-nf pipeline
+// Subworkflow with functionality specific to the artic-network/amplicon-nf pipeline
 //
 
 /*
@@ -223,4 +223,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-

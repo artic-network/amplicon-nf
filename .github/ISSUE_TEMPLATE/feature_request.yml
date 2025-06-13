@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea for the artic-network/fieldbioinformatics-nf pipeline
+description: Suggest an idea for the artic-network/amplicon-nf pipeline
 labels: enhancement
 body:
   - type: textarea

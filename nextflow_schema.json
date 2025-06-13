@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/artic-network/fieldbioinformatics-nf/master/nextflow_schema.json",
-    "title": "artic-network/fieldbioinformatics-nf pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/artic-network/amplicon-nf/master/nextflow_schema.json",
+    "title": "artic-network/amplicon-nf pipeline parameters",
     "description": "Amplicon genome assembly which doesn't suck",
     "type": "object",
     "$defs": {

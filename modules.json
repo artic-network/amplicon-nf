@@ -1,6 +1,6 @@
 {
-    "name": "artic-network/fieldbioinformatics-nf",
-    "homePage": "https://github.com/artic-network/fieldbioinformatics-nf",
+    "name": "artic-network/amplicon-nf",
+    "homePage": "https://github.com/artic-network/amplicon-nf",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {
