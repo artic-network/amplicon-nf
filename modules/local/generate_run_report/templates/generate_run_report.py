@@ -80,6 +80,8 @@ IUPAC_ALL_ALLOWED_DNA = {
     "-",
 }
 
+plotly_colour_scale = [(0, "#345c67"), (1, "#f3edca")]
+
 
 class MappingType(Enum):
     """
@@ -465,7 +467,7 @@ def amplicon_depth_heatmap(
         amplicon_depths,
         x=amplicon_depths.columns,
         y=amplicon_depths.index,
-        color_continuous_scale="Viridis",
+        color_continuous_scale=plotly_colour_scale,
         labels=dict(x="Amplicon", y="Sample", color="Mean Depth"),
         aspect="auto",
     )
@@ -679,7 +681,7 @@ def primer_mismatch_heatmap(
             z=scoremap,
             x=list(basename_to_line.keys()),
             y=[x for x in seqdict.keys()],
-            colorscale="Viridis_r",
+            colorscale=plotly_colour_scale,
             text=textmap if include_seqs else None,  # only show text if not minimal
             hovertemplate=hovertemplatestr,
             xgap=0.1,
