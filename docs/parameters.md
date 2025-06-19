@@ -1,6 +1,6 @@
 # artic-network/amplicon-nf pipeline parameters
 
-Amplicon genome assembly which doesn\'t suck
+Amplicon genome assembly for ARTIC style primer schemes using Nextflow.
 
 ## Input/output options
 
