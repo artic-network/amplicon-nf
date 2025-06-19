@@ -752,10 +752,17 @@ for tsv_path in depth_tsvs:
     df = pd.read_csv(
         tsv_path, sep="\t", index_col=None, names=["chrom", "pos", "depth"]
     )
-    payload["qc_table_info"][sample_name]["mean_depth"] = round(df["depth"].mean(), 2)
+    payload["qc_table_info"][sample_name]["mean_depth"] = (
+        round(df["depth"].mean(), 2) if len(df) > 0 else 0.0
+    )
     payload["qc_table_info"][sample_name]["primer_scheme"] = scheme_version_str
-    payload["qc_table_info"][sample_name]["coverage"] = round(
-        len(df[df["depth"] >= int("${params.min_coverage_depth}")]) / len(df) * 100, 2
+    payload["qc_table_info"][sample_name]["coverage"] = (
+        round(
+            len(df[df["depth"] >= int("${params.min_coverage_depth}")]) / len(df) * 100,
+            2,
+        )
+        if len(df) > 0
+        else 0.0
     )
     if payload["qc_table_info"][sample_name]["coverage"] >= int(
         "${params.qc_pass_high_coverage}"
