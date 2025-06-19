@@ -385,6 +385,8 @@ for chrom, fig in plot.items():
         if x["chrom"] == chrom and x["mean_depth"] < int("${params.min_coverage_depth}")
     ]
 
+    mean_depth = round(depth_df[depth_df["chrom"] == chrom]["depth"].mean(), 2) if not depth_df[depth_df["chrom"] == chrom].empty else 0.0
+
     # payload["contigs"].append(
     contig_payload = {
         "name": chrom,
@@ -407,7 +409,7 @@ for chrom, fig in plot.items():
         },
         "qc_status": "",
         "total_reads": reads[chrom],
-        "average_depth": round(depth_df[depth_df["chrom"] == chrom]["depth"].mean(), 2),
+        "average_depth": ,
         "plotly_html": contig_plot_html,
     }
 
