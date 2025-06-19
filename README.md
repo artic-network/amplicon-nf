@@ -104,6 +104,16 @@ nextflow run artic-network/amplicon-nf \
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
+## Problems and Solutions
+
+If you provide ONT data which does not have the `basecall_model_version_id` field in the read header (ONT basecallers include this info in the header) you will get an error message that looks like this:
+
+```sh
+  Provided fastq does not contain basecall_model_version_id in the read header so clair3 model cannot be chosen automatically, please provide an appropriate model with the --model parameter
+```
+
+If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models can be seen in the pipelines parameter schema [nextflow_schema.json](https://github.com/artic-network/amplicon-nf/blob/67dce6816764f18052addf9cffc3dbba0a8dcff5/nextflow_schema.json#L132-L165).
+
 ## Credits
 
 artic-network/amplicon-nf was originally written by Sam Wilkinson.
