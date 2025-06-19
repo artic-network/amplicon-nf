@@ -824,12 +824,16 @@ for tsv_path in amp_depth_tsvs:
                     }
                 )
 
-    payload["qc_table_info"][sample_name]["total_amp_dropouts"] = len(
-        [
-            x
-            for x in rows
-            if float(x["mean_depth"]) < int("${params.min_coverage_depth}")
-        ]
+    payload["qc_table_info"][sample_name]["total_amp_dropouts"] = (
+        len(
+            [
+                x
+                for x in rows
+                if float(x["mean_depth"]) < int("${params.min_coverage_depth}")
+            ]
+        )
+        if len(rows) > 0
+        else len(primer_pairs)
     )
 
 # amplicon_depth_rows.sort(key=lambda x: int(x["amplicon"].replace("Amplicon ", "")))
