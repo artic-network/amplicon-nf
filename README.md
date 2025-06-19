@@ -101,6 +101,8 @@ nextflow run artic-network/amplicon-nf \
    --storedir <STOREDIR> 
 ```
 
+The pipeline is configured with a set of default parameters which should suit most use cases but a full list of available configurable parameters is available in [docs/parameters.md](https://github.com/artic-network/amplicon-nf/blob/main/docs/parameters.md).
+
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
@@ -112,7 +114,7 @@ If you provide ONT data which does not have the `basecall_model_version_id` fiel
   Provided fastq does not contain basecall_model_version_id in the read header so clair3 model cannot be chosen automatically, please provide an appropriate model with the --model parameter
 ```
 
-If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models can be seen in the pipelines parameter schema [nextflow_schema.json](https://github.com/artic-network/amplicon-nf/blob/67dce6816764f18052addf9cffc3dbba0a8dcff5/nextflow_schema.json#L132-L165).
+If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models is available in the [parameters.md document](https://github.com/artic-network/amplicon-nf/blob/main/docs/parameters.md).
 
 ## Credits
 
