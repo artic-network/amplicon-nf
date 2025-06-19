@@ -39,7 +39,7 @@ nf_core_version: 3.3.1
 repository_type: pipeline
 template:
   author: Sam Wilkinson
-  description: Amplicon genome assembly which doesn't suck
+  description: Amplicon genome assembly for ARTIC style primer schemes using Nextflow.
   force: false
   is_nfcore: false
   name: amplicon-nf

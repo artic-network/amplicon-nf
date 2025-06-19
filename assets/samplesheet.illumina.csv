@@ -1,0 +1,3 @@
+sample,platform,scheme_name,fastq_1,fastq_2
+sample-1,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-1_S1_L001_R1_001.fastq.gz,/some/directory/sample-1_S1_L001_R2_001.fastq.gz
+sample-2,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-2_S2_L001_R1_001.fastq.gz,/some/directory/sample-2_S2_L001_R2_001.fastq.gz

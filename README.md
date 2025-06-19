@@ -103,6 +103,18 @@ nextflow run artic-network/amplicon-nf \
 
 The pipeline is configured with a set of default parameters which should suit most use cases but a full list of available configurable parameters is available in [docs/parameters.md](https://github.com/artic-network/amplicon-nf/blob/main/docs/parameters.md).
 
+If you are running this pipeline locally (for example on a sequencing laptop) you may with to put a limit on the amount of resources that the pipeline will attempt to use, to do this there are two profiles which limit the amount of resources the pipeline will try to use to fit on more modest hardware, if you wish to use one of these profiles you may do so like this:
+
+```bash
+nextflow run artic-network/amplicon-nf \
+   -profile low_resource,<docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --storedir <STOREDIR> 
+```
+
+The `-profile` parameter accepts multiple profiles separated by a comma so providing a parameter such as `-profile low_resource,docker` will use both profiles at the same time.
+
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
