@@ -87,7 +87,9 @@ sample-2,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-2_S2_L001_R
 
 As the ONT only samplesheet above does not need the `fastq_1` or `fastq_2` path columns the Illumina only samplesheet does not need the `fastq_directory` column.
 
-We recommend that you provide a scheme using a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2` which is laid out with the following schema `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>` .
+We recommend that you provide a scheme using a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2` which is laid out with the following schema `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>`, the scheme itself will be sourced from the [primerschemes repository](https://github.com/quick-lab/primerschemes).
+
+Alternatively, if you wish to use a scheme not available from the official repository you may provide a samplesheet containing the `custom_scheme_path` and `custom_scheme_name` parameters, `custom_scheme_path` should point to a directory containing two files `primer.bed` and `reference.fasta` which describe your custom scheme, `custom_scheme_name` is an optional field which allows you to provide a name for this custom scheme which will be used when generating a run report, if this is provided with a `scheme_name` the `custom_scheme_name` will be ignored. 
 
 Now, you can run the pipeline using:
 
