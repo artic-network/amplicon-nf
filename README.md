@@ -21,40 +21,82 @@
    to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
 -->
 
+
+
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
 First, prepare a samplesheet with your input data that looks as follows:
 
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,platform,scheme_name,custom_scheme_path,custom_scheme_name,fastq_directory,fastq_1,fastq_2
+nanopore_amplicon_data,nanopore,artic-inrb-mpox/2500/v1.0.0,,,/path/to/fastq/files/Barcode01/,,,
+illumina_amplicon_data,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires only `fastq_directory` which is intended to be a directory as created by Dorado / minKNOW during basecalling. Below there is an example layout of a `fastq_pass` directory, each row of the samplesheet in this case would point to a single `barcode` directory.
 
--->
+```
+fastq_pass
+   ├── barcode01
+   |   ├── reads0.fastq.gz
+   │   └── reads1.fastq.gz
+   ├── barcode02
+   │   ├── reads0.fastq.gz
+   │   ├── reads1.fastq.gz
+   │   └── reads2.fastq.gz
+   └── barcode03
+       └── reads0.fastq.gz
+```
+
+For example, if your `fastq_pass` directory looked the same as the above example your samplesheet could look like this:
+
+```csv
+sample,platform,scheme_name,fastq_directory
+barcode01,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode01
+barcode02,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode02
+barcode03,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode03
+```
+
+Please note that for a single platform run (as in, your data is all ONT rather than a mix of ONT and Illumina) you do not need to include irrelevant columns, the same is true for the custom scheme fields (`custom_scheme_path` and `custom_scheme_name`).
+
+For Illumina data the paths to the forward and reverse read files should be provided directly, for example if your directory looks like the below:
+```
+run_fastq_directory
+   ├── sample-1_S1_L001_R1_001.fastq.gz
+   |── sample-1_S1_L001_R2_001.fastq.gz
+   ├── sample-2_S2_L001_R1_001.fastq.gz
+   └── sample-2_S2_L001_R2_001.fastq.gz
+```
+
+Then your samplesheet could look like this:
+
+```csv
+sample,platform,scheme_name,fastq_1,fastq_2
+sample-1,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-1_S1_L001_R1_001.fastq.gz,/some/directory/sample-1_S1_L001_R2_001.fastq.gz
+sample-2,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-2_S2_L001_R1_001.fastq.gz,/some/directory/sample-2_S2_L001_R2_001.fastq.gz
+```
+
+As the ONT only samplesheet above does not need the `fastq_1` or `fastq_2` path columns the Illumina only samplesheet does not need the `fastq_directory` column.
+
+We recommend that you provide a scheme using a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2` which is laid out with the following schema `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>` .
 
 Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
 nextflow run artic-network/amplicon-nf \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir <OUTDIR> \
+   --storedir <STOREDIR> 
 ```
 
 > [!WARNING]

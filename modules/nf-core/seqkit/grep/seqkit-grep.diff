@@ -1,0 +1,53 @@
+Changes in component 'nf-core/seqkit/grep'
+'modules/nf-core/seqkit/grep/environment.yml' is unchanged
+'modules/nf-core/seqkit/grep/meta.yml' is unchanged
+Changes in 'seqkit/grep/main.nf':
+--- modules/nf-core/seqkit/grep/main.nf
++++ modules/nf-core/seqkit/grep/main.nf
+@@ -1,20 +1,19 @@
+ process SEQKIT_GREP {
+-    tag "$meta.id"
++    tag "${meta.id}"
+     label 'process_low'
+ 
+-
+     conda "${moduleDir}/environment.yml"
+-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+-        'https://depot.galaxyproject.org/singularity/seqkit:2.9.0--h9ee0642_0':
+-        'biocontainers/seqkit:2.9.0--h9ee0642_0' }"
++    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
++        ? 'https://depot.galaxyproject.org/singularity/seqkit:2.9.0--h9ee0642_0'
++        : 'biocontainers/seqkit:2.9.0--h9ee0642_0'}"
+ 
+     input:
+     tuple val(meta), path(sequence)
+     path pattern
+ 
+     output:
+-    tuple val(meta), path("*.{fa,fq}.gz")  , emit: filter
+-    path "versions.yml"                    , emit: versions
++    tuple val(meta), path("*.{fa,fq}"), emit: filter
++    path "versions.yml", emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+@@ -29,11 +28,11 @@
+     """
+     seqkit \\
+         grep \\
+-        $args \\
+-        --threads $task.cpus \\
++        ${args} \\
++        --threads ${task.cpus} \\
+         ${pattern_file} \\
+         ${sequence} \\
+-        -o ${prefix}.${suffix}.gz \\
++        -o ${prefix}.${suffix} \\
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+
+'modules/nf-core/seqkit/grep/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/seqkit/grep/tests/nextflow.config' is unchanged
+'modules/nf-core/seqkit/grep/tests/main.nf.test' is unchanged
+************************************************************

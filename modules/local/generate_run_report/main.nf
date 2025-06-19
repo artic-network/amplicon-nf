@@ -16,7 +16,7 @@ process GENERATE_RUN_REPORT {
     path plotly_js
 
     output:
-    path "*_amplicon-nf-report.html", emit: run_report_html
+    path "*_amplicon-nf_run-report.html", emit: run_report_html
     path "versions.yml", emit: versions
 
     when:

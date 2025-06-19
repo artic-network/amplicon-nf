@@ -3,3 +3,7 @@ reports:
     display: "MultiQC HTML report"
   samplesheet.csv:
     display: "Auto-created samplesheet with collated metadata and FASTQ paths"
+  "*_amplicon-nf_run-report.html.html":
+    display: "amplicon-nf run reports (per scheme)"
+  "*/*_amplicon-nf_sample-report.html":
+    display: "amplicon-nf sample reports"

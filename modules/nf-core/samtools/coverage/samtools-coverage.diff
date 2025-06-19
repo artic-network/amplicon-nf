@@ -1,0 +1,27 @@
+Changes in component 'nf-core/samtools/coverage'
+'modules/nf-core/samtools/coverage/environment.yml' is unchanged
+'modules/nf-core/samtools/coverage/meta.yml' is unchanged
+Changes in 'samtools/coverage/main.nf':
+--- modules/nf-core/samtools/coverage/main.nf
++++ modules/nf-core/samtools/coverage/main.nf
+@@ -22,12 +22,15 @@
+     script:
+     def args   = task.ext.args   ?: ''
+     def prefix = task.ext.prefix ?: "${meta.id}"
++
++    reference_arg = fasta ? "--reference ${fasta}" : ""
++
+     """
+     samtools \\
+         coverage \\
+         $args \\
+         -o ${prefix}.txt \\
+-        --reference ${fasta} \\
++        ${reference_arg} \\
+         $input
+ 
+     cat <<-END_VERSIONS > versions.yml
+
+'modules/nf-core/samtools/coverage/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/samtools/coverage/tests/main.nf.test' is unchanged
+************************************************************
