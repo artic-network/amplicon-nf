@@ -126,7 +126,7 @@ If you provide ONT data which does not have the `basecall_model_version_id` fiel
   Provided fastq does not contain basecall_model_version_id in the read header so clair3 model cannot be chosen automatically, please provide an appropriate model with the --model parameter
 ```
 
-If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models is available in the [parameters.md document](https://github.com/artic-network/amplicon-nf/blob/main/docs/parameters.md).
+If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models is available in the [parameters.md document](docs/parameters.md).
 
 ## Credits
 

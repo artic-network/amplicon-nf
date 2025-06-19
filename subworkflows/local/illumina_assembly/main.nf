@@ -68,19 +68,32 @@ workflow ILLUMINA_ASSEMBLY {
         )
         .set { ch_trimmed_fastq }
 
-    ch_reads_and_scheme
+    // No need to index a ref for each sample, just once per scheme
+    ch_refs_only = ch_reads_and_scheme
         .map { meta, _fastq_1, _fastq_2, _scheme_bed, scheme_ref ->
-            [meta, scheme_ref]
+            [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), scheme_ref]
         }
-        .set { ch_bwamem2_index_input }
+        .unique()
 
     BWAMEM2_INDEX(
-        ch_bwamem2_index_input
+        ch_refs_only,
     )
     ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions.first())
 
+    // Join the index with the per-sample metadata
+    ch_rejoined_bwamem2_indices = BWAMEM2_INDEX.out.index
+        .combine(
+            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref -> 
+                [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta]
+            },
+            by: 0
+        )
+        .map { _scheme_meta, bwamem2_index, meta ->
+            [meta, bwamem2_index]
+        }
+
     ch_trimmed_fastq
-        .join(BWAMEM2_INDEX.out.index)
+        .join(ch_rejoined_bwamem2_indices)
         .multiMap { meta, fastq_1, fastq_2, _scheme_bed, scheme_ref, scheme_ref_index ->
             reads: [meta, [fastq_1, fastq_2]]
             ref_index: [meta, scheme_ref_index]
@@ -110,14 +123,20 @@ workflow ILLUMINA_ASSEMBLY {
     SAMTOOLS_INDEX(ARTIC_ALIGN_TRIM.out.primertrimmed_bam)
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
 
-    ch_reads_and_scheme
-        .map { meta, _fastq_1, _fastq_2, _scheme_bed, scheme_ref ->
-            [meta, scheme_ref]
-        }
-        .set { ch_scheme_ref }
-
-    SAMTOOLS_FAIDX(ch_scheme_ref, [[:], []], false)
+    SAMTOOLS_FAIDX(ch_refs_only, [[:], []], false)
     ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions.first())
+
+    // Join the fai with the per-sample metadata
+    ch_rejoined_ref_fais = SAMTOOLS_FAIDX.out.fai
+        .combine(
+            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref -> 
+                [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta]
+            },
+            by: 0
+        )
+        .map { _scheme_meta, scheme_ref_fai, meta ->
+            [meta, scheme_ref_fai]
+        }
 
     ARTIC_ALIGN_TRIM.out.primertrimmed_bam
         .join(SAMTOOLS_INDEX.out.bai)
@@ -126,7 +145,7 @@ workflow ILLUMINA_ASSEMBLY {
                 [meta, scheme_bed, scheme_ref]
             }
         )
-        .join(SAMTOOLS_FAIDX.out.fai)
+        .join(ch_rejoined_ref_fais)
         .multiMap { meta, primertrimmed_bam, primertrimmed_bam_bai, _scheme_bed, scheme_ref, scheme_ref_fai ->
             sam_input: [meta, primertrimmed_bam, primertrimmed_bam_bai, [], [], []]
             ref_input: [meta, scheme_ref]
