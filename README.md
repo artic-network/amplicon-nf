@@ -13,7 +13,7 @@
 
 ## Introduction
 
-**artic-network/amplicon-nf** is a bioinformatics pipeline that ...
+**artic-network/amplicon-nf** is a bioinformatics pipeline that takes sequencing reads generated from ARTIC-style viral amplicon sequencing schemes, assembles them into consensus sequences, and runs some basic quality control on the outputs.
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
