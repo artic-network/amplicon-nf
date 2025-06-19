@@ -201,9 +201,9 @@ workflow ILLUMINA_ASSEMBLY {
         .set { ch_bcftools_consensus_depth_mask }
 
     BCFTOOLS_VIEW.out.vcf
-        .join(BCFTOOLS_VIEW.out.tbi, failOnMismatch: true, failOnDuplicate: true)
-        .join(ch_bcftools_consensus_reference, failOnMismatch: true, failOnDuplicate: true)
-        .join(ch_bcftools_consensus_depth_mask, failOnMismatch: true, failOnDuplicate: true)
+        .join(BCFTOOLS_VIEW.out.tbi)
+        .join(ch_bcftools_consensus_reference)
+        .join(ch_bcftools_consensus_depth_mask)
         .branch { meta, _vcf, _vcf_index, _reference, _depth_mask ->
             fixed: meta.vartype == "fixed"
             ambiguous: meta.vartype == "ambiguous"
@@ -230,7 +230,7 @@ workflow ILLUMINA_ASSEMBLY {
         .map { meta, vcf, vcf_index, reference, depth_mask ->
             [meta - meta.subMap("vartype"), vcf, vcf_index, reference, depth_mask]
         }
-        .join(ch_preconsensus_fasta, failOnMismatch: true, failOnDuplicate: true)
+        .join(ch_preconsensus_fasta)
         .map { meta, vcf, vcf_index, _scheme_ref, depth_mask, preconsensus ->
             [meta, vcf, vcf_index, preconsensus, depth_mask]
         }
