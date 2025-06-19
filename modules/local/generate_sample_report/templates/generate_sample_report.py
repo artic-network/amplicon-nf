@@ -374,7 +374,10 @@ for chrom, fig in plot.items():
         & (depth_df["depth"] >= int("${params.min_coverage_depth}"))
     ].shape[0]
     total_bases = depth_df[depth_df["chrom"] == chrom].shape[0]
-    percent_coverage = (bases_above_min_depth / total_bases) * 100
+
+    percent_coverage = (
+        (bases_above_min_depth / total_bases) * 100 if total_bases > 0 else 0.0
+    )
 
     amplicon_dropouts = [
         str(x["amplicon"])
