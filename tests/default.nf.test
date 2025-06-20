@@ -28,6 +28,7 @@ nextflow_pipeline {
                     stable_name,
                     "artic-sars-cov-2-400-v3.0.0_amplicon-nf_run-report.html - minimum file size: ${file("$outputDir/artic-sars-cov-2_400_v3.0.0_amplicon-nf_run-report.html").size() >= 4000000}",
                     "test_custom_scheme_name_amplicon-nf_run-report.html - minimum file size: ${file("$outputDir/test_custom_scheme_name_amplicon-nf_run-report.html").size() >= 4000000}",
+                    file("$outputDir/MN908947.3.aligned-consensus.fasta").exists(),
                     "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_sample-report.html - minimum file size: ${file("$outputDir/illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_sample-report.html").size() >= 4000000}",
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.amplicon_depths.tsv").exists(),
                     file("$outputDir/illumina_amplicon_test/illumina_amplicon_test.consensus.fasta").exists(),

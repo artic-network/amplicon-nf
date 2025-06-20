@@ -905,7 +905,7 @@ primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
 msa_list = glob("msas/*.fa*")
 for msa_path in msa_list:
     msa, seqdict = parse_msa(msa_path)
-    contig_name = msa_path.split("/")[-1].replace(".aligned_chroms.fas", "")
+    contig_name = msa_path.split("/")[-1].split("_")[0]
 
     primer_mismatch_heatmaps["plots"].append(
         {

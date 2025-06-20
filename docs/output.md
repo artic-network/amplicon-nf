@@ -52,6 +52,17 @@ amplicon-nf generates custom per-sample reports with QC metrics and a read depth
 
 The consensus FASTA contains the genome sequence of the sample based on the reads provided. This is based on the reference sequence provided, and areas not covered by sufficient reads to determine the contents of the genome are replaced with `N` indicating that any base may be present.
 
+### Aligned FASTAs
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CHROM-NAME>.<SCHEME>.aligned-consensus.fasta`: An alignment of all consensus sequences aligned to the reference sequence for each reference segment for each scheme.
+
+</details>
+
+The alignment FASTA(s) contain(s) an alignment of all consensus FASTAs to the scheme reference FASTA with one FASTA file per segment and per scheme.
+
 ### BAM files
 
 <details markdown="1">
