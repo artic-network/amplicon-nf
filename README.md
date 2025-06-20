@@ -120,13 +120,13 @@ The `-profile` parameter accepts multiple profiles separated by a comma so provi
 
 ## Problems and Solutions
 
-If you provide ONT data which does not have the `basecall_model_version_id` field in the read header (ONT basecallers include this info in the header) you will get an error message that looks like this:
+If you provide ONT data which does not have the `basecall_model_version_id` field in the read header (ONT basecallers include this automatically) you will get an error message that looks like this:
 
 ```sh
   Provided fastq does not contain basecall_model_version_id in the read header so clair3 model cannot be chosen automatically, please provide an appropriate model with the --model parameter
 ```
 
-If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models is available in the [parameters.md document](docs/parameters.md).
+If you do see this, you will need to provide the Clair3 model name manually with the `--manual_clair3_model` parameter, a full list of the available models is available in the [parameters.md document](docs/parameters.md), please note that this will apply to all samples in the run so a single samplesheet should only include data generated using a single basecalling model if using the `--manual_clair3_model` parameter.
 
 ## Credits
 
