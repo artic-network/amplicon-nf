@@ -34,7 +34,7 @@ amplicon-nf generates custom run reports for each primer scheme used to generate
 <summary>Output files</summary>
 
 - `<SAMPLE>/`
-  - `<SAMPLE>_amplicon-nf_sample-report.html`: a standalone sample report that can be viewed in your web browser, one report is generated sample provided in the samplesheet.
+  - `<SAMPLE>_amplicon-nf_sample-report.html`: a standalone sample report that can be viewed in your web browser, one report is generated for each sample provided in the samplesheet.
 
 </details>
 
