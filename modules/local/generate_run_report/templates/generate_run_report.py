@@ -745,6 +745,18 @@ header_lines, bed_lines = primalbedtools.bedfiles.BedLineParser.from_file("${bed
 
 primer_pairs = primalbedtools.primerpairs.create_primerpairs(bed_lines)
 
+samplesheet_df = pd.read_csv("${samplesheet_csv}", index_col=False)
+if "${meta.scheme}" != "[]":
+    scheme_samplesheet_df = samplesheet_df[
+        samplesheet_df["scheme_name"].str.contains("${meta.scheme}", na=False)
+    ]
+else:
+    scheme_samplesheet_df = samplesheet_df[
+        samplesheet_df["custom_scheme_path"].str.contains(
+            "${meta.custom_scheme}", na=False
+        )
+    ]
+
 depth_tsvs = glob("depth_tsvs/*.tsv")
 for tsv_path in depth_tsvs:
     sample_name = tsv_path.split("/")[-1].split(".")[0]
@@ -774,7 +786,6 @@ for tsv_path in depth_tsvs:
         payload["qc_table_info"][sample_name]["qc_result"] = "warning"
     else:
         payload["qc_table_info"][sample_name]["qc_result"] = "fail"
-
 
 coverage_tsvs = glob("coverage_tsvs/*.txt")
 for tsv_path in coverage_tsvs:
@@ -835,6 +846,41 @@ for tsv_path in amp_depth_tsvs:
         if len(rows) > 0
         else len(primer_pairs)
     )
+
+for row in scheme_samplesheet_df.itertuples():
+    if not payload["qc_table_info"].get(row.sample):
+        samples.add(row.sample)
+        payload["qc_table_info"].setdefault(row.sample, {})
+        payload["qc_table_info"][row.sample]["primer_scheme"] = scheme_version_str
+        payload["qc_table_info"][row.sample]["coverage"] = 0.0
+        payload["qc_table_info"][row.sample]["mean_depth"] = 0.0
+        payload["qc_table_info"][row.sample]["total_reads"] = 0
+        payload["qc_table_info"][row.sample]["total_amp_dropouts"] = len(primer_pairs)
+
+    if len([x for x in amplicon_depth_rows if x["sample"] == row.sample]) == 0:
+        for x in primer_pairs:
+            amplicon_depth_rows.append(
+                {
+                    "sample": row.sample,
+                    "chrom": str(x.chrom),
+                    "amplicon": x.amplicon_number,
+                    "mean_depth": 0.0,
+                }
+            )
+
+amplicon_depth_rows = sorted(
+    amplicon_depth_rows,
+    key=lambda x: (x["sample"], x["chrom"], x["amplicon"]),
+)
+
+# Sort the qc table info by sample name
+payload["qc_table_info"] = dict(
+    sorted(
+        payload["qc_table_info"].items(),
+        key=lambda item: item[0],
+    )
+)
+
 
 # amplicon_depth_rows.sort(key=lambda x: int(x["amplicon"].replace("Amplicon ", "")))
 amplicon_depth_df = pd.DataFrame(amplicon_depth_rows)

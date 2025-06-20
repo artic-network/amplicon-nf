@@ -226,11 +226,26 @@ workflow AMPLICON_NF {
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
         .groupTuple()
 
+    samplesheet_csv = file("${params.input}", checkIfExists: true)
+
     ch_run_report_input = ch_bed_by_scheme
         .join(ch_depth_tsvs_by_scheme)
         .join(ch_amp_depth_tsvs_by_scheme)
         .join(ch_coverage_tsvs_by_scheme)
         .join(ch_msas_by_scheme)
+    
+    ch_run_report_input = ch_run_report_input
+        .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
+            [
+                meta,
+                bed,
+                depth_tsvs,
+                amp_depth_tsvs,
+                coverage_tsvs,
+                msas,
+                samplesheet_csv,
+            ]
+        }
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,

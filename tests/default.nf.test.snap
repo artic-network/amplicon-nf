@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            96,
+            80,
             {
                 "ARTIC_ALIGN_TRIM": {
                     "artic": "1.7.1"
@@ -92,14 +92,6 @@
                 "illumina_amplicon_test/illumina_amplicon_test.vcf.gz",
                 "illumina_amplicon_test/illumina_amplicon_test.vcf.gz.tbi",
                 "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_sample-report.html",
-                "illumina_amplicon_test_2",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2.align_trim_report.csv",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2.amplicon_depths.tsv",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2.consensus.fasta",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2.primertrimmed.sorted.bam",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2.vcf.gz",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2.vcf.gz.tbi",
-                "illumina_amplicon_test_2/illumina_amplicon_test_2_amplicon-nf_sample-report.html",
                 "illumina_custom_scheme_Test",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.align_trim_report.csv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.amplicon_depths.tsv",
@@ -108,14 +100,6 @@
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz.tbi",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test_amplicon-nf_sample-report.html",
-                "illumina_custom_scheme_Test_2",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2.align_trim_report.csv",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2.amplicon_depths.tsv",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2.consensus.fasta",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2.primertrimmed.sorted.bam",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2.vcf.gz",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2.vcf.gz.tbi",
-                "illumina_custom_scheme_Test_2/illumina_custom_scheme_Test_2_amplicon-nf_sample-report.html",
                 "nanopore_amplicon_test",
                 "nanopore_amplicon_test/nanopore_amplicon_test.amplicon_depths.tsv",
                 "nanopore_amplicon_test/nanopore_amplicon_test.consensus.fasta",
@@ -146,6 +130,36 @@
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test_amplicon-nf_sample-report.html",
                 "nanopore_custom_scheme_test/primer.bed",
                 "nanopore_custom_scheme_test/reference.fasta",
+                "nanopore_empty_files",
+                "nanopore_empty_files/nanopore_empty_files.amplicon_depths.tsv",
+                "nanopore_empty_files/nanopore_empty_files.consensus.fasta",
+                "nanopore_empty_files/nanopore_empty_files.fastq.gz",
+                "nanopore_empty_files/nanopore_empty_files.minion.log.txt",
+                "nanopore_empty_files/nanopore_empty_files.normalised.vcf.gz",
+                "nanopore_empty_files/nanopore_empty_files.primertrimmed.rg.sorted.bam",
+                "nanopore_empty_files/nanopore_empty_files.primertrimmed.rg.sorted.bam.bai",
+                "nanopore_empty_files/nanopore_empty_files.sorted.bam",
+                "nanopore_empty_files/nanopore_empty_files.sorted.bam.bai",
+                "nanopore_empty_files/nanopore_empty_files.trimmed.rg.sorted.bam",
+                "nanopore_empty_files/nanopore_empty_files.trimmed.rg.sorted.bam.bai",
+                "nanopore_empty_files/nanopore_empty_files_amplicon-nf_sample-report.html",
+                "nanopore_empty_files/primer.bed",
+                "nanopore_empty_files/reference.fasta",
+                "nanopore_empty_files_2",
+                "nanopore_empty_files_2/nanopore_empty_files_2.amplicon_depths.tsv",
+                "nanopore_empty_files_2/nanopore_empty_files_2.consensus.fasta",
+                "nanopore_empty_files_2/nanopore_empty_files_2.fastq.gz",
+                "nanopore_empty_files_2/nanopore_empty_files_2.minion.log.txt",
+                "nanopore_empty_files_2/nanopore_empty_files_2.normalised.vcf.gz",
+                "nanopore_empty_files_2/nanopore_empty_files_2.primertrimmed.rg.sorted.bam",
+                "nanopore_empty_files_2/nanopore_empty_files_2.primertrimmed.rg.sorted.bam.bai",
+                "nanopore_empty_files_2/nanopore_empty_files_2.sorted.bam",
+                "nanopore_empty_files_2/nanopore_empty_files_2.sorted.bam.bai",
+                "nanopore_empty_files_2/nanopore_empty_files_2.trimmed.rg.sorted.bam",
+                "nanopore_empty_files_2/nanopore_empty_files_2.trimmed.rg.sorted.bam.bai",
+                "nanopore_empty_files_2/nanopore_empty_files_2_amplicon-nf_sample-report.html",
+                "nanopore_empty_files_2/primer.bed",
+                "nanopore_empty_files_2/reference.fasta",
                 "pipeline_info",
                 "pipeline_info/amplicon-nf_software_mqc_versions.yml",
                 "test_custom_scheme_name_amplicon-nf_run-report.html"
@@ -169,6 +183,6 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.4"
         },
-        "timestamp": "2025-06-19T12:38:10.521153"
+        "timestamp": "2025-06-20T10:09:12.536406"
     }
 }
