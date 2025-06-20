@@ -170,7 +170,8 @@
             ],
             "artic-sars-cov-2-400-v3.0.0_amplicon-nf_run-report.html - minimum file size: true",
             "test_custom_scheme_name_amplicon-nf_run-report.html - minimum file size: true",
-            false,
+            true,
+            true,
             "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_sample-report.html - minimum file size: true",
             true,
             true,
@@ -187,6 +188,6 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.4"
         },
-        "timestamp": "2025-06-20T15:08:36.774883"
+        "timestamp": "2025-06-20T15:34:50.38885"
     }
 }
