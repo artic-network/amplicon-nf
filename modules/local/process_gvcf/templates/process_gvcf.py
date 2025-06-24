@@ -2,6 +2,11 @@
 
 import itertools
 from types import SimpleNamespace
+import pysam
+import sys
+import os
+from collections import defaultdict
+
 
 # from https://www.geeksforgeeks.org/python-make-a-list-of-intervals-with-sequential-numbers/
 # via artic-mask
