@@ -503,8 +503,6 @@ def amplicon_depth_heatmap(
             "select2d",
             "lasso2d",
             "select",
-            "autoScale2d",
-            "zoom",
         ]
     )
 
@@ -703,7 +701,6 @@ def primer_mismatch_heatmap(
             "select2d",
             "lasso2d",
             "select",
-            "zoom",
         ]
     )
 

@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 
 import itertools
-import argparse
-import pysam
-import sys
-import os
-from collections import defaultdict
 from types import SimpleNamespace
 
 # from https://www.geeksforgeeks.org/python-make-a-list-of-intervals-with-sequential-numbers/
