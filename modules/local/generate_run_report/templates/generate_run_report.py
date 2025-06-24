@@ -853,6 +853,7 @@ for row in scheme_samplesheet_df.itertuples():
         payload["qc_table_info"][row.sample]["mean_depth"] = 0.0
         payload["qc_table_info"][row.sample]["total_reads"] = 0
         payload["qc_table_info"][row.sample]["total_amp_dropouts"] = len(primer_pairs)
+        payload["qc_table_info"][row.sample]["qc_result"] = "fail"
 
     if len([x for x in amplicon_depth_rows if x["sample"] == row.sample]) == 0:
         for x in primer_pairs:
@@ -877,7 +878,24 @@ payload["qc_table_info"] = dict(
         key=lambda item: item[0],
     )
 )
-
+with open(f"{scheme_version_str.replace("/", "_")}_qc_results.tsv", "w") as f:
+    writer = csv.DictWriter(
+        f,
+        fieldnames=[
+            "sample",
+            "primer_scheme",
+            "coverage",
+            "mean_depth",
+            "total_reads",
+            "total_amp_dropouts",
+            "qc_result",
+        ],
+        delimiter="\t",
+    )
+    writer.writeheader()
+    for sample, row in payload["qc_table_info"].items():
+        row["sample"] = sample
+        writer.writerow(row)
 
 # amplicon_depth_rows.sort(key=lambda x: int(x["amplicon"].replace("Amplicon ", "")))
 amplicon_depth_df = pd.DataFrame(amplicon_depth_rows)
