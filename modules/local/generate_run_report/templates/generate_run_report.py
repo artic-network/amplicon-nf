@@ -685,13 +685,13 @@ def primer_mismatch_heatmap(
             xgap=0.1,
             ygap=0.1,
             name="Primer Mismatches",
+            zmin=0,
         )
     )
     fig.update_layout(
         font=dict(family="Roboto, monospace", size=16),
         hoverlabel=dict(font_family="Roboto, monospace"),
         title_text=f"Primer Mismatches: {list(primary_ref)[0]}",
-        coloraxis=dict(cmax=10, cmin=0),
     )
     fig.update_yaxes(autorange="reversed")
 
