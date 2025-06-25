@@ -686,6 +686,7 @@ def primer_mismatch_heatmap(
             ygap=0.1,
             name="Primer Mismatches",
             zmin=0,
+            zmax=10,
         )
     )
     fig.update_layout(
