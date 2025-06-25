@@ -28,6 +28,17 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 amplicon-nf generates custom run reports for each primer scheme used to generate the data used in the run. This report summarises some basic QC information about each sample in a table as well as some plots which are helpful to determine the cause of any issues encountered.
 
+### Run QC Summaries
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<SCHEME_NAME>_amplicon-nf_qc_results.tsv`: a TSV file containing the same information as the qc table within the pre-run report QC table.
+
+</details>
+
+A TSV ([tab-separated-values](https://en.wikipedia.org/wiki/Tab-separated_values)) file containing basic summary QC info about the samples included in the run, a summary TSV is generated per scheme used in the run.
+
 ### Sample Reports
 
 <details markdown="1">
