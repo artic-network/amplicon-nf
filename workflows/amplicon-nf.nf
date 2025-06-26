@@ -163,8 +163,8 @@ workflow AMPLICON_NF {
 
     ch_chroms = ch_bed_by_scheme
         .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
-        .filter { bed_row ->
-            "${bed_row[0]}".startsWith('#') == false
+        .filter { _meta, bed_row ->
+            !bed_row[0].toString().startsWith("#")
         }
         .map { meta, bed_row -> [meta, bed_row[0]] }
         .unique()

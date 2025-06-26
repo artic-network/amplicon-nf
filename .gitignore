@@ -10,3 +10,4 @@ null/
 .nf-test*
 storedir/
 amplicon-nf/
+.vscode/
