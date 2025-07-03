@@ -58,6 +58,12 @@ sample-2,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-2_S2_L001_R
 
 An [example Illumina samplesheet](../assets/samplesheet.illumina.csv) has been provided with the pipeline.
 
+### Primer Schemes
+
+We recommend that you provide a scheme using a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2` which is laid out with the following schema `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>`, the scheme itself will be sourced from the [primerschemes repository](https://github.com/quick-lab/primerschemes).
+
+Alternatively, if you wish to use a scheme not available from the official repository you may provide a samplesheet containing the `custom_scheme_path` and `custom_scheme_name` parameters, `custom_scheme_path` should point to a directory containing two files `primer.bed` and `reference.fasta` which describe your custom scheme, `custom_scheme_name` is an optional field which allows you to provide a name for this custom scheme which will be used when generating a run report, if this is provided with a `scheme_name` the `custom_scheme_name` will be ignored. 
+
 ### Full samplesheet
 
 If you wish to run a mix of platforms or even a mix of primer schemes in the same pipeline that is fully supported (even encouraged), if you provide a full samplesheet each sample is treated separately and a separate run QC report will be generated for each primer scheme.
@@ -78,9 +84,8 @@ illumina_amplicon_data,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path
 | `custom_scheme_path` | A path which points to a directory containing two files `primer.bed` and `reference.fasta` which describe your custom scheme.                                                                       |
 | `custom_scheme_name` | The name of your custom scheme, this is used to refer to the scheme in the per-run QC reports.                                                                                                      |
 | `fastq_directory`    | A directory containing your Nanopore read FASTQS for this sample.                                                                                                                                   |
-
-| `fastq_1`            | Full path to FastQ file for Illumina short reads 1 for this sample.                                                                                                                                                 |
-| `fastq_2`            | Full path to FastQ file for Illumina short reads 2 for this sample.                                                                                                                                                 |
+| `fastq_1`            | Full path to FastQ file for Illumina short reads 1 for this sample.                                                                                                                                 |
+| `fastq_2`            | Full path to FastQ file for Illumina short reads 2 for this sample.                                                                                                                                 |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
@@ -125,6 +130,20 @@ storedir: './storedir/'
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+### Running the pipeline in low resource settings
+
+If you are running this pipeline locally (for example on a sequencing laptop) you may wish to put a limit on the amount of resources that the pipeline will attempt to use, to do this there are two profiles which limit the amount of resources the pipeline will try to use to fit on more modest hardware, if you wish to use one of these profiles you may do so like this:
+
+```bash
+nextflow run artic-network/amplicon-nf \
+   -profile low_resource,<docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --storedir <STOREDIR> 
+```
+
+The `-profile` parameter accepts multiple profiles separated by a comma so providing a parameter such as `-profile low_resource,docker` will use both profiles at the same time.
 
 ### Updating the pipeline
 

@@ -39,15 +39,14 @@
                 "type": "string",
                 "format": "directory-path",
                 "exists": true,
-                "errorMessage": "Custom scheme path must exist and cannot contain spaces.",
+                "errorMessage": "Custom scheme path must exist.",
                 "meta": [
                     "custom_scheme"
                 ]
             },
             "custom_scheme_name": {
                 "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "Custom scheme name must be provided and cannot contain spaces.",
+                "errorMessage": "Custom scheme name must be provided if a custom scheme is used.",
                 "meta": [
                     "custom_scheme_name"
                 ]

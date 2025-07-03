@@ -438,5 +438,6 @@ render_qc_report(
 )
 
 with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
     for package in ("plotly", "primalbedtools", "pandas", "jinja2"):
-        f.write(f"{package}: {version(package)}\\n")
+        f.write(f"  {package}: {version(package)}\\n")

@@ -6,6 +6,7 @@ import pysam
 import sys
 import os
 from collections import defaultdict
+from importlib.metadata import version
 
 
 # from https://www.geeksforgeeks.org/python-make-a-list-of-intervals-with-sequential-numbers/
@@ -217,6 +218,9 @@ def main():
             variants_out.write(record)
 
     write_depth_mask(args.mask_output, contig_depth, args.min_depth)
+
+    with open("versions.yml", "wt") as versions_fh:
+        versions_fh.write("${task.process}:\\n  pysam: " + str(version("pysam")))
 
 
 main()

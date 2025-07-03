@@ -40,21 +40,19 @@ workflow AMPLICON_NF {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    ch_samplesheet
+    ch_input = ch_samplesheet
         .branch { meta, _fastq_directory, _fastq_1, _fastq_2 ->
             nanopore: meta.platform == "nanopore"
             illumina: meta.platform == "illumina"
         }
-        .set { ch_input }
 
     //
     // Generate virus assemblies
     //
-    ch_input.nanopore
+    ch_nanopore_input = ch_input.nanopore
         .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
             [meta, fastq_dir]
         }
-        .set { ch_nanopore_input }
 
     ONT_ASSEMBLY(
         ch_nanopore_input,
@@ -66,11 +64,10 @@ workflow AMPLICON_NF {
     SEQKIT_REPLACE_ONT(ONT_ASSEMBLY.out.consensus_fasta)
     ch_versions = ch_versions.mix(SEQKIT_REPLACE_ONT.out.versions.first())
 
-    ch_input.illumina
+    ch_illumina_input = ch_input.illumina
         .map { meta, _fastq_dir, fastq_1, fastq_2 ->
             [meta, fastq_1, fastq_2]
         }
-        .set { ch_illumina_input }
 
     ILLUMINA_ASSEMBLY(
         ch_illumina_input,
@@ -117,38 +114,38 @@ workflow AMPLICON_NF {
         .join(ch_amp_depth_tsv)
         .join(SAMTOOLS_COVERAGE.out.coverage)
 
-    ch_sample_report_template = file(
+    sample_report_template = file(
         "${projectDir}/assets/sample_report_template.html",
         checkIfExists: true
     )
-    ch_run_report_template = file(
+    run_report_template = file(
         "${projectDir}/assets/run_report_template.html",
         checkIfExists: true
     )
-    ch_artic_logo_svg = file(
+    artic_logo_svg = file(
         "${projectDir}/assets/artic-logo-small.svg",
         checkIfExists: true
     )
-    ch_bootstrap_bundle_min_js = file(
+    bootstrap_bundle_min_js = file(
         "${projectDir}/assets/bootstrap.bundle.min.js",
         checkIfExists: true
     )
-    ch_bootstrap_bundle_min_css = file(
+    bootstrap_bundle_min_css = file(
         "${projectDir}/assets/bootstrap.min.css",
         checkIfExists: true
     )
-    ch_plotly_js = file(
+    plotly_js = file(
         "${projectDir}/assets/plotly.min.js",
         checkIfExists: true
     )
 
     GENERATE_SAMPLE_REPORT(
         ch_sample_report_input,
-        ch_sample_report_template,
-        ch_artic_logo_svg,
-        ch_bootstrap_bundle_min_js,
-        ch_bootstrap_bundle_min_css,
-        ch_plotly_js,
+        sample_report_template,
+        artic_logo_svg,
+        bootstrap_bundle_min_js,
+        bootstrap_bundle_min_css,
+        plotly_js,
     )
     ch_versions = ch_versions.mix(GENERATE_SAMPLE_REPORT.out.versions.first())
 
@@ -249,11 +246,11 @@ workflow AMPLICON_NF {
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,
-        ch_run_report_template,
-        ch_artic_logo_svg,
-        ch_bootstrap_bundle_min_js,
-        ch_bootstrap_bundle_min_css,
-        ch_plotly_js,
+        run_report_template,
+        artic_logo_svg,
+        bootstrap_bundle_min_js,
+        bootstrap_bundle_min_css,
+        plotly_js,
     )
     ch_versions = ch_versions.mix(GENERATE_RUN_REPORT.out.versions.first())
 

@@ -48,7 +48,7 @@
 
 - [plotly](https://github.com/plotly/plotly.py)
 
-> Inc., P. T. (2015). Collaborative data science. Montreal, QC: Plotly Technologies Inc. Retrieved from https://plot.ly
+> Plotly Technologies Inc. (2015). Collaborative data science. Montreal, QC: Plotly Technologies Inc. Retrieved from https://plot.ly
 
 - [biopython](https://github.com/biopython/biopython)
 
@@ -61,10 +61,6 @@
 - [freebayes](https://github.com/freebayes/freebayes)
 
 > Garrison E, Marth G. Haplotype-based variant detection from short-read sequencing. arXiv preprint arXiv:1207.3907 [q-bio.GN] 2012
-
-- [pytest](https://github.com/pytest-dev/pytest)
-
-> Krekel et al., https://github.com/pytest-dev/pytest
 
 - [Seqkit](https://github.com/shenwei356/seqkit)
 

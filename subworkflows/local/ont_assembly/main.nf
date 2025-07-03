@@ -17,13 +17,13 @@ workflow ONT_ASSEMBLY {
         ch_input
     )
     ch_versions = ch_versions.mix(ARTIC_GUPPYPLEX.out.versions.first())
-    ARTIC_GUPPYPLEX.out.fastq.set { ch_guppyplexed_fastq }
 
-    ch_guppyplexed_fastq
+    ch_guppyplexed_fastq = ARTIC_GUPPYPLEX.out.fastq
+
+    ch_minion_input = ch_guppyplexed_fastq
         .map { meta, fastq_dir ->
             [meta, fastq_dir, meta.custom_scheme ? file(meta.custom_scheme) : []]
         }
-        .set { ch_minion_input }
 
     ARTIC_MINION(
         ch_minion_input,

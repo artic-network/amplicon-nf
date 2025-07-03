@@ -15,6 +15,7 @@ process PROCESS_GVCF {
     tuple val(meta), path("variants.vcf"), emit: variants_vcf
     tuple val(meta), path("consensus.vcf"), emit: consensus_vcf
     tuple val(meta), path("mask.txt"), emit: depth_mask
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
