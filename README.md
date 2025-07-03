@@ -73,7 +73,7 @@ artic-network/amplicon-nf was originally written by Sam Wilkinson (@BioWilko).
 
 I thank the following people for their assistance in the development of this pipeline:
 
-* James A. Fellows Yates (@jfy133), Áine O'Toole (@aineniamh), Rachel Colquhoun (@rmcolq), Chris G. Kent (@ChrisgKent), and Andrew Rambaut (@rambaut) for the extremely useful testing and feedback.
+* James A. Fellows Yates (@jfy133), Áine O'Toole (@aineniamh), Rachel Colquhoun (@rmcolq), Chris G. Kent (@ChrisgKent), Bede Constantinides (@bede) and Andrew Rambaut (@rambaut) for the extremely useful testing and feedback.
 * Jared Simpson (@jts) for originally writing the [Illumina Freebayes consensus generation workflow](https://github.com/jts/ncov2019-artic-nf/blob/6ecf07bef462bfb896ae91629c49116761c03175/modules/illumina.nf#L174-L227) the Illumina workflow is based on.
 
 ## Contributions and Support
