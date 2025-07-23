@@ -33,7 +33,7 @@
                     "fa_icon": "fas fa-folder-open",
                     "default": "outdir"
                 },
-                "storedir": {
+                "store_dir": {
                     "type": "string",
                     "format": "directory-path",
                     "title": "Store directory name",
