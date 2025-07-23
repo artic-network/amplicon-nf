@@ -8,6 +8,6 @@ testing*
 *.pyc
 null/
 .nf-test*
-storedir/
+store_dir/
 amplicon-nf/
 .vscode/

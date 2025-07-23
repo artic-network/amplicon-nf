@@ -94,7 +94,7 @@ An [example samplesheet](../assets/samplesheet.csv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run artic-network/amplicon-nf --input ./samplesheet.csv --outdir ./results --storedir ./storedir  -profile docker
+nextflow run artic-network/amplicon-nf --input ./samplesheet.csv --outdir ./results --store_dir ./store_dir  -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile which is recommended. See below for more information about profiles.
@@ -104,7 +104,7 @@ Note that the pipeline will create the following files in your working directory
 ```bash
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
-<STOREDIR>          # Storage directory in specified location (defined with --storedir)
+<store_dir>          # Storage directory in specified location (defined with --store_dir)
 .nextflow_log       # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
@@ -127,7 +127,7 @@ with:
 ```yaml title="params.yaml"
 input: './samplesheet.csv'
 outdir: './results/'
-storedir: './storedir/'
+store_dir: './store_dir/'
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
@@ -141,7 +141,7 @@ nextflow run artic-network/amplicon-nf \
    -profile low_resource,<docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
-   --storedir <STOREDIR> 
+   --store_dir <store_dir> 
 ```
 
 The `-profile` parameter accepts multiple profiles separated by a comma so providing a parameter such as `-profile low_resource,docker` will use both profiles at the same time.

@@ -12,7 +12,8 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
-                "outdir"
+                "outdir",
+                "store_dir"
             ],
             "properties": {
                 "input": {
@@ -30,15 +31,16 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "outdir"
                 },
-                "storedir": {
+                "store_dir": {
                     "type": "string",
                     "format": "directory-path",
                     "title": "Store directory name",
                     "description": "Where to store files downloaded by the pipeline for future use.",
                     "help_text": "Any downloaded primer schemes / clair3 models will be stored in this directory for future use. If not set when running from the command line, the schemes will be stored in the current working directory/store_dir. If this is run via epi2me by default they will be stored in your `epi2melabs/data/` directory.",
-                    "default": "./storedir"
+                    "default": "store_dir"
                 },
                 "email": {
                     "type": "string",

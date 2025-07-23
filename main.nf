@@ -31,7 +31,7 @@ workflow ARTICNETWORK_AMPLICON_NF {
 
     main:
 
-    ch_store_dir = file("${params.storedir}", checkIfExists: true)
+    ch_store_dir = file("${params.store_dir}", checkIfExists: true)
 
     //
     // WORKFLOW: Run pipeline
