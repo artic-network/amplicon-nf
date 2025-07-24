@@ -42,6 +42,13 @@
                     "help_text": "Any downloaded primer schemes / clair3 models will be stored in this directory for future use. If not set when running from the command line, the schemes will be stored in the current working directory/store_dir. If this is run via epi2me by default they will be stored in your `epi2melabs/data/` directory.",
                     "default": "store_dir"
                 },
+                "read_directory": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "title": "Path containing FASTQ files or barcode directories.",
+                    "description": "Path containing FASTQ file pairs (for Illumina) or barcode directories (for Nanopore). The pipeline will try to match your input samplesheet CSV to the contents of this directory if fully specified.",
+                    "help_text": "This only needs to be set if you are not providing FASTQ files (or directories for Nanopore) in the samplesheet CSV. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored.\nIllumina: The pipeline will look for FASTQ file pairs which are named with the sample name, e.g. `sample1_R1.fastq.gz` and `sample1_R2.fastq.gz`. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored.\nNanopore: The pipeline will look for directories named with the barcode, e.g. `barcode01/fastq_pass/` containing FASTQ files. If you are providing barcode directories in the samplesheet CSV, then this parameter will be ignored."
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",

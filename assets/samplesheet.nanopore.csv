@@ -1,4 +1,4 @@
-sample,platform,scheme_name,fastq_directory
-barcode01,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode01
-barcode02,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode02
-barcode03,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode03
+sample,barcode,platform,scheme_name
+sample1,barcode01,nanopore,artic-inrb-mpox/2500/v1.0.0
+sample2,barcode02,nanopore,artic-inrb-mpox/2500/v1.0.0
+sample3,barcode03,nanopore,artic-inrb-mpox/2500/v1.0.0
