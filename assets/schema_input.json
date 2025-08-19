@@ -16,6 +16,15 @@
                     "id"
                 ]
             },
+            "barcode": {
+                "type": "string",
+                "pattern": "^(?:(?!\\.)(?!\\/)\\S)+$",
+                "errorMessage": "Barcode cannot contain spaces, '.', or '/'",
+                "uniqueItems": true,
+                "meta": [
+                    "barcode"
+                ]
+            },
             "platform": {
                 "type": "string",
                 "enum": [

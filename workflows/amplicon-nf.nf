@@ -40,19 +40,66 @@ workflow AMPLICON_NF {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
-    ch_input = ch_samplesheet
-        .branch { meta, _fastq_directory, _fastq_1, _fastq_2 ->
-            nanopore: meta.platform == "nanopore"
-            illumina: meta.platform == "illumina"
-        }
+    ch_input = ch_samplesheet.branch { meta, _fastq_directory, _fastq_1, _fastq_2 ->
+        nanopore: meta.platform == "nanopore"
+        illumina: meta.platform == "illumina"
+    }
+
+    if (params.read_directory) {
+        // 
+        // Illumina file fuzzy matching from read_directory
+        //
+        read_directory = file(params.read_directory, checkIfExists: true)
+
+        ch_illumina_missing_files = ch_input.illumina
+            .filter { _meta, _fastq_dir, fastq_1, fastq_2 ->
+                !fastq_1 || !fastq_2
+            }
+            .map { meta, _fastq_dir, _fastq_1, _fastq_2 ->
+                [meta.id, meta]
+            }
+
+        // Find Illumina file names from the fastq_directory, then get rid of the sample suffix (e.g. _S1) from the file names so it'll match the sample names in the samplesheet.
+        ch_file_pairs = Channel.fromFilePairs(
+                "${read_directory}/*_R{1,2}*.fastq.gz",
+                size: 2,
+                type: "file",
+                followLinks: true,
+                maxDepth: 1,
+            )
+            .map { common_key, file_pair ->
+                [common_key.replaceAll("_S.\$", ""), file_pair[0], file_pair[1]]
+            }
+
+        ch_fuzzy_matched_illumina = ch_illumina_missing_files
+            .join(ch_file_pairs, failOnDuplicate: true, failOnMismatch: true)
+            .map { _sample_name, meta, fastq_1, fastq_2 ->
+                [meta, fastq_1, fastq_2]
+            }
+
+        // 
+        // ONT file fuzzy matching from read_directory
+        //
+        ch_nanopore_fuzzy_match = ch_input.nanopore
+            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
+                !fastq_dir && meta.barcode
+            }
+            .map { meta, _fastq_dir, _fastq_1, _fastq_2 ->
+                [meta, file("${read_directory}/${meta.barcode}/", checkIfExists: true)]
+            }
+    }
 
     //
     // Generate virus assemblies
     //
     ch_nanopore_input = ch_input.nanopore
+        .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
+            fastq_dir && !meta.barcode
+        }
         .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
             [meta, fastq_dir]
         }
+        .mix(ch_nanopore_fuzzy_match)
 
     ONT_ASSEMBLY(
         ch_nanopore_input,
@@ -64,10 +111,15 @@ workflow AMPLICON_NF {
     SEQKIT_REPLACE_ONT(ONT_ASSEMBLY.out.consensus_fasta)
     ch_versions = ch_versions.mix(SEQKIT_REPLACE_ONT.out.versions.first())
 
+    // Mix in the fuzzy matched Illumina files with the well behaved samplesheet entries.
     ch_illumina_input = ch_input.illumina
+        .filter { _meta, _fastq_dir, fastq_1, fastq_2 ->
+            fastq_1 && fastq_2
+        }
         .map { meta, _fastq_dir, fastq_1, fastq_2 ->
             [meta, fastq_1, fastq_2]
         }
+        .mix(ch_fuzzy_matched_illumina)
 
     ILLUMINA_ASSEMBLY(
         ch_illumina_input,
@@ -158,58 +210,60 @@ workflow AMPLICON_NF {
         }
         .unique()
 
-    ch_chroms = ch_bed_by_scheme
-        .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
-        .filter { _meta, bed_row ->
-            !bed_row[0].toString().startsWith("#")
-        }
-        .map { meta, bed_row -> [meta, bed_row[0]] }
-        .unique()
+    if (params.primer_mismatch_plot) {
+        ch_chroms = ch_bed_by_scheme
+            .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
+            .filter { _meta, bed_row ->
+                !bed_row[0].toString().startsWith("#")
+            }
+            .map { meta, bed_row -> [meta, bed_row[0]] }
+            .unique()
 
-    ch_consensus_by_chrom = ch_chroms
-        .combine(
-            ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
-            by: 0
-        )
-        .map { meta, chrom, fasta ->
-            [
-                meta + [chrom: chrom] + [id: chrom],
-                fasta,
-            ]
-        }
-        .groupTuple()
+        ch_consensus_by_chrom = ch_chroms
+            .combine(
+                ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
+                by: 0
+            )
+            .map { meta, chrom, fasta ->
+                [
+                    meta + [chrom: chrom] + [id: chrom],
+                    fasta,
+                ]
+            }
+            .groupTuple()
 
-    CAT_CAT(ch_consensus_by_chrom)
-    ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
+        CAT_CAT(ch_consensus_by_chrom)
+        ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
 
-    SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
-    ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
+        SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
+        ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
 
-    ch_refs_per_chrom = ch_chroms
-        .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
-        .map { meta, chrom, ref -> [meta + [chrom: chrom, id: chrom], ref] }
+        ch_refs_per_chrom = ch_chroms
+            .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
+            .map { meta, chrom, ref -> [meta + [chrom: chrom, id: chrom], ref] }
 
-    SEQKIT_GREP_REFS(ch_refs_per_chrom, [])
-    ch_versions = ch_versions.mix(SEQKIT_GREP_REFS.out.versions.first())
+        SEQKIT_GREP_REFS(ch_refs_per_chrom, [])
+        ch_versions = ch_versions.mix(SEQKIT_GREP_REFS.out.versions.first())
 
-    ch_mafft_align_input = SEQKIT_GREP_FASTAS.out.filter
-        .join(SEQKIT_GREP_REFS.out.filter)
-        .multiMap { meta, fastas, reference ->
-            fastas: [meta, fastas]
-            reference: [meta, reference]
-        }
+        ch_mafft_align_input = SEQKIT_GREP_FASTAS.out.filter
+            .join(SEQKIT_GREP_REFS.out.filter)
+            .multiMap { meta, fastas, reference ->
+                fastas: [meta, fastas]
+                reference: [meta, reference]
+            }
 
-    MAFFT_ALIGN(ch_mafft_align_input.reference, [[:], []], ch_mafft_align_input.fastas, [[:], []], [[:], []], [[:], []], false)
-    ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions.first())
+        MAFFT_ALIGN(ch_mafft_align_input.reference, [[:], []], ch_mafft_align_input.fastas, [[:], []], [[:], []], [[:], []], false)
+        ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions.first())
 
-    ch_msas_by_scheme = MAFFT_ALIGN.out.fas
-        .map { meta, msa ->
-            [
-                meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
-                msa,
-            ]
-        }
-        .groupTuple()
+        ch_msas_by_scheme = MAFFT_ALIGN.out.fas
+            .map { meta, msa ->
+                [
+                    meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                    msa,
+                ]
+            }
+            .groupTuple()
+    }
 
     ch_amp_depth_tsvs_by_scheme = ch_amp_depth_tsv
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
@@ -225,24 +279,33 @@ workflow AMPLICON_NF {
 
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
-    ch_run_report_input = ch_bed_by_scheme
-        .join(ch_depth_tsvs_by_scheme)
-        .join(ch_amp_depth_tsvs_by_scheme)
-        .join(ch_coverage_tsvs_by_scheme)
-        .join(ch_msas_by_scheme)
-    
-    ch_run_report_input = ch_run_report_input
-        .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
-            [
-                meta,
-                bed,
-                depth_tsvs,
-                amp_depth_tsvs,
-                coverage_tsvs,
-                msas,
-                samplesheet_csv,
-            ]
-        }
+    if (params.primer_mismatch_plot) {
+        ch_run_report_input = ch_bed_by_scheme
+            .join(ch_depth_tsvs_by_scheme)
+            .join(ch_amp_depth_tsvs_by_scheme)
+            .join(ch_coverage_tsvs_by_scheme)
+            .join(ch_msas_by_scheme)
+            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
+                [
+                    meta,
+                    bed,
+                    depth_tsvs,
+                    amp_depth_tsvs,
+                    coverage_tsvs,
+                    msas,
+                    samplesheet_csv,
+                ]
+            }
+    }
+    else {
+        ch_run_report_input = ch_bed_by_scheme
+            .join(ch_depth_tsvs_by_scheme)
+            .join(ch_amp_depth_tsvs_by_scheme)
+            .join(ch_coverage_tsvs_by_scheme)
+            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs ->
+                [meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, [], samplesheet_csv]
+            }
+    }
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,
@@ -260,44 +323,51 @@ workflow AMPLICON_NF {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name:  'amplicon-nf_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'amplicon-nf_software_' + 'mqc_' + 'versions.yml',
             sort: true,
-            newLine: true
-        ).set { ch_collated_versions }
+            newLine: true,
+        )
+        .set { ch_collated_versions }
 
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config        = Channel.fromPath(
-        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config = params.multiqc_config ?
-        Channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        Channel.empty()
-    ch_multiqc_logo          = params.multiqc_logo ?
-        Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        Channel.empty()
+    ch_multiqc_config = Channel.fromPath(
+        "${projectDir}/assets/multiqc_config.yml",
+        checkIfExists: true
+    )
+    ch_multiqc_custom_config = params.multiqc_config
+        ? Channel.fromPath(params.multiqc_config, checkIfExists: true)
+        : Channel.empty()
+    ch_multiqc_logo = params.multiqc_logo
+        ? Channel.fromPath(params.multiqc_logo, checkIfExists: true)
+        : Channel.empty()
 
-    summary_params      = paramsSummaryMap(
-        workflow, parameters_schema: "nextflow_schema.json")
+    summary_params = paramsSummaryMap(
+        workflow,
+        parameters_schema: "nextflow_schema.json"
+    )
     ch_workflow_summary = Channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-        file(params.multiqc_methods_description, checkIfExists: true) :
-        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description))
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')
+    )
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description
+        ? file(params.multiqc_methods_description, checkIfExists: true)
+        : file("${projectDir}/assets/methods_description_template.yml", checkIfExists: true)
+    ch_methods_description = Channel.value(
+        methodsDescriptionText(ch_multiqc_custom_methods_description)
+    )
 
     ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_methods_description.collectFile(
             name: 'methods_description_mqc.yaml',
-            sort: true
+            sort: true,
         )
     )
 
-    MULTIQC (
+    MULTIQC(
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),

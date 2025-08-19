@@ -43,6 +43,8 @@ nextflow_pipeline {
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.vcf.gz").exists(),
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.sorted.bam").exists(),
                     file("$outputDir/nanopore_amplicon_test/nanopore_amplicon_test.sorted.bam").exists(),
+                    file("$outputDir/illumina_fuzzy_match/illumina_fuzzy_match.consensus.fasta").exists(),
+                    file("$outputDir/nanopore_fuzzy_match/nanopore_fuzzy_match.consensus.fasta").exists(),
                     ).match()
                 }
             )
