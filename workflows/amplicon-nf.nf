@@ -210,58 +210,60 @@ workflow AMPLICON_NF {
         }
         .unique()
 
-    ch_chroms = ch_bed_by_scheme
-        .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
-        .filter { _meta, bed_row ->
-            !bed_row[0].toString().startsWith("#")
-        }
-        .map { meta, bed_row -> [meta, bed_row[0]] }
-        .unique()
+    if (params.primer_mismatch_plot) {
+        ch_chroms = ch_bed_by_scheme
+            .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
+            .filter { _meta, bed_row ->
+                !bed_row[0].toString().startsWith("#")
+            }
+            .map { meta, bed_row -> [meta, bed_row[0]] }
+            .unique()
 
-    ch_consensus_by_chrom = ch_chroms
-        .combine(
-            ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
-            by: 0
-        )
-        .map { meta, chrom, fasta ->
-            [
-                meta + [chrom: chrom] + [id: chrom],
-                fasta,
-            ]
-        }
-        .groupTuple()
+        ch_consensus_by_chrom = ch_chroms
+            .combine(
+                ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
+                by: 0
+            )
+            .map { meta, chrom, fasta ->
+                [
+                    meta + [chrom: chrom] + [id: chrom],
+                    fasta,
+                ]
+            }
+            .groupTuple()
 
-    CAT_CAT(ch_consensus_by_chrom)
-    ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
+        CAT_CAT(ch_consensus_by_chrom)
+        ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
 
-    SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
-    ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
+        SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
+        ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
 
-    ch_refs_per_chrom = ch_chroms
-        .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
-        .map { meta, chrom, ref -> [meta + [chrom: chrom, id: chrom], ref] }
+        ch_refs_per_chrom = ch_chroms
+            .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
+            .map { meta, chrom, ref -> [meta + [chrom: chrom, id: chrom], ref] }
 
-    SEQKIT_GREP_REFS(ch_refs_per_chrom, [])
-    ch_versions = ch_versions.mix(SEQKIT_GREP_REFS.out.versions.first())
+        SEQKIT_GREP_REFS(ch_refs_per_chrom, [])
+        ch_versions = ch_versions.mix(SEQKIT_GREP_REFS.out.versions.first())
 
-    ch_mafft_align_input = SEQKIT_GREP_FASTAS.out.filter
-        .join(SEQKIT_GREP_REFS.out.filter)
-        .multiMap { meta, fastas, reference ->
-            fastas: [meta, fastas]
-            reference: [meta, reference]
-        }
+        ch_mafft_align_input = SEQKIT_GREP_FASTAS.out.filter
+            .join(SEQKIT_GREP_REFS.out.filter)
+            .multiMap { meta, fastas, reference ->
+                fastas: [meta, fastas]
+                reference: [meta, reference]
+            }
 
-    MAFFT_ALIGN(ch_mafft_align_input.reference, [[:], []], ch_mafft_align_input.fastas, [[:], []], [[:], []], [[:], []], false)
-    ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions.first())
+        MAFFT_ALIGN(ch_mafft_align_input.reference, [[:], []], ch_mafft_align_input.fastas, [[:], []], [[:], []], [[:], []], false)
+        ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions.first())
 
-    ch_msas_by_scheme = MAFFT_ALIGN.out.fas
-        .map { meta, msa ->
-            [
-                meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
-                msa,
-            ]
-        }
-        .groupTuple()
+        ch_msas_by_scheme = MAFFT_ALIGN.out.fas
+            .map { meta, msa ->
+                [
+                    meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                    msa,
+                ]
+            }
+            .groupTuple()
+    }
 
     ch_amp_depth_tsvs_by_scheme = ch_amp_depth_tsv
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
@@ -277,22 +279,32 @@ workflow AMPLICON_NF {
 
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
-    ch_run_report_input = ch_bed_by_scheme
-        .join(ch_depth_tsvs_by_scheme)
-        .join(ch_amp_depth_tsvs_by_scheme)
-        .join(ch_coverage_tsvs_by_scheme)
-        .join(ch_msas_by_scheme)
-
-    ch_run_report_input = ch_run_report_input.map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
-        [
-            meta,
-            bed,
-            depth_tsvs,
-            amp_depth_tsvs,
-            coverage_tsvs,
-            msas,
-            samplesheet_csv,
-        ]
+    if (params.primer_mismatch_plot) {
+        ch_run_report_input = ch_bed_by_scheme
+            .join(ch_depth_tsvs_by_scheme)
+            .join(ch_amp_depth_tsvs_by_scheme)
+            .join(ch_coverage_tsvs_by_scheme)
+            .join(ch_msas_by_scheme)
+            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
+                [
+                    meta,
+                    bed,
+                    depth_tsvs,
+                    amp_depth_tsvs,
+                    coverage_tsvs,
+                    msas,
+                    samplesheet_csv,
+                ]
+            }
+    }
+    else {
+        ch_run_report_input = ch_bed_by_scheme
+            .join(ch_depth_tsvs_by_scheme)
+            .join(ch_amp_depth_tsvs_by_scheme)
+            .join(ch_coverage_tsvs_by_scheme)
+            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs ->
+                [meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, [], samplesheet_csv]
+            }
     }
 
     GENERATE_RUN_REPORT(

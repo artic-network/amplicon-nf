@@ -74,6 +74,12 @@
                     "default": 200,
                     "description": "What depth of sequencing coverage to normalise the primertrimmed BAM files to. Set to 0 to disable normalisation."
                 },
+                "primer_mismatch_plot": {
+                    "type": "boolean",
+                    "description": "Whether to generate primer mismatch plots for each primer scheme utilised within the run.",
+                    "help_text": "This will generate a plot showing the number of mismatches in the primers for each sample. This requires aligning all sample consensus sequences to a reference which may be prohibitive for some schemes / species.",
+                    "fa_icon": "fas fa-chart-bar"
+                },
                 "lower_ambiguity_frequency": {
                     "type": "number",
                     "default": 0.2,
@@ -129,13 +135,11 @@
                 },
                 "skip_ont_quality_check": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Skip filtering of ONT read lengths.",
                     "help_text": "Set this to true if you want to skip filtering of ONT read lengths. If you are providing barcode dirs from a 'fastq_pass' directory this should be set to true."
                 },
                 "allow_mismatched_primers": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Do not remove reads which appear to have mismatched primers."
                 },
                 "manual_clair3_model": {

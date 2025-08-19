@@ -730,7 +730,7 @@ payload = {
     "tool_version": "${workflow.manifest.version}",
     "citation_link": "https://github.com/artic-network/amplicon-nf",
     "contact_email": "",
-    "funder_statement": "ARTIC2 is funded by the Wellcome Trust Award (313694/Z/24/).",
+    "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",
     "timestamp": datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
     "qc_table_info": {},
     "single_plots": [],
@@ -917,21 +917,22 @@ for chrom in chroms:
     )
 payload["nested_plots"].append(amp_depth_heatmaps)
 
-primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
 msa_list = glob("msas/*.fa*")
-for msa_path in msa_list:
-    msa, seqdict = parse_msa(msa_path)
-    contig_name = msa_path.split("/")[-1].split("_")[0]
+if len(msa_list) > 0:
+    primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
+    for msa_path in msa_list:
+        msa, seqdict = parse_msa(msa_path)
+        contig_name = msa_path.split("/")[-1].split("_")[0]
 
-    primer_mismatch_heatmaps["plots"].append(
-        {
-            "name": contig_name,
-            "plot_html": primer_mismatch_heatmap(
-                array=msa, seqdict=seqdict, bedfile="${bed}"
-            ),
-        }
-    )
-payload["nested_plots"].append(primer_mismatch_heatmaps)
+        primer_mismatch_heatmaps["plots"].append(
+            {
+                "name": contig_name,
+                "plot_html": primer_mismatch_heatmap(
+                    array=msa, seqdict=seqdict, bedfile="${bed}"
+                ),
+            }
+        )
+    payload["nested_plots"].append(primer_mismatch_heatmaps)
 
 render_qc_report(
     payload=payload,
