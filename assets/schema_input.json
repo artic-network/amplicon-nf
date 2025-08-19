@@ -18,8 +18,8 @@
             },
             "barcode": {
                 "type": "string",
-                "pattern": "^(?:(?!\\.)\\S)+$",
-                "errorMessage": "Barcode cannot contain spaces or '.'",
+                "pattern": "^(?:(?!\\.)(?!\\/)\\S)+$",
+                "errorMessage": "Barcode cannot contain spaces, '.', or '/'",
                 "uniqueItems": true,
                 "meta": [
                     "barcode"
