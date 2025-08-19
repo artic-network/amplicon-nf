@@ -10,6 +10,10 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/artic-network/amplicon-nf)
 
+## Acknowledgements
+
+This package has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – `313694/Z/24/Z` and discretionary award – `206298/Z/17/Z`) and is distrubed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.
+
 ## Introduction
 
 **artic-network/amplicon-nf** is a bioinformatics pipeline that takes sequencing reads generated from ARTIC-style viral amplicon sequencing schemes, assembles them into consensus sequences, and runs some basic quality control on the outputs.
