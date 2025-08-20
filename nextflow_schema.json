@@ -198,12 +198,7 @@
                     "description": "Skip filtering of ONT read lengths.",
                     "help_text": "Set this to true if you want to skip filtering of ONT read lengths. If you are providing barcode dirs from a 'fastq_pass' directory then this should be set to true to avoid duplicate work."
                 }
-            },
-            "required": [
-                "min_ont_read_quality",
-                "min_ont_read_length",
-                "max_ont_read_length"
-            ]
+            }
         },
         "illumina_pipeline_settings": {
             "title": "Illumina Pipeline Settings",
