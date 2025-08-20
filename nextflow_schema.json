@@ -92,7 +92,7 @@
                 },
                 "min_ambiguity_count": {
                     "type": "integer",
-                    "default": 1,
+                    "default": 10,
                     "description": "Minimum number of reads supporting a minor allele variant to call an ambiguous variant."
                 },
                 "min_coverage_depth": {
