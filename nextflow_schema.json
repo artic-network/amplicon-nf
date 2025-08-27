@@ -47,8 +47,8 @@
                     "type": "string",
                     "format": "directory-path",
                     "title": "Path containing FASTQ files or barcode directories.",
-                    "description": "Path containing FASTQ file pairs (for Illumina) or barcode directories (for Nanopore). The pipeline will try to match your input samplesheet CSV to the contents of this directory if fully specified.",
-                    "help_text": "This only needs to be set if you are not providing FASTQ files (or directories for Nanopore) in the samplesheet CSV. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored.\nIllumina: The pipeline will look for FASTQ file pairs which are named with the sample name, e.g. `sample1_R1.fastq.gz` and `sample1_R2.fastq.gz`. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored.\nNanopore: The pipeline will look for directories named with the barcode, e.g. `barcode01/fastq_pass/` containing FASTQ files. If you are providing barcode directories in the samplesheet CSV, then this parameter will be ignored.",
+                    "description": "Path containing FASTQ file pairs (for Illumina) or barcode directories (for Nanopore). The pipeline will only try to match your input samplesheet CSV to the contents of this directory if FASTQ files or directories are not provided.",
+                    "help_text": "This only needs to be set if you are not providing FASTQ files (or directories for Nanopore) in the samplesheet CSV. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored. Illumina: The pipeline will look for FASTQ file pairs which are named with the sample name, e.g. `sample1_R1.fastq.gz` and `sample1_R2.fastq.gz`.\nNanopore: The pipeline will look for directories named with the barcode, e.g. `fastq_pass/barcode01/` containing FASTQ files.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "email": {

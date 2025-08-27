@@ -4,4 +4,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::artic=1.7.4
+  - "bioconda::align_trim=1.0.1"
+  - "bioconda::samtools=1.22.1"
