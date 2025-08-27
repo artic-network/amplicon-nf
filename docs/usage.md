@@ -42,9 +42,9 @@ fastq_pass
 If you wish to provide explicit FASTQ directories then a valid samplesheet could look like this:
 ```csv title="samplesheet.nanopore_explicit.csv"
 sample,platform,scheme_name,fastq_directory
-barcode01,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode01
-barcode02,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode02
-barcode03,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode03
+sample1,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode01
+sample2,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode02
+sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode03
 ```
 
 > [!NOTE]
@@ -56,9 +56,9 @@ If you wish to utilise fuzzy directory matching then a valid samplesheet could l
 
 ```csv title="samplesheet.nanopore_fuzzy.csv"
 sample,platform,scheme_name,barcode
-barcode01,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode01
-barcode02,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode02
-barcode03,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode03
+sample1,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode01
+sample2,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode02
+sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode03
 ```
 
 Please Note that the full barcode name must be provided and must match the directory exactly, as in, `01` or `1` would be invalid since they would not match the directory exactly.
