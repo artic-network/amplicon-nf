@@ -3,8 +3,8 @@ process ARTIC_GET_MODELS {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/artic:1.7.4--pyhdfd78af_0'
-        : 'biocontainers/artic:1.7.4--pyhdfd78af_0'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.0--256002af11f03c04'
+        : 'community.wave.seqera.io/library/artic:1.8.0--387ea41493eee1d6'}"
 
     input:
     path store_directory

@@ -12,7 +12,7 @@ include { BCFTOOLS_CONSENSUS as BCFTOOLS_CONSENSUS_FIXED     } from '../../../mo
 include { BCFTOOLS_VIEW                                      } from '../../../modules/nf-core/bcftools/view/main'
 
 include { ARTIC_GET_SCHEME                                   } from '../../../modules/local/artic/get_scheme/main'
-include { ARTIC_ALIGN_TRIM                                   } from '../../../modules/local/artic/align_trim/main'
+include { ARTIC_ALIGNTRIM                                    } from '../../../modules/nf-core/artic/aligntrim/main'
 include { PROCESS_GVCF                                       } from '../../../modules/local/process_gvcf/main'
 
 
@@ -24,16 +24,14 @@ workflow ILLUMINA_ASSEMBLY {
 
     main:
 
-    ch_branched_input = ch_input
-        .branch { meta, _fastq_1, _fastq_2 ->
-            remote_scheme: meta.scheme
-            custom_scheme: meta.custom_scheme
-        }
+    ch_branched_input = ch_input.branch { meta, _fastq_1, _fastq_2 ->
+        remote_scheme: meta.scheme
+        custom_scheme: meta.custom_scheme
+    }
 
-    ch_custom_scheme_input = ch_branched_input.custom_scheme
-        .map { meta, fastq_1, fastq_2 ->
-            [meta, fastq_1, fastq_2, file("${meta.custom_scheme.toUriString()}/primer.bed", checkIfExists: true), file("${meta.custom_scheme.toUriString()}/reference.fasta", checkIfExists: true)]
-        }
+    ch_custom_scheme_input = ch_branched_input.custom_scheme.map { meta, fastq_1, fastq_2 ->
+        [meta, fastq_1, fastq_2, file("${meta.custom_scheme.toUriString()}/primer.bed", checkIfExists: true), file("${meta.custom_scheme.toUriString()}/reference.fasta", checkIfExists: true)]
+    }
 
     ARTIC_GET_SCHEME(
         ch_branched_input.remote_scheme,
@@ -41,13 +39,11 @@ workflow ILLUMINA_ASSEMBLY {
     )
     ch_versions = ch_versions.mix(ARTIC_GET_SCHEME.out.versions.first())
 
-    ch_reads_and_scheme = ARTIC_GET_SCHEME.out.reads_and_scheme
-        .mix(ch_custom_scheme_input)
+    ch_reads_and_scheme = ARTIC_GET_SCHEME.out.reads_and_scheme.mix(ch_custom_scheme_input)
 
-    ch_trimmomatic_input = ch_reads_and_scheme
-        .map { meta, fastq_1, fastq_2, _scheme_bed, _scheme_ref ->
-            [meta, [fastq_1, fastq_2]]
-        }
+    ch_trimmomatic_input = ch_reads_and_scheme.map { meta, fastq_1, fastq_2, _scheme_bed, _scheme_ref ->
+        [meta, [fastq_1, fastq_2]]
+    }
 
     TRIMMOMATIC(ch_trimmomatic_input)
     ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions.first())
@@ -70,14 +66,14 @@ workflow ILLUMINA_ASSEMBLY {
         .unique()
 
     BWAMEM2_INDEX(
-        ch_refs_only,
+        ch_refs_only
     )
     ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions.first())
 
     // Join the index with the per-sample metadata
     ch_rejoined_bwamem2_indices = BWAMEM2_INDEX.out.index
         .combine(
-            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref -> 
+            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref ->
                 [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta]
             },
             by: 0
@@ -102,17 +98,21 @@ workflow ILLUMINA_ASSEMBLY {
     )
     ch_versions = ch_versions.mix(BWAMEM2_MEM.out.versions.first())
 
-    ch_sorted_bam = BWAMEM2_MEM.out.bam
-        .join(
-            ch_trimmed_fastq.map { meta, _fastq_1, _fastq_2, scheme_bed, scheme_ref ->
-                [meta, scheme_bed, scheme_ref]
-            }
-        )
+    ch_sorted_bam = BWAMEM2_MEM.out.bam.join(
+        ch_trimmed_fastq.map { meta, _fastq_1, _fastq_2, scheme_bed, scheme_ref ->
+            [meta, scheme_bed, scheme_ref]
+        }
+    )
 
-    ARTIC_ALIGN_TRIM(ch_sorted_bam)
-    ch_versions = ch_versions.mix(ARTIC_ALIGN_TRIM.out.versions.first())
+    ch_aligntrim_input = ch_sorted_bam.map { meta, sorted_bam, scheme_bed, _scheme_ref ->
+        [meta, sorted_bam, scheme_bed, params.normalise_depth ?: []]
+    }
 
-    SAMTOOLS_INDEX(ARTIC_ALIGN_TRIM.out.primertrimmed_bam)
+    // Sort the output BAMfile
+    ARTIC_ALIGNTRIM(ch_aligntrim_input, true)
+    ch_versions = ch_versions.mix(ARTIC_ALIGNTRIM.out.versions.first())
+
+    SAMTOOLS_INDEX(ARTIC_ALIGNTRIM.out.primertrimmed_bam)
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
 
     SAMTOOLS_FAIDX(ch_refs_only, [[:], []], false)
@@ -121,7 +121,7 @@ workflow ILLUMINA_ASSEMBLY {
     // Join the fai with the per-sample metadata
     ch_rejoined_ref_fais = SAMTOOLS_FAIDX.out.fai
         .combine(
-            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref -> 
+            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref ->
                 [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta]
             },
             by: 0
@@ -130,7 +130,7 @@ workflow ILLUMINA_ASSEMBLY {
             [meta, scheme_ref_fai]
         }
 
-    ch_freebayes_input = ARTIC_ALIGN_TRIM.out.primertrimmed_bam
+    ch_freebayes_input = ARTIC_ALIGNTRIM.out.primertrimmed_bam
         .join(SAMTOOLS_INDEX.out.bai)
         .join(
             ch_sorted_bam.map { meta, _sorted_bam, scheme_bed, scheme_ref ->
@@ -198,18 +198,16 @@ workflow ILLUMINA_ASSEMBLY {
         }
 
     // Don't use the depth mask for ambiguous variants preconsensus generation
-    ch_bcftools_consensus_input_ambiguous = ch_bcftools_consensus_input.ambiguous
-        .map { meta, vcf, vcf_index, reference, _depth_mask ->
-            [meta, vcf, vcf_index, reference, []]
-        }
+    ch_bcftools_consensus_input_ambiguous = ch_bcftools_consensus_input.ambiguous.map { meta, vcf, vcf_index, reference, _depth_mask ->
+        [meta, vcf, vcf_index, reference, []]
+    }
 
     BCFTOOLS_CONSENSUS_AMBIGUOUS(ch_bcftools_consensus_input_ambiguous)
     ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS_AMBIGUOUS.out.versions.first())
 
-    ch_preconsensus_fasta = BCFTOOLS_CONSENSUS_AMBIGUOUS.out.fasta
-        .map { meta, fasta ->
-            [meta - meta.subMap("vartype"), fasta]
-        }
+    ch_preconsensus_fasta = BCFTOOLS_CONSENSUS_AMBIGUOUS.out.fasta.map { meta, fasta ->
+        [meta - meta.subMap("vartype"), fasta]
+    }
 
     ch_bcftools_consensus_input_fixed = ch_bcftools_consensus_input.fixed
         .map { meta, vcf, vcf_index, reference, depth_mask ->
@@ -224,7 +222,7 @@ workflow ILLUMINA_ASSEMBLY {
     ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS_FIXED.out.versions.first())
 
     // Join the primertrimmed bam with its index
-    ch_primertrimmed_bam = ARTIC_ALIGN_TRIM.out.primertrimmed_bam.join(
+    ch_primertrimmed_bam = ARTIC_ALIGNTRIM.out.primertrimmed_bam.join(
         SAMTOOLS_INDEX.out.bai
     )
 
@@ -234,7 +232,7 @@ workflow ILLUMINA_ASSEMBLY {
 
     emit:
     consensus_fasta              = BCFTOOLS_CONSENSUS_FIXED.out.fasta
-    amplicon_depths              = ARTIC_ALIGN_TRIM.out.amplicon_depths
+    amplicon_depths              = ARTIC_ALIGNTRIM.out.amp_depth_report
     sorted_bam                   = BWAMEM2_MEM.out.bam
     primertrimmed_normalised_bam = ch_primertrimmed_bam
     primer_scheme                = ch_primer_scheme
