@@ -12,6 +12,7 @@
 <div align="center">
    <img src="/assets/amplicon-nf-badge.png" alt="amplicon-nf logo" width="400" align="center">
 </div>
+
 ## Introduction
 
 **artic-network/amplicon-nf** is a bioinformatics pipeline that takes sequencing reads generated from ARTIC-style viral amplicon sequencing schemes, assembles them into consensus sequences, and runs some basic quality control on the outputs.
