@@ -3,8 +3,8 @@ process ARTIC_GET_MODELS {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.8.0--256002af11f03c04'
-        : 'community.wave.seqera.io/library/artic:1.8.0--387ea41493eee1d6'}"
+        ? 'oras://community.wave.seqera.io/library/align_trim_artic:6863f018c551c6f7'
+        : 'community.wave.seqera.io/library/align_trim_artic:0f8f4f3c2bfcc274'}"
 
     input:
     path store_directory
