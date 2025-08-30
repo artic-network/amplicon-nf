@@ -25,7 +25,7 @@ process ARTIC_GET_SCHEME {
         --scheme-directory ${store_directory}/amplicon-nf/primer-schemes/ \\
         --scheme-name ${scheme_split[0]} \\
         --scheme-length ${scheme_split[1]} \\
-        --scheme-version ${scheme_split[2]} \\  
+        --scheme-version ${scheme_split[2]} \\
         --read-file ${fastq_1}
 
     cat <<-END_VERSIONS > versions.yml
