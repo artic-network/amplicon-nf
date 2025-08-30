@@ -3,8 +3,8 @@ process ARTIC_GET_SCHEME {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/artic:1.8.1--pyhdfd78af_0'
-        : 'biocontainers/artic:1.8.1--pyhdfd78af_0'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.1--ec21cd6688fda876'
+        : 'community.wave.seqera.io/library/artic:1.8.1--8ca66e901fbb9970'}"
 
     input:
     tuple val(meta), path(fastq_1), path(fastq_2)
@@ -25,7 +25,7 @@ process ARTIC_GET_SCHEME {
         --scheme-directory ${store_directory}/amplicon-nf/primer-schemes/ \\
         --scheme-name ${scheme_split[0]} \\
         --scheme-length ${scheme_split[1]} \\
-        --scheme-version ${scheme_split[2]} \\
+        --scheme-version ${scheme_split[2]} \\  
         --read-file ${fastq_1}
 
     cat <<-END_VERSIONS > versions.yml
