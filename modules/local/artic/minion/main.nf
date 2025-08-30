@@ -4,8 +4,8 @@ process ARTIC_MINION {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/align_trim_artic:6863f018c551c6f7'
-        : 'community.wave.seqera.io/library/align_trim_artic:0f8f4f3c2bfcc274'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.1--ec21cd6688fda876'
+        : 'community.wave.seqera.io/library/artic:1.8.1--8ca66e901fbb9970'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)
@@ -13,7 +13,6 @@ process ARTIC_MINION {
 
     output:
     tuple val(meta), path("${prefix}.sorted.bam"), path("${prefix}.sorted.bam.bai"), emit: sorted_bam
-    tuple val(meta), path("${prefix}.trimmed.rg.sorted.bam"), path("${prefix}.trimmed.rg.sorted.bam.bai"), emit: normalised_bam
     tuple val(meta), path("${prefix}.primertrimmed.rg.sorted.bam"), path("${prefix}.primertrimmed.rg.sorted.bam.bai"), emit: primertrimmed_normalised_bam
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
@@ -55,11 +54,11 @@ process ARTIC_MINION {
     stub:
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.1.trimmed.rg.sorted.bam
-    touch ${prefix}.1.trimmed.rg.sorted.bai
+    touch ${prefix}.1.primertrimmed.rg.sorted.bam
+    touch ${prefix}.1.primertrimmed.rg.sorted.bam.bai
     touch ${prefix}.1.vcf
-    touch ${prefix}.2.trimmed.rg.sorted.bam
-    touch ${prefix}.2.trimmed.rg.sorted.bai
+    touch ${prefix}.2.primertrimmed.rg.sorted.bam
+    touch ${prefix}.2.primertrimmed.rg.sorted.bam.bai
     touch ${prefix}.2.vcf
 
     touch ${prefix}.alignreport.csv
