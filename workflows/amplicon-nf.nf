@@ -87,19 +87,48 @@ workflow AMPLICON_NF {
             .map { meta, _fastq_dir, _fastq_1, _fastq_2 ->
                 [meta, file("${read_directory}/${meta.barcode}/", checkIfExists: true)]
             }
+
+        // Mix in the fuzzy matched Nanopore files with the well behaved samplesheet entries.
+        ch_nanopore_input = ch_input.nanopore
+            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
+                fastq_dir && !meta.barcode
+            }
+            .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
+                [meta, fastq_dir]
+            }
+            .mix(ch_nanopore_fuzzy_match)
+
+        // Mix in the fuzzy matched Illumina files with the well behaved samplesheet entries.
+        ch_illumina_input = ch_input.illumina
+            .filter { _meta, _fastq_dir, fastq_1, fastq_2 ->
+                fastq_1 && fastq_2
+            }
+            .map { meta, _fastq_dir, fastq_1, fastq_2 ->
+                [meta, fastq_1, fastq_2]
+            }
+            .mix(ch_fuzzy_matched_illumina)
+    }
+    else {
+        ch_nanopore_input = ch_input.nanopore
+            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
+                fastq_dir && !meta.barcode
+            }
+            .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
+                [meta, fastq_dir]
+            }
+
+        ch_illumina_input = ch_input.illumina
+            .filter { _meta, _fastq_dir, fastq_1, fastq_2 ->
+                fastq_1 && fastq_2
+            }
+            .map { meta, _fastq_dir, fastq_1, fastq_2 ->
+                [meta, fastq_1, fastq_2]
+            }
     }
 
     //
     // Generate virus assemblies
-    //
-    ch_nanopore_input = ch_input.nanopore
-        .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-            fastq_dir && !meta.barcode
-        }
-        .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
-            [meta, fastq_dir]
-        }
-        .mix(ch_nanopore_fuzzy_match)
+    //    
 
     ONT_ASSEMBLY(
         ch_nanopore_input,
@@ -110,16 +139,6 @@ workflow AMPLICON_NF {
 
     SEQKIT_REPLACE_ONT(ONT_ASSEMBLY.out.consensus_fasta)
     ch_versions = ch_versions.mix(SEQKIT_REPLACE_ONT.out.versions.first())
-
-    // Mix in the fuzzy matched Illumina files with the well behaved samplesheet entries.
-    ch_illumina_input = ch_input.illumina
-        .filter { _meta, _fastq_dir, fastq_1, fastq_2 ->
-            fastq_1 && fastq_2
-        }
-        .map { meta, _fastq_dir, fastq_1, fastq_2 ->
-            [meta, fastq_1, fastq_2]
-        }
-        .mix(ch_fuzzy_matched_illumina)
 
     ILLUMINA_ASSEMBLY(
         ch_illumina_input,
