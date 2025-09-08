@@ -68,11 +68,11 @@ workflow AMPLICON_NF {
                 maxDepth: 1,
             )
             .map { common_key, file_pair ->
-                [common_key.replaceAll("_S.\$", ""), file_pair[0], file_pair[1]]
+                [common_key.replaceAll("_L00.\$", "").replaceAll("_S.\$", ""), file_pair[0], file_pair[1]]
             }
 
         ch_fuzzy_matched_illumina = ch_illumina_missing_files
-            .join(ch_file_pairs, failOnDuplicate: true, failOnMismatch: true)
+            .join(ch_file_pairs, failOnDuplicate: true)
             .map { _sample_name, meta, fastq_1, fastq_2 ->
                 [meta, fastq_1, fastq_2]
             }

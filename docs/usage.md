@@ -104,9 +104,6 @@ sample-2,illumina,artic-inrb-mpox/2500/v1.0.0
 > [!NOTE]
 > An [example Illumina samplesheet](../assets/samplesheet.illumina_implicit.csv) has been provided with the pipeline.
 
-> [!WARNING]
-> If you have data from a sequencing run with separate lanes then this **will not work** due to how Illumina sequencers name FASTQ files from different lanes, in this case you should either concatenate the paired FASTQs from each lane or use the explicit workflow above (recommended).
-
 ### Primer Schemes
 
 We recommend that you provide a scheme using a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2` which is laid out with the following schema `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>`, the scheme itself will be sourced from the [primerschemes repository](https://github.com/quick-lab/primerschemes).

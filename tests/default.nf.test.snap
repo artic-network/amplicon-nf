@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            92,
+            111,
             {
                 "ARTIC_ALIGNTRIM": {
                     "align_trim": "1.0.2"
@@ -90,7 +90,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.4.4dev"
+                    "artic-network/amplicon-nf": "v0.4.5dev"
                 }
             },
             [
@@ -116,6 +116,15 @@
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz.tbi",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test_amplicon-nf_sample-report.html",
+                "illumina_fuzzy_lane_match",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.align_trim_report.tsv",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.amp_depth_report.tsv",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.consensus.fasta",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.primertrimmed.sorted.bam",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.sorted.bam",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.vcf.gz",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.vcf.gz.tbi",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match_amplicon-nf_sample-report.html",
                 "illumina_fuzzy_match",
                 "illumina_fuzzy_match/illumina_fuzzy_match.align_trim_report.tsv",
                 "illumina_fuzzy_match/illumina_fuzzy_match.amp_depth_report.tsv",
@@ -195,6 +204,6 @@
             "nf-test": "0.9.2",
             "nextflow": "24.10.4"
         },
-        "timestamp": "2025-09-05T10:33:33.541115"
+        "timestamp": "2025-09-08T11:27:30.590038"
     }
 }

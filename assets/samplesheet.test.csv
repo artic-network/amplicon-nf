@@ -6,4 +6,5 @@ illumina_amplicon_test,,illumina,artic-sars-cov-2/400/v3.0.0,,,,https://github.c
 illumina_custom_scheme_Test,,illumina,,s3://artic-example-datasets/custom_scheme/,test_custom_scheme_name,,https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/illumina/amplicon/sample1_R1.fastq.gz,https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/illumina/amplicon/sample1_R2.fastq.gz
 illumina_empty_files,,illumina,artic-sars-cov-2/400/v3.0.0,,,,s3://artic-example-datasets/amplicon-nf-testdata/empty_test/test-1_R1.fastq.gz,s3://artic-example-datasets/amplicon-nf-testdata/empty_test/test-1_R2.fastq.gz
 illumina_fuzzy_match,,illumina,artic-sars-cov-2/400/v3.0.0,,,,
+illumina_fuzzy_lane_match,,illumina,artic-sars-cov-2/400/v3.0.0,,,,
 nanopore_fuzzy_match,real-data-test,nanopore,artic-sars-cov-2/400/v3.0.0,,,,
