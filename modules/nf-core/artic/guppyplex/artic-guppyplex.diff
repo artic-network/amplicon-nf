@@ -16,8 +16,8 @@ Changes in 'artic/guppyplex/main.nf':
 -        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/5a/5a747cc579edfc0cb2176b749afc02550ab5de678ae6a40d2cfadeba6c0de25d/data' :
 -        'community.wave.seqera.io/library/artic:1.6.2--d4956cdc155b8612' }"
 +    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-+        ? 'oras://community.wave.seqera.io/library/artic:1.8.2--3926ec20b6aea090'
-+        : 'community.wave.seqera.io/library/artic:1.8.2--46ea09213d2ee46a'}"
++        ? 'oras://community.wave.seqera.io/library/artic:1.8.4--1f9246bebdff8da5'
++        : 'community.wave.seqera.io/library/artic:1.8.4--464dd0e425a760e9'}"
  
      input:
      tuple val(meta), path(fastq_dir)
