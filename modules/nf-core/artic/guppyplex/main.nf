@@ -4,8 +4,8 @@ process ARTIC_GUPPYPLEX {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.8.3--2713d1edf4f8cd75'
-        : 'community.wave.seqera.io/library/artic:1.8.3--409fc63a05305b9d'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.4--1f9246bebdff8da5'
+        : 'community.wave.seqera.io/library/artic:1.8.4--464dd0e425a760e9'}"
 
     input:
     tuple val(meta), path(fastq_dir)
