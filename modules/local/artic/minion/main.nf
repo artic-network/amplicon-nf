@@ -4,8 +4,8 @@ process ARTIC_MINION {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.8.2--3926ec20b6aea090'
-        : 'community.wave.seqera.io/library/artic:1.8.2--46ea09213d2ee46a'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.3--2713d1edf4f8cd75'
+        : 'community.wave.seqera.io/library/artic:1.8.3--409fc63a05305b9d'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)
@@ -17,7 +17,7 @@ process ARTIC_MINION {
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
-    tuple val(meta), path("primer.bed"), path("reference.fasta"), emit: primer_scheme
+    tuple val(meta), path("${prefix}.primer.bed"), path("${prefix}.reference.fasta"), emit: primer_scheme
     tuple val(meta), path("${prefix}.minion.log.txt"), emit: minion_log
     path "versions.yml", emit: versions
 
@@ -30,7 +30,7 @@ process ARTIC_MINION {
 
     scheme_split = meta.scheme ? meta.scheme.split("/") : ["", "", ""]
     scheme_string = custom_scheme_directory ? "--bed ${custom_scheme_directory}/primer.bed --ref ${custom_scheme_directory}/reference.fasta" : "--scheme-name ${scheme_split[0]} --scheme-length ${scheme_split[1]} --scheme-version ${scheme_split[2]}"
-    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed primer.bed && cp ${custom_scheme_directory}/reference.fasta reference.fasta" : "cp ${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed primer.bed && cp ${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta reference.fasta"
+    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed ${prefix}.primer.bed && cp ${custom_scheme_directory}/reference.fasta ${prefix}.reference.fasta" : ""
 
     """
     artic \\
