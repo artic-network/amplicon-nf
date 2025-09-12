@@ -61,7 +61,7 @@ nextflow run artic-network/amplicon-nf \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
-   --storedir <STOREDIR> 
+   --store_dir <STOREDIR> 
 ```
 
 The pipeline is configured with a set of default parameters which should suit most use cases but a full list of available configurable parameters is available in [docs/parameters.md](https://github.com/artic-network/amplicon-nf/blob/main/docs/parameters.md).
