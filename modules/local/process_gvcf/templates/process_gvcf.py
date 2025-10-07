@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import itertools
-import argparse
+from types import SimpleNamespace
 import pysam
 import sys
 import os
 from collections import defaultdict
-from types import SimpleNamespace
+from importlib.metadata import version
+
 
 # from https://www.geeksforgeeks.org/python-make-a-list-of-intervals-with-sequential-numbers/
 # via artic-mask
@@ -217,6 +218,9 @@ def main():
             variants_out.write(record)
 
     write_depth_mask(args.mask_output, contig_depth, args.min_depth)
+
+    with open("versions.yml", "wt") as versions_fh:
+        versions_fh.write("${task.process}:\\n  pysam: " + str(version("pysam")))
 
 
 main()

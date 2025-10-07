@@ -503,8 +503,6 @@ def amplicon_depth_heatmap(
             "select2d",
             "lasso2d",
             "select",
-            "autoScale2d",
-            "zoom",
         ]
     )
 
@@ -687,13 +685,14 @@ def primer_mismatch_heatmap(
             xgap=0.1,
             ygap=0.1,
             name="Primer Mismatches",
+            zmin=0,
+            zmax=10,
         )
     )
     fig.update_layout(
         font=dict(family="Roboto, monospace", size=16),
         hoverlabel=dict(font_family="Roboto, monospace"),
         title_text=f"Primer Mismatches: {list(primary_ref)[0]}",
-        coloraxis=dict(cmax=10, cmin=0),
     )
     fig.update_yaxes(autorange="reversed")
 
@@ -703,7 +702,6 @@ def primer_mismatch_heatmap(
             "select2d",
             "lasso2d",
             "select",
-            "zoom",
         ]
     )
 
@@ -732,7 +730,7 @@ payload = {
     "tool_version": "${workflow.manifest.version}",
     "citation_link": "https://github.com/artic-network/amplicon-nf",
     "contact_email": "",
-    "funder_statement": "ARTIC2 is funded by the Wellcome Trust Award (313694/Z/24/).",
+    "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",
     "timestamp": datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
     "qc_table_info": {},
     "single_plots": [],
@@ -856,6 +854,7 @@ for row in scheme_samplesheet_df.itertuples():
         payload["qc_table_info"][row.sample]["mean_depth"] = 0.0
         payload["qc_table_info"][row.sample]["total_reads"] = 0
         payload["qc_table_info"][row.sample]["total_amp_dropouts"] = len(primer_pairs)
+        payload["qc_table_info"][row.sample]["qc_result"] = "fail"
 
     if len([x for x in amplicon_depth_rows if x["sample"] == row.sample]) == 0:
         for x in primer_pairs:
@@ -880,7 +879,24 @@ payload["qc_table_info"] = dict(
         key=lambda item: item[0],
     )
 )
-
+with open(f"{scheme_version_str.replace("/", "_")}_qc_results.tsv", "w") as f:
+    writer = csv.DictWriter(
+        f,
+        fieldnames=[
+            "sample",
+            "primer_scheme",
+            "coverage",
+            "mean_depth",
+            "total_reads",
+            "total_amp_dropouts",
+            "qc_result",
+        ],
+        delimiter="\t",
+    )
+    writer.writeheader()
+    for sample, row in payload["qc_table_info"].items():
+        row["sample"] = sample
+        writer.writerow(row)
 
 # amplicon_depth_rows.sort(key=lambda x: int(x["amplicon"].replace("Amplicon ", "")))
 amplicon_depth_df = pd.DataFrame(amplicon_depth_rows)
@@ -901,21 +917,22 @@ for chrom in chroms:
     )
 payload["nested_plots"].append(amp_depth_heatmaps)
 
-primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
 msa_list = glob("msas/*.fa*")
-for msa_path in msa_list:
-    msa, seqdict = parse_msa(msa_path)
-    contig_name = msa_path.split("/")[-1].split("_")[0]
+if len(msa_list) > 0:
+    primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
+    for msa_path in msa_list:
+        msa, seqdict = parse_msa(msa_path)
+        contig_name = msa_path.split("/")[-1].split("_")[0]
 
-    primer_mismatch_heatmaps["plots"].append(
-        {
-            "name": contig_name,
-            "plot_html": primer_mismatch_heatmap(
-                array=msa, seqdict=seqdict, bedfile="${bed}"
-            ),
-        }
-    )
-payload["nested_plots"].append(primer_mismatch_heatmaps)
+        primer_mismatch_heatmaps["plots"].append(
+            {
+                "name": contig_name,
+                "plot_html": primer_mismatch_heatmap(
+                    array=msa, seqdict=seqdict, bedfile="${bed}"
+                ),
+            }
+        )
+    payload["nested_plots"].append(primer_mismatch_heatmaps)
 
 render_qc_report(
     payload=payload,
@@ -930,5 +947,6 @@ render_qc_report(
 )
 
 with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
     for package in ("plotly", "primalbedtools", "pandas", "jinja2"):
-        f.write(f"{package}: {version(package)}\\n")
+        f.write(f"  {package}: {version(package)}\\n")

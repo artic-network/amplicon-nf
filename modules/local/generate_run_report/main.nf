@@ -17,6 +17,7 @@ process GENERATE_RUN_REPORT {
 
     output:
     path "*_amplicon-nf_run-report.html", emit: run_report_html
+    path "*_qc_results.tsv", emit: qc_results_tsv
     path "versions.yml", emit: versions
 
     when:

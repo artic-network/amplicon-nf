@@ -4,8 +4,8 @@ process ARTIC_MINION {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/artic:1.7.3--pyhdfd78af_0'
-        : 'biocontainers/artic:1.7.3--pyhdfd78af_0'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.4--1f9246bebdff8da5'
+        : 'community.wave.seqera.io/library/artic:1.8.4--464dd0e425a760e9'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)
@@ -13,12 +13,11 @@ process ARTIC_MINION {
 
     output:
     tuple val(meta), path("${prefix}.sorted.bam"), path("${prefix}.sorted.bam.bai"), emit: sorted_bam
-    tuple val(meta), path("${prefix}.trimmed.rg.sorted.bam"), path("${prefix}.trimmed.rg.sorted.bam.bai"), emit: normalised_bam
     tuple val(meta), path("${prefix}.primertrimmed.rg.sorted.bam"), path("${prefix}.primertrimmed.rg.sorted.bam.bai"), emit: primertrimmed_normalised_bam
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
-    tuple val(meta), path("primer.bed"), path("reference.fasta"), emit: primer_scheme
+    tuple val(meta), path("${prefix}.primer.bed"), path("${prefix}.reference.fasta"), emit: primer_scheme
     tuple val(meta), path("${prefix}.minion.log.txt"), emit: minion_log
     path "versions.yml", emit: versions
 
@@ -31,7 +30,7 @@ process ARTIC_MINION {
 
     scheme_split = meta.scheme ? meta.scheme.split("/") : ["", "", ""]
     scheme_string = custom_scheme_directory ? "--bed ${custom_scheme_directory}/primer.bed --ref ${custom_scheme_directory}/reference.fasta" : "--scheme-name ${scheme_split[0]} --scheme-length ${scheme_split[1]} --scheme-version ${scheme_split[2]}"
-    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed primer.bed && cp ${custom_scheme_directory}/reference.fasta reference.fasta" : "cp ${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/primer.bed primer.bed && cp ${store_directory}/amplicon-nf/primer-schemes/${scheme_split[0]}/${scheme_split[1]}/${scheme_split[2]}/reference.fasta reference.fasta"
+    scheme_copy_string = custom_scheme_directory ? "cp ${custom_scheme_directory}/primer.bed ${prefix}.primer.bed && cp ${custom_scheme_directory}/reference.fasta ${prefix}.reference.fasta" : ""
 
     """
     artic \\
@@ -55,11 +54,11 @@ process ARTIC_MINION {
     stub:
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}.1.trimmed.rg.sorted.bam
-    touch ${prefix}.1.trimmed.rg.sorted.bai
+    touch ${prefix}.1.primertrimmed.rg.sorted.bam
+    touch ${prefix}.1.primertrimmed.rg.sorted.bam.bai
     touch ${prefix}.1.vcf
-    touch ${prefix}.2.trimmed.rg.sorted.bam
-    touch ${prefix}.2.trimmed.rg.sorted.bai
+    touch ${prefix}.2.primertrimmed.rg.sorted.bam
+    touch ${prefix}.2.primertrimmed.rg.sorted.bam.bai
     touch ${prefix}.2.vcf
 
     touch ${prefix}.alignreport.csv

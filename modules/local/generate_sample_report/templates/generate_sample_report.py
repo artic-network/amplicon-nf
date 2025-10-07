@@ -354,7 +354,7 @@ payload = {
     "tool_version": "${workflow.manifest.version}",
     "citation_link": "https://github.com/artic-network/amplicon-nf",
     "contact_email": "",
-    "funder_statement": "ARTIC2 is funded by the Wellcome Trust Award (313694/Z/24/).",
+    "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",
     "timestamp": datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
     "contigs": [],
 }
@@ -438,5 +438,6 @@ render_qc_report(
 )
 
 with open("versions.yml", "w") as f:
+    f.write("${task.process}:\\n")
     for package in ("plotly", "primalbedtools", "pandas", "jinja2"):
-        f.write(f"{package}: {version(package)}\\n")
+        f.write(f"  {package}: {version(package)}\\n")

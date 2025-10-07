@@ -6,15 +6,22 @@
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with at least 3 columns (more depending on how you are using the pipeline), and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Nanopore (ONT) only runs
+## Nanopore (ONT) only runs
 
-If you are only running nanopore sequenced samples through the pipeline then you only need to fill in a subset of the samplesheet, for example, if you had a `fastq_pass` direectory which looked like this:
+There are two ways to run the pipeline for ONT data; 
+1) with explicit FASTQ directories within the samplesheet in the `fastq_directory` column, this is recommended since all FASTQ directories are explicitly linked with their sample name within the samplesheet making mistakes where data is associated with incorrect metadata less likely.
+2) with implicit (fuzzy) matching of FASTQ directories based on the provided `barcode` column, this option will match up subdirectories of the directory provided with the `--read_directory` parameter so you will not have to provide filepaths within the samplesheet.
+
+> [!NOTE]
+>Whichever option you use, it is important to remember that for ONT data the pipeline expects a directory of FASTQ files to be provided, not fastq files directly even if a directory only contains a single FASTQ file.
+
+If you are only running ONT sequenced samples through the pipeline then you only need to fill in a subset of the samplesheet which will be different based on which of the above two options you are using, the following examples would be valid for a fastq_pass directory which looks like this:
 
 ```
 fastq_pass
@@ -27,36 +34,81 @@ fastq_pass
    │   └── reads2.fastq.gz
    └── barcode03
        └── reads0.fastq.gz
+
 ```
-Then a valid samplesheet could look like this:
-```csv title="samplesheet.csv"
+
+### 1: Explicit FASTQ Directory Input
+
+If you wish to provide explicit FASTQ directories then a valid samplesheet could look like this:
+```csv title="samplesheet.nanopore_explicit.csv"
 sample,platform,scheme_name,fastq_directory
-barcode01,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode01
-barcode02,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode02
-barcode03,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode03
+sample1,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode01
+sample2,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode02
+sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode03
 ```
-It is important to remember that for ONT data the pipeline expects a directory of FASTQ files to be provided, not fastq files directly even if a directory only contains a single FASTQ file.
 
-An [example Nanopore samplesheet](../assets/samplesheet.nanopore.csv) has been provided with the pipeline.
+> [!NOTE]
+> An [example explicit Nanopore samplesheet](../assets/samplesheet.nanopore_explicit.csv) has been provided with the pipeline for reference.
 
-### Illumina only runs
+### 2: Implicit (fuzzy) FASTQ Directory Input
 
-If you are only running Illumina sequenced samples through the pipeline then you only need to fill in a subset of the samplesheet, for example, if you had a output directory which looked like this:
+If you wish to utilise fuzzy directory matching then a valid samplesheet could look like this (remember, the `fastq_pass` directory **MUST** be provided with `--read_directory` for this samplesheet to be valid):
+
+```csv title="samplesheet.nanopore_fuzzy.csv"
+sample,platform,scheme_name,barcode
+sample1,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode01
+sample2,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode02
+sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode03
+```
+
+Please Note that the full barcode name must be provided and must match the directory exactly, as in, `01` or `1` would be invalid since they would not match the directory exactly.
+> [!NOTE]
+> An [example explicit Nanopore samplesheet](../assets/samplesheet.nanopore_implicit.csv) has been provided with the pipeline for reference.
+
+## Illumina only runs
+
+As with ONT data, there are two ways to run the pipeline for Illumina datasets; 
+1) with explicit FASTQ directories within the samplesheet in the `fastq_1` and `fastq_2` columns, this is recommended since all FASTQ files are explicitly linked with their sample name within the samplesheet making mistakes where data is associated with incorrect metadata less likely.
+2) with implicit (fuzzy) matching of FASTQ file pairs based on the provided `sample` column, this option will match up file pairs within the directory provided with the `--read_directory` parameter so you will not have to provide filepaths within the samplesheet.
+
+If you are only running Illumina sequenced samples through the pipeline then you only need to fill in a subset of the samplesheet which will be different based on which of the above two options you are using, the following examples would be valid for a directory which looks like this:
+
 ```
 run_fastq_directory
-   ├── sample-1_S1_L001_R1_001.fastq.gz
-   |── sample-1_S1_L001_R2_001.fastq.gz
-   ├── sample-2_S2_L001_R1_001.fastq.gz
-   └── sample-2_S2_L001_R2_001.fastq.gz
+   ├── sample-1_S1_R1_001.fastq.gz
+   |── sample-1_S1_R2_001.fastq.gz
+   ├── sample-2_S2_R1_001.fastq.gz
+   └── sample-2_S2_R2_001.fastq.gz
 ```
-Then a valid samplesheet could look like this:
-```csv title="samplesheet.csv"
+### 1: Explicit paired FASTQ input
+
+For explicit FASTQ pairs, a valid samplesheet for the above directory would look like this:
+```csv title="samplesheet.illumina_explicit.csv"
 sample,platform,scheme_name,fastq_1,fastq_2
-sample-1,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-1_S1_L001_R1_001.fastq.gz,/some/directory/sample-1_S1_L001_R2_001.fastq.gz
-sample-2,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-2_S2_L001_R1_001.fastq.gz,/some/directory/sample-2_S2_L001_R2_001.fastq.gz
+sample-1,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-1_S1_R1_001.fastq.gz,/some/directory/sample-1_S1_R2_001.fastq.gz
+sample-2,illumina,artic-inrb-mpox/2500/v1.0.0,/some/directory/sample-2_S2_R1_001.fastq.gz,/some/directory/sample-2_S2_R2_001.fastq.gz
 ```
 
-An [example Illumina samplesheet](../assets/samplesheet.illumina.csv) has been provided with the pipeline.
+> [!NOTE]
+> An [example Illumina samplesheet](../assets/samplesheet.illumina_explicit.csv) has been provided with the pipeline.
+
+### 2: Fuzzy paired FASTQ Input
+
+If you wish to utilise fuzzy directory matching then a valid samplesheet could look like this (remember, the `run_fastq_directory` **MUST** be provided with `--read_directory` for this samplesheet to be valid).
+
+```csv title="samplesheet.illumina_implicit.csv"
+sample,platform,scheme_name
+sample-1,illumina,artic-inrb-mpox/2500/v1.0.0
+sample-2,illumina,artic-inrb-mpox/2500/v1.0.0
+```
+> [!NOTE]
+> An [example Illumina samplesheet](../assets/samplesheet.illumina_implicit.csv) has been provided with the pipeline.
+
+### Primer Schemes
+
+We recommend that you provide a scheme using a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2` which is laid out with the following schema `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>`, the scheme itself will be sourced from the [primerschemes repository](https://github.com/quick-lab/primerschemes).
+
+Alternatively, if you wish to use a scheme not available from the official repository you may provide a samplesheet containing the `custom_scheme_path` and `custom_scheme_name` parameters, `custom_scheme_path` should point to a directory containing two files `primer.bed` and `reference.fasta` which describe your custom scheme, `custom_scheme_name` is an optional field which allows you to provide a name for this custom scheme which will be used when generating a run report, if this is provided with a `scheme_name` the `custom_scheme_name` will be ignored. 
 
 ### Full samplesheet
 
@@ -74,13 +126,13 @@ illumina_amplicon_data,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`             | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`).              |
 | `platform`           | The platform used to sequence the sample, this must either be `nanopore` or `illumina`                                                                                                              |
+| `barcode`            | The barcode for this specific sample, if you provide this for nanopore data and the `--read_directory` parameter the pipeline will match your data with your samplesheet automatically              |
 | `scheme_name`        | The [primalscheme labs](https://labs.primalscheme.com/) identifier for the scheme used to amplify your sequencing data, this must be in the format `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>` |
 | `custom_scheme_path` | A path which points to a directory containing two files `primer.bed` and `reference.fasta` which describe your custom scheme.                                                                       |
 | `custom_scheme_name` | The name of your custom scheme, this is used to refer to the scheme in the per-run QC reports.                                                                                                      |
 | `fastq_directory`    | A directory containing your Nanopore read FASTQS for this sample.                                                                                                                                   |
-
-| `fastq_1`            | Full path to FastQ file for Illumina short reads 1 for this sample.                                                                                                                                                 |
-| `fastq_2`            | Full path to FastQ file for Illumina short reads 2 for this sample.                                                                                                                                                 |
+| `fastq_1`            | Full path to FastQ file for Illumina short reads 1 for this sample.                                                                                                                                 |
+| `fastq_2`            | Full path to FastQ file for Illumina short reads 2 for this sample.                                                                                                                                 |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
@@ -89,7 +141,7 @@ An [example samplesheet](../assets/samplesheet.csv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run artic-network/amplicon-nf --input ./samplesheet.csv --outdir ./results --storedir ./storedir  -profile docker
+nextflow run artic-network/amplicon-nf --input ./samplesheet.csv --outdir ./results --store_dir ./store_dir  -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile which is recommended. See below for more information about profiles.
@@ -99,6 +151,7 @@ Note that the pipeline will create the following files in your working directory
 ```bash
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
+<store_dir>          # Storage directory in specified location (defined with --store_dir)
 .nextflow_log       # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
@@ -121,10 +174,24 @@ with:
 ```yaml title="params.yaml"
 input: './samplesheet.csv'
 outdir: './results/'
-storedir: './storedir/'
+store_dir: './store_dir/'
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+### Running the pipeline in low resource settings
+
+If you are running this pipeline locally (for example on a sequencing laptop) you may wish to put a limit on the amount of resources that the pipeline will attempt to use, to do this there are two profiles which limit the amount of resources the pipeline will try to use to fit on more modest hardware, if you wish to use one of these profiles you may do so like this:
+
+```bash
+nextflow run artic-network/amplicon-nf \
+   -profile low_resource,<docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --store_dir <store_dir> 
+```
+
+The `-profile` parameter accepts multiple profiles separated by a comma so providing a parameter such as `-profile low_resource,docker` will use both profiles at the same time.
 
 ### Updating the pipeline
 

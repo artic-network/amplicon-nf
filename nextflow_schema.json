@@ -12,7 +12,8 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": [
                 "input",
-                "outdir"
+                "outdir",
+                "store_dir"
             ],
             "properties": {
                 "input": {
@@ -30,15 +31,45 @@
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "output"
                 },
-                "storedir": {
+                "store_dir": {
                     "type": "string",
                     "format": "directory-path",
                     "title": "Store directory name",
                     "description": "Where to store files downloaded by the pipeline for future use.",
-                    "help_text": "Any downloaded primer schemes / clair3 models will be stored in this directory for future use. If not set when running from the command line, the schemes will be stored in the current working directory/store_dir. If this is run via epi2me by default they will be stored in your `epi2melabs/data/` directory.",
-                    "default": "./storedir"
+                    "help_text": "Any downloaded primer schemes / clair3 models will be stored in this directory for future use. If not set when running from the command line, the schemes will be stored in the current working directory/store_dir. If this is run via epi2me by default they will be stored in your `epi2melabs/data/` directory if you use the default value.",
+                    "fa_icon": "fas fa-database",
+                    "default": "store_dir"
+                },
+                "read_directory": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "title": "Path containing FASTQ files or barcode directories.",
+                    "description": "Path containing FASTQ file pairs (for Illumina) or barcode directories (for Nanopore). The pipeline will only try to match your input samplesheet CSV to the contents of this directory if FASTQ files or directories are not provided.",
+                    "help_text": "This only needs to be set if you are not providing FASTQ files (or directories for Nanopore) in the samplesheet CSV. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored. Illumina: The pipeline will look for FASTQ file pairs which are named with the sample name, e.g. `sample1_R1.fastq.gz` and `sample1_R2.fastq.gz`.\nNanopore: The pipeline will look for directories named with the barcode, e.g. `fastq_pass/barcode01/` containing FASTQ files.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "nextclade": {
+                    "type": "boolean",
+                    "title": "Run nextclade",
+                    "description": "Run Nextclade for clade assignment, mutation calling, and sequence quality checks for genome consensus sequence",
+                    "fa_icon": "fas fa-project-diagram",
+                    "default": false
+                },
+                "nextclade_dataset_name": {
+                    "type": "string",
+                    "format": "path",
+                    "title": "Nextclade dataset name, must specify path like name eg: nextstrain/mpox/lineage-b.1",
+                    "description": "Name of Nextclade dataset to retrieve. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_tag":{
+                    "type": "string",
+                    "title": "Nextclade dataset tag.",
+                    "description": "Version tag of the dataset to download. If not specified, Nextclade will retrieve the latest version.",
+                    "fa_icon": "fas fa-project-diagram"
                 },
                 "email": {
                     "type": "string",
@@ -55,80 +86,77 @@
             }
         },
         "pipeline_settings": {
-            "title": "pipeline_settings",
+            "title": "Pipeline Settings",
             "type": "object",
-            "description": "General settings which change the behaviour of the pipeline",
+            "description": "General settings which change the behaviour of the pipeline for both ONT and Illumina workflows.",
             "default": "",
             "properties": {
                 "normalise_depth": {
                     "type": "integer",
                     "default": 200,
-                    "description": "What depth of sequencing coverage to normalise the primertrimmed BAM files to. Set to 0 to disable normalisation."
+                    "description": "What depth of sequencing coverage to normalise the primertrimmed BAM files to. Set to 0 to disable normalisation.",
+                    "help_text": "Unless you have a specific reason to disable normalisation we recommend that you leave this set to 200. This will ensure that the consensus sequences generated from the primertrimmed BAM files are of a consistent depth, for amplicon sequencing higher depths are varely rarely of any utility and simply increase the time taken to run the pipeline.",
+                    "fa_icon": "fas fa-area-chart"
                 },
-                "lower_ambiguity_frequency": {
-                    "type": "number",
-                    "default": 0.2,
-                    "description": "Minimum frequency of a minor allele variant to call an ambiguous variant."
-                },
-                "upper_ambiguity_frequency": {
-                    "type": "number",
-                    "default": 0.8,
-                    "description": "Maximum frequency of a minor allele variant to call an ambiguous variant."
-                },
-                "min_ambiguity_count": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "Minimum number of reads supporting a minor allele variant to call an ambiguous variant."
+                "primer_mismatch_plot": {
+                    "type": "boolean",
+                    "description": "Whether to generate primer mismatch plots for each primer scheme utilised within the run.",
+                    "help_text": "This will generate a plot showing the number of mismatches in the primers for each sample within the per-primer-scheme run report, this may be useful in cases where you have amplicon dropouts and are uncertain of the cause. This requires aligning all sample consensus sequences to a reference which may be prohibitive for some schemes / species hence this being optional.",
+                    "fa_icon": "fas fa-chart-bar"
                 },
                 "min_coverage_depth": {
                     "type": "integer",
                     "default": 20,
-                    "description": "Minimum coverage depth for a position to be included in the consensus sequence."
-                },
-                "qc_pass_min_coverage": {
-                    "type": "integer",
-                    "default": 50,
-                    "description": "Coverage of reference above 'minimum_coverage_depth' to be considered a minimal QC pass"
-                },
-                "qc_pass_high_coverage": {
-                    "type": "integer",
-                    "default": 90,
-                    "description": "Coverage of reference above `minimum_coverage_depth` to be considered a high QC pass."
+                    "description": "Minimum coverage depth for a position to be included in the consensus sequence.",
+                    "help_text": "This is the minimum coverage depth for a position to be included in the consensus sequence. If a position has less than this depth, it will be set to 'N' in the consensus sequence. This may be changed if you have a specific reason to do so, but we recommend that you leave it at 20 for most amplicon sequencing applications. Lower values may improve consensus sequence coverage but at the cost of accuracy, higher values may improve accuracy but at the cost of coverage.",
+                    "fa_icon": "fas fa-area-chart"
                 },
                 "min_mapping_quality": {
                     "type": "integer",
                     "default": 20,
-                    "description": "Minimum mapping quality for a read to be included in the consensus sequence."
+                    "description": "Minimum mapping quality for a read to be included in the consensus sequence.",
+                    "help_text": "Reads which map to the reference sequence with a mapping quality lower than this threshold will be discarded during the `align_trim` primer trimming / normalisation step. This may be changed if you have a specific reason to do so, but we recommend that you leave it at 20 for most amplicon sequencing applications, this is likely to only be relevant if you are sequencing a virus with repeat regions longer than the scheme amplicon length such as MPXV where the ITRs at the start and end of the genome are identical meaning that read mappers are unable to distinguish whether a read originated at the 3' or 5' end.",
+                    "fa_icon": "fas fa-align-right"
                 },
                 "primer_match_threshold": {
                     "type": "integer",
                     "default": 35,
-                    "description": "Allow fuzzy primer position matching within this threshold."
-                },
-                "min_ont_read_quality": {
-                    "type": "integer",
-                    "default": 7,
-                    "description": "Minimum mean quality score for a read to pass quality filtering."
-                },
-                "min_ont_read_length": {
-                    "type": "integer",
-                    "description": "Minimum length of a read to pass read length filtering. We recommend that you set this to your expected amplicon length - 100."
-                },
-                "max_ont_read_length": {
-                    "type": "integer",
-                    "description": "Maximum length of a read to pass read length filtering. We recommend that you set this to your expected amplicon length + 100."
-                },
-                "skip_ont_quality_check": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Skip filtering of ONT read lengths.",
-                    "help_text": "Set this to true if you want to skip filtering of ONT read lengths. If you are providing barcode dirs from a 'fastq_pass' directory this should be set to true."
+                    "description": "Allow fuzzy primer position matching within this threshold.",
+                    "help_text": "This controls how far outside of an amplicon boundary an alignment can be while still being considered a match to the primer. This is useful to control for instances where reads are not adapter / barcode trimmed (or incompletely trimmed) and these extra bases have some degree of homology with the reference leading to alignments extending beyond the amplicon boundary."
                 },
                 "allow_mismatched_primers": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Do not remove reads which appear to have mismatched primers."
+                    "description": "Do not remove reads which appear to have mismatched primers.",
+                    "help_text": "This prevents the pipeline from removing reads / read pairs which appear to have mismatched primers (i.e. those that cross an amplicon boundary). This can be useful in cases where a primer scheme has a high overlap between amplicons and your reads are shorter than said overlap, which can lead to large gaps within the consensus sequence since reads cannot be assigned to a specific amplicon. This should only be used if you are absolutely certain that you have a reason to do so since it may lead to poor quality consensus sequences being generated if used improperly."
                 },
+                "qc_pass_min_coverage": {
+                    "type": "integer",
+                    "default": 50,
+                    "description": "Coverage of reference above 'minimum_coverage_depth' to be considered a minimal QC pass",
+                    "help_text": "This number is only used to mark samples as passing QC within the run / sample reports, the default values are what we consider to be reasonable QC thresholds for amplicon sequencing but these should be changed to reflect your own requirements and QC processes."
+                },
+                "qc_pass_high_coverage": {
+                    "type": "integer",
+                    "default": 90,
+                    "description": "Coverage of reference above `minimum_coverage_depth` to be considered a high QC pass.",
+                    "help_text": "This number is only used to mark samples as passing QC within the run / sample reports, the default values are what we consider to be reasonable QC thresholds for amplicon sequencing but these should be changed to reflect your own requirements and QC processes."
+                }
+            },
+            "required": [
+                "normalise_depth",
+                "min_coverage_depth",
+                "qc_pass_min_coverage",
+                "qc_pass_high_coverage",
+                "min_mapping_quality",
+                "primer_match_threshold"
+            ]
+        },
+        "ont_pipeline_settings": {
+            "title": "Nanopore (ONT) Pipeline Settings",
+            "type": "object",
+            "description": "Settings which change the behaviour of the pipeline specifically for the Nanopore (ONT) workflow.",
+            "default": "",
+            "properties": {
                 "manual_clair3_model": {
                     "type": "string",
                     "title": "Manually specify clair3 model for the nanopore workflow",
@@ -163,10 +191,66 @@
                         "r941_prom_sup_g5014",
                         "r941_prom_hac_g360+g422"
                     ]
+                },
+                "min_ont_read_quality": {
+                    "type": "integer",
+                    "title": "Minimum mean read quality for ONT reads to pass quality filtering in guppyplex",
+                    "default": 7,
+                    "description": "Minimum mean quality score for a read to pass quality filtering.",
+                    "help_text": "Reads with a mean quality score below this threshold will be filtered out. This is a good way to filter out low-quality reads, in most cases this will have been done by the Dorado basecaller but you can use this to filter out any remaining low-quality reads or set a higher minimum threshold if desired."
+                },
+                "min_ont_read_length": {
+                    "type": "integer",
+                    "title": "Minimum read length for ONT reads to pass read length filtering in guppyplex",
+                    "description": "Minimum length of a read to pass read length filtering.",
+                    "help_text": "Reads shorter than this length will be filtered out. If you are using rapid barcoding this should be used carefully since rapid barcoding tagments amplicons during the barcoding reaction, if you are using a native barcoding kit then we recommend that you set this to your expected amplicon length - 10% (e.g. if your expected amplicon length is 400bp, then set this to 360bp).",
+                    "fa_icon": "fas fa-align-left"
+                },
+                "max_ont_read_length": {
+                    "type": "integer",
+                    "title": "Maximum read length for ONT reads to pass read length filtering in guppyplex",
+                    "description": "Maximum length of a read to pass read length filtering.",
+                    "help_text": "Reads longer than this length will be filtered out. This is useful to filter out reads which are too long for the amplicon scheme which are likely to be contaminants, long PCR products, or readthrough errors.",
+                    "fa_icon": "fas fa-align-right"
+                },
+                "skip_ont_quality_check": {
+                    "type": "boolean",
+                    "description": "Skip filtering of ONT read lengths.",
+                    "help_text": "Set this to true if you want to skip filtering of ONT read lengths. If you are providing barcode dirs from a 'fastq_pass' directory then this should be set to true to avoid duplicate work."
+                }
+            }
+        },
+        "illumina_pipeline_settings": {
+            "title": "Illumina Pipeline Settings",
+            "type": "object",
+            "description": "Settings which change the behaviour of the pipeline specifically for the Illumina workflow.",
+            "default": "",
+            "properties": {
+                "lower_ambiguity_frequency": {
+                    "type": "number",
+                    "title": "Lower Ambiguity Frequency",
+                    "default": 0.2,
+                    "description": "Minimum frequency of a minor allele variant to call an ambiguous variant in Freebayes.",
+                    "help_text": "Increasing this value will result in fewer ambiguity codes being added to the consensus sequence whereas reducing it will increase them. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
+                },
+                "upper_ambiguity_frequency": {
+                    "type": "number",
+                    "default": 0.8,
+                    "description": "Maximum frequency of a major allele variant to call an ambiguous variant in Freebayes.",
+                    "help_text": "Increasing this value will result in fewer ambiguity codes being added to the consensus sequence whereas reducing it will increase them. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
+                },
+                "min_ambiguity_count": {
+                    "type": "integer",
+                    "title": "Minimum Ambiguous Allele Count",
+                    "default": 10,
+                    "description": "Minimum absolute number of reads supporting a minor allele variant to call an ambiguous variant in Freebayes.",
+                    "help_text": "Increasing this value will result in fewer ambiguity codes being added to the consensus sequence whereas reducing it will increase them. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
                 }
             },
             "required": [
-                "normalise_depth"
+                "lower_ambiguity_frequency",
+                "upper_ambiguity_frequency",
+                "min_ambiguity_count"
             ]
         },
         "institutional_config_options": {
@@ -325,6 +409,12 @@
     "allOf": [
         {
             "$ref": "#/$defs/pipeline_settings"
+        },
+        {
+            "$ref": "#/$defs/ont_pipeline_settings"
+        },
+        {
+            "$ref": "#/$defs/illumina_pipeline_settings"
         },
         {
             "$ref": "#/$defs/input_output_options"

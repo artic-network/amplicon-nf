@@ -153,11 +153,23 @@ def validateInputSamplesheet(input) {
 // Generate methods description for MultiQC
 //
 def toolCitationText() {
-    // TODO nf-core: Optionally add in-text citation tools to this list.
-    // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
         "Tools used in the workflow included:",
+        "Fieldbioinformatics (Loman et al.)",
+        "bcftools (Li 2011)",
+        "bwa (Li 2013)",
+        "clair3 (Zheng et al. 2022)",
+        "minimap2 (Li 2018)",
+        "mafft (Katoh et al. 2002)",
+        "pandas (The pandas development team 2025)",
+        "pysam (Heger et al.)",
+        "cyvcf2 (Pedersen et al. 2017)",
+        "samtools (Danecek et al. 2021)",
+        "seqtk (Li et al.)",
+        "plotly (Plotly Technologies Inc. 2015)",
+        "biopython (Cock et al. 2009)",
+        "primalbedtools (Kent et al. 2024)",
+        "freebayes (Garrison and Marth 2012)",
         "MultiQC (Ewels et al. 2016)",
         ".",
     ].join(' ').trim()
@@ -166,11 +178,24 @@ def toolCitationText() {
 }
 
 def toolBibliographyText() {
-    // TODO nf-core: Optionally add bibliographic entries to this list.
-    // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
     def reference_text = [
-        "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
+        "<li>Loman et al., https://github.com/artic-network/fieldbioinformatics</li>",
+        "<li>Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics (2011) 27(21) 2987-93.</li>",
+        "<li>Li H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM. arXiv:1303.3997v2</li>",
+        "<li>Zheng, Z., Li, S., Su, J. et al. Symphonizing pileup and full-alignment for deep learning-based long-read variant calling. Nat Comput Sci 2, 797–803 (2022). https://doi.org/10.1038/s43588-022-00387-x</li>",
+        "<li>Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics, 34:3094-3100. doi:10.1093/bioinformatics/bty191</li>",
+        "<li>Kazutaka Katoh, Kazuharu Misawa, Kei‐ichi Kuma, Takashi Miyata, MAFFT: a novel method for rapid multiple sequence alignment based on fast Fourier transform, Nucleic Acids Research, Volume 30, Issue 14, 15 July 2002, Pages 3059–3066, https://doi.org/10.1093/nar/gkf436</li>",
+        "<li>The pandas development team. (2025). pandas-dev/pandas: Pandas (v2.3.0). Zenodo. https://doi.org/10.5281/zenodo.15597513</li>",
+        "<li>Heger et al., https://github.com/pysam-developers/pysam</li>",
+        "<li>Brent S Pedersen, Aaron R Quinlan, cyvcf2: fast, flexible variant analysis with Python, Bioinformatics, Volume 33, Issue 12, June 2017, Pages 1867–1869, https://doi.org/10.1093/bioinformatics/btx057</li>",
+        "<li>Twelve years of SAMtools and BCFtools Petr Danecek, James K Bonfield, Jennifer Liddle, John Marshall, Valeriu Ohan, Martin O Pollard, Andrew Whitwham, Thomas Keane, Shane A McCarthy, Robert M Davies, Heng Li GigaScience, Volume 10, Issue 2, February 2021, giab008, https://doi.org/10.1093/gigascience/giab008</li>",
+        "<li>Li et al., https://github.com/lh3/seqtk</li>",
+        "<li>Plotly Technologies Inc. (2015). Collaborative data science. Montreal, QC: Plotly Technologies Inc. Retrieved from https://plot.ly</li>",
+        "<li>Cock, P.J.A. et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics 2009 Jun 1; 25(11) 1422-3 https://doi.org/10.1093/bioinformatics/btp163 pmid:19304878</li>",
+        "<li>Kent, C., Smith, A. D., Tyson, J., Stepniak, D., Kinganda-Lusamaki, E., Lee, T., Weaver, M., Sparks, N., Landsdowne, L., Wilkinson, S. A., Brier, T., Colquhoun, R., O’Toole, A. N., Kingebeni, P. M., Goodfellow, I. G., Rambaut, A., Loman, N. J., & Quick, J. (2024). PrimalScheme: open-source community resources for low-cost viral genome sequencing. Cold Spring Harbor Laboratory. https://doi.org/10.1101/2024.12.20.629611</li>",
+        "<li>Garrison E, Marth G. Haplotype-based variant detection from short-read sequencing. arXiv preprint arXiv:1207.3907 [q-bio.GN] 2012</li>",
+        "<li>Shen, W., Le, S., Li, Y., & Hu, F. (2016). SeqKit: A Cross-Platform and Ultrafast Toolkit for FASTA/Q File Manipulation. PLOS ONE, 11(10), e0163962. https://doi.org/10.1371/journal.pone.0163962</li>",
+        "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>",
     ].join(' ').trim()
 
     return reference_text
@@ -203,9 +228,8 @@ def methodsDescriptionText(mqc_methods_yaml) {
     meta["tool_citations"] = ""
     meta["tool_bibliography"] = ""
 
-    // TODO nf-core: Only uncomment below if logic in toolCitationText/toolBibliographyText has been filled!
-    // meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-    // meta["tool_bibliography"] = toolBibliographyText()
+    meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+    meta["tool_bibliography"] = toolBibliographyText()
 
 
     def methods_text = mqc_methods_yaml.text
