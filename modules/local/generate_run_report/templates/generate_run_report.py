@@ -845,6 +845,23 @@ for tsv_path in amp_depth_tsvs:
         else len(primer_pairs)
     )
 
+# parsing of nextclade lineages.tsv output
+nextclade_rows = []
+nextclade_tsv = "nextclade.tsv"
+if Path(nextclade_tsv).is_file():
+    with open(nextclade_tsv, newline="") as fh:
+        for row in csv.DictReader(fh, delimiter="\t"):
+            nextclade_rows.append(
+                {
+                    "Sample": row.get("seqName", ""),
+                    "QC_status": row.get("qc_status", ""),
+                    "Clade": row.get("clade", ""),
+                    "Lineage": row.get("lineage", ""),
+                    "Cov": row.get("qc_overall_score", ""),
+                }
+            )
+payload["nextclade_table"] = nextclade_rows
+
 for row in scheme_samplesheet_df.itertuples():
     if not payload["qc_table_info"].get(row.sample):
         samples.add(row.sample)
