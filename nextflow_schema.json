@@ -71,6 +71,12 @@
                     "description": "Version tag of the dataset to download. If not specified, Nextclade will retrieve the latest version.",
                     "fa_icon": "fas fa-project-diagram"
                 },
+                "fasta_header_extra":{
+                    "type": "string",
+                    "title": "Control fasta header naming of consensus sequence output.",
+                    "description": "Default is to include workflow name and verison.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
