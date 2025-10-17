@@ -7,16 +7,16 @@
                     "align_trim": "1.0.2"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.8.4"
+                    "artic": "1.8.5"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.8.4"
+                    "artic": "1.8.5"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.8.4"
+                    "artic": "1.8.5"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.8.4"
+                    "artic": "1.8.5"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": 1.21
@@ -90,7 +90,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.4.7dev"
+                    "artic-network/amplicon-nf": "v0.4.8dev"
                 }
             },
             [
@@ -202,8 +202,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "24.10.4"
+            "nextflow": "25.04.7"
         },
-        "timestamp": "2025-09-11T12:23:14.444425"
+        "timestamp": "2025-10-17T14:26:15.568595"
     }
 }
