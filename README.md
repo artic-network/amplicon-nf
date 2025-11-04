@@ -3,7 +3,7 @@
 </div>
 
 [![GitHub Actions CI Status](https://github.com/artic-network/amplicon-nf/actions/workflows/nf-test.yml/badge.svg)](https://github.com/artic-network/amplicon-nf/actions/workflows/nf-test.yml)
-[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.17522200-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.17522200)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
 [![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.1)
