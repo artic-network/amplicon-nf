@@ -49,7 +49,7 @@ illumina_amplicon_data,,illumina,,/path/to/custom_scheme/,some_scheme_name,,/pat
 
 The `scheme_name` field refers to a scheme as a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2`.
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires only `fastq_directory` which is intended to be a directory as created by Dorado / minKNOW during basecalling. Below there is an example layout of a `fastq_pass` directory, each row of the samplesheet in this case would point to a single `barcode` directory.
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires only `fastq_directory` which is intended to be a directory as created by Dorado / minKNOW during basecalling, whereas Illumina requires a pair of read files.
 
 > [!NOTE]
 > There are more detailed pipeline / Nextflow usage instructions (including samplesheet construction and custom primer schemes), there are available in: [docs/usage.md](docs/usage.md).
