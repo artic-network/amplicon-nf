@@ -126,6 +126,24 @@ workflow AMPLICON_NF {
             }
     }
 
+    // If there's no work to do, produce an informative error message stating the possible causes.
+    ch_nanopore_input
+        .mix(ch_illumina_input)
+        .ifEmpty {
+            error(
+                """
+                No valid input found. Please check the following:
+                
+                1) If you are using implicit (fuzzy) input matching, ensure you are providing the `--read_directory` parameter and that the directory structure / file naming conventions are compatible with the expected patterns as described in https://github.com/artic-network/amplicon-nf/blob/main/docs/usage.md, this is crucial for successful file matching. This is the most common cause of this error being raised.
+
+                2) The samplesheet provided via --input is not empty.
+
+            """
+            )
+        }
+        .filter { it != null }
+
+
     //
     // Generate virus assemblies
     //    
