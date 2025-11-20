@@ -5,8 +5,8 @@ process GENERATE_SAMPLE_REPORT {
     conda "${moduleDir}/environment.yml"
 
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/pip_jinja2_biopython_numpy_pruned:62f9c8b9b1f39c59'
-        : 'community.wave.seqera.io/library/pip_jinja2_biopython_numpy_pruned:fbb9affc06c37839'}"
+        ? 'oras://community.wave.seqera.io/library/primalbedtools_biopython_jinja2_numpy_pruned:2ad9362062fb41eb'
+        : 'community.wave.seqera.io/library/primalbedtools_biopython_jinja2_numpy_pruned:d3e3819de3f6e323'}"
 
     input:
     tuple val(meta), path(bed), path(depth_tsv), path(amp_depth_tsv), path(coverage_report)
