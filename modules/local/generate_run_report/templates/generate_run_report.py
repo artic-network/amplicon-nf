@@ -8,9 +8,9 @@ import numpy as np
 import pathlib
 from importlib.metadata import version
 
+from primalbedtools.scheme import Scheme
+from primalbedtools.amplicons import create_amplicons
 from primalbedtools.bedfiles import BedLine
-from primalbedtools.bedfiles import BedLineParser
-import primalbedtools.primerpairs
 
 from collections import Counter
 import pandas as pd
@@ -532,10 +532,12 @@ def primer_mismatch_heatmap(
     """
     # Read in the bedfile
 
-    _header, bedlines = BedLineParser.from_file(bedfile)
+    primer_scheme = Scheme.from_file(bedfile)
+
+    scheme_headers = primer_scheme.header_dict
 
     # Find the mapping genome
-    bed_chrom_names = {bedline.chrom for bedline in bedlines}
+    bed_chrom_names = {bedline.chrom for bedline in primer_scheme.bedlines}
 
     # Reference genome
     primary_ref = bed_chrom_names.intersection(seqdict.keys())
@@ -560,7 +562,11 @@ def primer_mismatch_heatmap(
             )
     else:  # mapping == MappingType.FIRST & len(primary_ref) > 0
         # Filter the bedlines for only the reference genome
-        bedlines = [bedline for bedline in bedlines if bedline.chrom in primary_ref]
+        bedlines = [
+            bedline
+            for bedline in primer_scheme.bedlines
+            if bedline.chrom in primary_ref
+        ]
 
     kmers_names = [bedline.primername for bedline in bedlines]
 
@@ -689,10 +695,15 @@ def primer_mismatch_heatmap(
             zmax=10,
         )
     )
+    chrom_label = (
+        f"{scheme_headers.get(list(primary_ref)[0])} ({list(primary_ref)[0]})"
+        if scheme_headers.get(list(primary_ref)[0])
+        else list(primary_ref)[0]
+    )
     fig.update_layout(
         font=dict(family="Roboto, monospace", size=16),
         hoverlabel=dict(font_family="Roboto, monospace"),
-        title_text=f"Primer Mismatches: {list(primary_ref)[0]}",
+        title_text=f"Primer Mismatches: {chrom_label}",
     )
     fig.update_yaxes(autorange="reversed")
 
@@ -739,9 +750,9 @@ payload = {
 
 samples = set()
 
-header_lines, bed_lines = primalbedtools.bedfiles.BedLineParser.from_file("${bed}")
+primer_scheme = Scheme.from_file("${bed}")
 
-primer_pairs = primalbedtools.primerpairs.create_primerpairs(bed_lines)
+primer_pairs = create_amplicons(primer_scheme.bedlines)
 
 samplesheet_df = pd.read_csv("${samplesheet_csv}", index_col=False)
 if "${meta.scheme}" != "[]":
@@ -905,13 +916,18 @@ chroms = amplicon_depth_df.chrom.unique()
 amp_depth_heatmaps = {"name": "Amplicon Depths", "plots": []}
 for chrom in chroms:
     chrom_df = amplicon_depth_df.loc[amplicon_depth_df["chrom"] == chrom]
+    chrom_label = (
+        f"{primer_scheme.header_dict.get(chrom)} ({chrom})"
+        if primer_scheme.header_dict.get(chrom)
+        else chrom
+    )
     amp_depth_heatmaps["plots"].append(
         {
             "name": chrom,
             "plot_html": amplicon_depth_heatmap(
                 amplicon_depths=chrom_df,
                 scheme_str=scheme_version_str,
-                chrom_name=chrom,
+                chrom_name=chrom_label,
             ),
         }
     )
