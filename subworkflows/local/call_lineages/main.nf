@@ -3,27 +3,37 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { CAT_CAT }              from '../../../modules/nf-core/cat/cat/main.nf'
-include { NEXTCLADE_DATASETGET } from '../../../modules/nf-core/nextclade/datasetget/main.nf'
-include { NEXTCLADE_RUN }        from '../../../modules/nf-core/nextclade/run/main.nf'
+include { CAT_CAT }                                 from '../../../modules/nf-core/cat/cat'
+include { NEXTCLADE_DATASETGET }                    from '../../../modules/nf-core/nextclade/datasetget'
+include { NEXTCLADE_RUN }                           from '../../../modules/nf-core/nextclade/run'
+include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC }     from "../../../modules/nf-core/seqkit/replace"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-workflow LINEAGE_CALL {
+workflow CALL_LINEAGES {
     take: 
         ch_consensus // channel from amplicon-nf.nf 
     
     main:
         nextclade_tag_ch = Channel.of(params.nextclade_dataset_tag ?: "")
+        
         NEXTCLADE_DATASETGET (
             params.nextclade_dataset_name,
             nextclade_tag_ch
         )
+
+        ch_all_consensus_fasta = ch_consensus
+            .map { _meta, fasta -> fasta }
+            .collectFile(name: 'all_consensus.fasta')
+            .map { multi_fasta ->[[id: 'all_consensus.fasta'], multi_fasta]}
+        
+        SEQKIT_REPLACE_NC(ch_all_consensus_fasta)
+
         NEXTCLADE_RUN (
-            ch_consensus,
+            SEQKIT_REPLACE_NC.out.fastx,
             NEXTCLADE_DATASETGET.out.dataset
         )
     
