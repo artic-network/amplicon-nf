@@ -8,7 +8,6 @@ include { paramsSummaryMap                          } from'plugin/nf-schema'
 include { paramsSummaryMultiqc                      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                    } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
-include { LINEAGE_CALL                              } from "../subworkflows/local/lineage/"
 
 include { ONT_ASSEMBLY                              } from '../subworkflows/local/ont_assembly/main'
 include { ILLUMINA_ASSEMBLY                         } from '../subworkflows/local/illumina_assembly/main'
@@ -17,6 +16,7 @@ include { SAMTOOLS_DEPTH                            } from '../modules/nf-core/s
 include { SAMTOOLS_COVERAGE                         } from '../modules/nf-core/samtools/coverage/main'
 include { SEQKIT_REPLACE as SEQKIT_REPLACE_ONT      } from '../modules/nf-core/seqkit/replace/main'
 include { SEQKIT_REPLACE as SEQKIT_REPLACE_ILLUMINA } from '../modules/nf-core/seqkit/replace/main'
+include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC       } from '../modules/nf-core/seqkit/replace/main'
 include { MAFFT_ALIGN                               } from '../modules/nf-core/mafft/align/main'
 include { SEQKIT_GREP as SEQKIT_GREP_FASTAS         } from '../modules/nf-core/seqkit/grep/main'
 include { SEQKIT_GREP as SEQKIT_GREP_REFS           } from '../modules/nf-core/seqkit/grep/main'
@@ -154,19 +154,6 @@ workflow AMPLICON_NF {
     ch_reheadered_consensus_fasta = SEQKIT_REPLACE_ILLUMINA.out.fastx.mix(
         SEQKIT_REPLACE_ONT.out.fastx
     )
-
-    //
-    // Run Nextclade - optional
-    //
-    if (params.nextclade) {
-        ch_all_consensus_fasta = ch_reheadered_consensus_fasta
-            .map { _meta, fasta -> fasta }
-            .collectFile(name: 'all_consensus.fasta')
-            .map { multi_fasta ->[[id: 'all_consensus'], multi_fasta]
-    }
-        LINEAGE_CALL(ch_all_consensus_fasta)
-        ch_versions = ch_versions.mix(LINEAGE_CALL.out.versions)
-    }
 
     //
     // Generate report for each sample
@@ -414,5 +401,4 @@ workflow AMPLICON_NF {
     versions        = ch_versions // channel: software versions used in the workflow    
     consensus_fasta = ch_reheadered_consensus_fasta // channel: consensus FASTA files
     sample_report   = GENERATE_SAMPLE_REPORT.out.sample_report_html // channel: sample report files
-    lineage_report = LINEAGE_CALL.out.nextclade_tsv
 }
