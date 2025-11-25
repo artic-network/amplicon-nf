@@ -15,6 +15,7 @@
 
 include { AMPLICON_NF             } from './workflows/amplicon-nf'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { CALL_LINEAGES           } from './subworkflows/local/call_lineages'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,6 +44,7 @@ workflow ARTICNETWORK_AMPLICON_NF {
 
     emit:
     multiqc_report = AMPLICON_NF.out.multiqc_report // channel: /path/to/multiqc_report.html
+    consensus_fasta = AMPLICON_NF.out.consensus_fasta // channel: consensus FASTA files
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,6 +71,15 @@ workflow {
     ARTICNETWORK_AMPLICON_NF(
         PIPELINE_INITIALISATION.out.samplesheet
     )
+
+
+    //
+    // SUBWORKFLOW: Optional run nextclade
+    //
+    if (params.nextclade) {
+        CALL_LINEAGES(ARTICNETWORK_AMPLICON_NF.out.consensus_fasta)
+    }
+
     //
     // SUBWORKFLOW: Run completion tasks
     //
