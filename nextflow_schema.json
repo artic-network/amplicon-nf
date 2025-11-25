@@ -91,6 +91,13 @@
                     "help_text": "This is the minimum coverage depth for a position to be included in the consensus sequence. If a position has less than this depth, it will be set to 'N' in the consensus sequence. This may be changed if you have a specific reason to do so, but we recommend that you leave it at 20 for most amplicon sequencing applications. Lower values may improve consensus sequence coverage but at the cost of accuracy, higher values may improve accuracy but at the cost of coverage.",
                     "fa_icon": "fas fa-area-chart"
                 },
+                "percent_coverage": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Minimum depth for percentage coverage - for reporting purposes only.",
+                    "help_text": "Percent Coverage Depth is defined as how many positions in the genome are covered by X depth. For exampel 90% of the genome is covered at 100X or greater).",
+                    "fa_icon": "fas fa-area-chart"
+                },
                 "min_mapping_quality": {
                     "type": "integer",
                     "default": 20,

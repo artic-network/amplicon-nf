@@ -212,7 +212,8 @@
               <th><strong>Sample</strong></th>
               <th><strong>Primer Scheme</strong></th>
               <th><strong>Total Reads</strong></th>
-              <th><strong>Coverage Above {{minimum_coverage_depth}}x</strong></th>
+              <th><strong>Cov > {{minimum_coverage_depth}}x</strong></th>
+              <th><strong>Cov > {{percent_coverage}}x</strong></th>
               <th><strong>Mean Depth</strong></th>
               <th><strong>Total Amplicon Dropouts</strong></th>
               <th><strong>QC Result</strong></th>
@@ -225,6 +226,7 @@
               <td>{{ results.primer_scheme }}</td>
               <td>{{ results.total_reads }}</td>
               <td>{{ results.coverage }}</td>
+              <td>{{ results.percent_coverage }}</td>
               <td>{{ results.mean_depth }}</td>
               <td>{{ results.total_amp_dropouts }}</td>
               <td>

@@ -726,6 +726,7 @@ payload = {
     "pipeline_version": "${workflow.manifest.version}",
     "primer_scheme_version": scheme_version_str,
     "minimum_coverage_depth": "${params.min_coverage_depth}",
+    "percent_coverage": "${params.percent_coverage}",
     "tool_name": "amplicon-nf",
     "tool_version": "${workflow.manifest.version}",
     "citation_link": "https://github.com/artic-network/amplicon-nf",
@@ -770,6 +771,14 @@ for tsv_path in depth_tsvs:
         round(
             len(df[df["depth"] >= int("${params.min_coverage_depth}")]) / len(df) * 100,
             2,
+        )
+        if len(df) > 0
+        else 0.0
+    )
+    payload["qc_table_info"][sample_name]["percent_coverage"] = (
+        round(
+            (df['depth'] > int("${params.percent_coverage}")).sum() / len(df) * 100,
+            2
         )
         if len(df) > 0
         else 0.0
@@ -886,6 +895,7 @@ with open(f"{scheme_version_str.replace("/", "_")}_qc_results.tsv", "w") as f:
             "sample",
             "primer_scheme",
             "coverage",
+            "percent_coverage",
             "mean_depth",
             "total_reads",
             "total_amp_dropouts",
