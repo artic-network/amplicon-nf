@@ -250,6 +250,28 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Lineage table here -- add by Josh-->
+      <div class="tab-pane fade show active" id="lineage-table" role="tabpanel">
+        <table class="table table-sm mt-2">
+          <thead>
+            <tr>
+              <th><strong>Sample</strong></th>
+              <th><strong>Clade</strong></th>
+              <th><strong>Overall Status</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sample, results in lineage_table_info.items() %}
+            <tr>
+              <td>{{ sample }}</td>
+              <td>{{ results.Clade }}</td>
+              <td>{{ results.Overall }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
       <!-- Single Plots -->
       {% for plot in single_plots %}
