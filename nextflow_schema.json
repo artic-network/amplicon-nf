@@ -95,7 +95,7 @@
                     "type": "integer",
                     "default": 100,
                     "description": "Minimum depth for percentage coverage - for reporting purposes only.",
-                    "help_text": "Percent Coverage Depth is defined as how many positions in the genome are covered by X depth. For exampel 90% of the genome is covered at 100X or greater).",
+                    "help_text": "Percent of the genome covered by X reads. For example: 90% of the genome is covered at 100X or greater).",
                     "fa_icon": "fas fa-area-chart"
                 },
                 "min_mapping_quality": {
