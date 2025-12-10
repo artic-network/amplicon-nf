@@ -13,7 +13,7 @@ include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC }     from "../../../modules/nf-co
     RUN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-workflow CALL_LINEAGES {
+workflow RUN_NEXTCLADE {
     take: 
         ch_consensus // channel from amplicon-nf.nf 
     
