@@ -15,7 +15,7 @@
 
 include { AMPLICON_NF             } from './workflows/amplicon-nf'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
-include { CALL_LINEAGES           } from './subworkflows/local/call_lineages'
+include { RUN_NEXTCLADE           } from './subworkflows/local/run_nextclade'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +77,7 @@ workflow {
     // SUBWORKFLOW: Optional run nextclade
     //
     if (params.nextclade) {
-        CALL_LINEAGES(ARTICNETWORK_AMPLICON_NF.out.consensus_fasta)
+        RUN_NEXTCLADE(ARTICNETWORK_AMPLICON_NF.out.consensus_fasta)
     }
 
     //
