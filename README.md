@@ -3,7 +3,7 @@
 </div>
 
 [![GitHub Actions CI Status](https://github.com/artic-network/amplicon-nf/actions/workflows/nf-test.yml/badge.svg)](https://github.com/artic-network/amplicon-nf/actions/workflows/nf-test.yml)
-[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.17522200-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.17522200)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
 [![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.1)
@@ -49,7 +49,7 @@ illumina_amplicon_data,,illumina,,/path/to/custom_scheme/,some_scheme_name,,/pat
 
 The `scheme_name` field refers to a scheme as a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2`.
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires only `fastq_directory` which is intended to be a directory as created by Dorado / minKNOW during basecalling. Below there is an example layout of a `fastq_pass` directory, each row of the samplesheet in this case would point to a single `barcode` directory.
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires only `fastq_directory` which is intended to be a directory as created by Dorado / minKNOW during basecalling, whereas Illumina requires a pair of read files.
 
 > [!NOTE]
 > There are more detailed pipeline / Nextflow usage instructions (including samplesheet construction and custom primer schemes), there are available in: [docs/usage.md](docs/usage.md).
