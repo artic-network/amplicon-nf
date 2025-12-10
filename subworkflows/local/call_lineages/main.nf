@@ -18,11 +18,11 @@ workflow CALL_LINEAGES {
         ch_consensus // channel from amplicon-nf.nf 
     
     main:
-        nextclade_tag_ch = Channel.of(params.nextclade_tag ?: "")
+        nextclade_tag = params.nextclade_tag ?: ""
         
         NEXTCLADE_DATASETGET (
             params.nextclade,
-            nextclade_tag_ch
+            nextclade_tag
         )
 
         ch_all_consensus_fasta = ch_consensus
