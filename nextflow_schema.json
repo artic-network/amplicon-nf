@@ -52,20 +52,13 @@
                     "fa_icon": "fas fa-folder-open"
                 },
                 "nextclade": {
-                    "type": "boolean",
-                    "title": "Run nextclade",
-                    "description": "Run Nextclade for clade assignment, mutation calling, and sequence quality checks for genome consensus sequence",
-                    "fa_icon": "fas fa-project-diagram",
-                    "default": false
-                },
-                "nextclade_dataset_name": {
                     "type": "string",
                     "format": "path",
-                    "title": "Nextclade dataset name, must specify path like name eg: nextstrain/mpox/lineage-b.1",
-                    "description": "Name of Nextclade dataset to retrieve. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "title": "Specify Nextclade dataset - must specify path like name eg: nextstrain/mpox/lineage-b.1",
+                    "description": "Run Nextclade for clade assignment, mutation calling, and sequence quality checks for genome consensus sequence. Name of Nextclade dataset to retrieve. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
                     "fa_icon": "fas fa-project-diagram"
                 },
-                "nextclade_dataset_tag":{
+                "nextclade_tag":{
                     "type": "string",
                     "title": "Nextclade dataset tag.",
                     "description": "Version tag of the dataset to download. If not specified, Nextclade will retrieve the latest version.",
