@@ -16,7 +16,6 @@ include { SAMTOOLS_DEPTH                            } from '../modules/nf-core/s
 include { SAMTOOLS_COVERAGE                         } from '../modules/nf-core/samtools/coverage/main'
 include { SEQKIT_REPLACE as SEQKIT_REPLACE_ONT      } from '../modules/nf-core/seqkit/replace/main'
 include { SEQKIT_REPLACE as SEQKIT_REPLACE_ILLUMINA } from '../modules/nf-core/seqkit/replace/main'
-include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC       } from '../modules/nf-core/seqkit/replace/main'
 include { MAFFT_ALIGN                               } from '../modules/nf-core/mafft/align/main'
 include { SEQKIT_GREP as SEQKIT_GREP_FASTAS         } from '../modules/nf-core/seqkit/grep/main'
 include { SEQKIT_GREP as SEQKIT_GREP_REFS           } from '../modules/nf-core/seqkit/grep/main'
