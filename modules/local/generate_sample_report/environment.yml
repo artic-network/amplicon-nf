@@ -4,11 +4,9 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-- pip==24.3.1
-- pip:
-  - Jinja2==3.1.6
-  - biopython==1.85
-  - numpy==2.3.0
-  - pandas==2.3.0
-  - plotly==6.1.2
-  - primalbedtools==0.9
+  - bioconda::primalbedtools=1.0.0
+  - conda-forge::biopython=1.86
+  - conda-forge::jinja2=3.1.6
+  - conda-forge::numpy=2.3.5
+  - conda-forge::pandas=2.3.3
+  - conda-forge::plotly=6.5.0

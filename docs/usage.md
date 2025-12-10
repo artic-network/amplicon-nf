@@ -209,7 +209,6 @@ nextflow run artic-network/amplicon-nf \
 
 Where for example `<dataset>` is eg `nextstrain/mpox/lineage-b.1` and `<tag>` is `2025-09-09--12-13-13Z`. See https://clades.nextstrain.org/ (click `Change Dataset`) to see available datasets and tag versions.
 
-
 ### Updating the pipeline
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
