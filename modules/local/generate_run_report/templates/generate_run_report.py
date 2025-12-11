@@ -744,8 +744,7 @@ payload = {
     "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",
     "timestamp": datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
     "qc_table_info": {},
-    #add another table here for lineage
-    "lineage_table_info": {},
+    "nextclade_table": {},
     "single_plots": [],
     "nested_plots": [],
 }
@@ -858,10 +857,10 @@ for tsv_path in amp_depth_tsvs:
         else len(primer_pairs)
     )
 
-# parsing of nextclade lineages.tsv output
-nextclade_rows = []
-nextclade_tsv = "nextclade.tsv"
-if Path(nextclade_tsv).is_file():
+# Optionally parse nextclade tsv output
+nextclade_tsv = Path("nextclade.tsv")
+if nextclade_tsv.is_file():
+    nextclade_rows = []
     with open(nextclade_tsv, newline="") as fh:
         for row in csv.DictReader(fh, delimiter="\t"):
             nextclade_rows.append(
@@ -873,7 +872,32 @@ if Path(nextclade_tsv).is_file():
                     "Cov": row.get("qc_overall_score", ""),
                 }
             )
-payload["nextclade_table"] = nextclade_rows
+    payload["nextclade_table"] = nextclade_rows
+
+
+# try:
+#     with open("lineages.tsv", 'r') as lineage_table_input:
+#         csvreader = csv.reader(lineage_table_input, delimiter="\t")
+#         lheader = next(csvreader)
+#         for row in csvreader:
+#             lsample = row[1].split(" ")[0]
+#             lclade = row[3]
+#             loverall = row[8]
+#             if len(lclade) == 0:
+#                 lclade = "ERROR"
+#             if len(loverall) == 0:
+#                 loverall = "UNKNOWN"
+#             payload["lineage_table_info"][lsample]["Sample"] = lsample
+#             payload["lineage_table_info"][lsample]["Clade"] = lclade
+#             payload["lineage_table_info"][lsample]["Overall"] = loverall
+
+
+# except:
+#     payload["lineage_table_info"].setdefault("Default", {})
+#     payload["lineage_table_info"]["Default"]["Sample"] = "Default"
+#     payload["lineage_table_info"]["Default"]["Clade"] = "18A"
+#     payload["lineage_table_info"]["Default"]["Overall"] = "good"
+
 
 for row in scheme_samplesheet_df.itertuples():
     if not payload["qc_table_info"].get(row.sample):
@@ -909,37 +933,6 @@ payload["qc_table_info"] = dict(
         key=lambda item: item[0],
     )
 )
-
-
-#read lineage table from the output folder
-try:
-    with open("lineages.tsv", 'r') as lineage_table_input:
-        csvreader = csv.reader(lineage_table_input, delimiter="\t")
-        lheader = next(csvreader)
-        for row in csvreader:
-            lsample = row[1].split(" ")[0]
-            lclade = row[3]
-            loverall = row[8]
-            if len(lclade) == 0:
-                lclade = "ERROR"
-            if len(loverall) == 0:
-                loverall = "UNKNOWN"
-            payload["lineage_table_info"][lsample]["Sample"] = lsample
-            payload["lineage_table_info"][lsample]["Clade"] = lclade
-            payload["lineage_table_info"][lsample]["Overall"] = loverall
-
-
-except:
-    payload["lineage_table_info"].setdefault("Default", {})
-    payload["lineage_table_info"]["Default"]["Sample"] = "Default"
-    payload["lineage_table_info"]["Default"]["Clade"] = "18A"
-    payload["lineage_table_info"]["Default"]["Overall"] = "good"
-## end of new edit
-print(payload["lineage_table_info"])
-print("---- check ----")
-print(payload["qc_table_info"])
-
-
 
 with open(f"{scheme_version_str.replace("/", "_")}_qc_results.tsv", "w") as f:
     writer = csv.DictWriter(
