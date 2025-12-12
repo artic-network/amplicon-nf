@@ -210,6 +210,11 @@
         <button class="nav-link" id="nested-plot-{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#nested-plot-{{ loop.index }}" type="button" role="tab">{{ plot_type.name }}</button>
       </li>
       {% endfor %}
+      {% if nextclade_table %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="nextclade-table-tab" data-bs-toggle="tab" data-bs-target="#nextclade-table" type="button" role="tab">Nextclade Results</button>
+      </li>
+      {% endif %}
     </ul>
 
     <div class="tab-content border p-3 bg-white" id="contigTabsContent" style="border-top: none">
@@ -252,28 +257,33 @@
       </div>
       
       <!-- Nextclade output -->
-      {% if nextclade_table %}
-      <div class="tab-pane fade" id="lineage-table" role="tabpanel">
+      <!-- {% if nextclade_table %} -->
+      <div class="tab-pane fade" id="nextclade-table" role="tabpanel">
         <table class="table table-sm mt-2">
           <thead>
             <tr>
               <th><strong>Sample</strong></th>
+              <th><strong>QC status</strong></th>
+              <th><strong>QC Score</strong></th>
               <th><strong>Clade</strong></th>
-              <th><strong>Overall Status</strong></th>
+              <th><strong>Lineage</strong></th>
+
             </tr>
           </thead>
           <tbody>
             {% for sample, results in nextclade_table.items() %}
             <tr>
               <td>{{ sample }}</td>
-              <td>{{ results.Clade }}</td>
-              <td>{{ results.Overall }}</td>
+              <td>{{ results.qc_status }}</td>
+              <td>{{ results.qc_score }}</td>
+              <td>{{ results.clade }}</td>
+              <td>{{ results.lineage }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      {% endif %}
+      <!-- {% endif %} -->
 
       <!-- Single Plots -->
       {% for plot in single_plots %}
