@@ -26,9 +26,11 @@ workflow RUN_NEXTCLADE {
         )
 
         ch_all_consensus_fasta = ch_consensus
-            .map { _meta, fasta -> fasta }
-            .collectFile(name: 'all_consensus.fasta')
-            .map { multi_fasta ->[[id: 'all_consensus.fasta'], multi_fasta]}
+            .collectFile(name: 'all_consensus.fasta') { _meta, fasta -> fasta }
+            .map { fasta ->
+                def meta = [id: fasta.getName()]
+                tuple(meta, fasta)
+            }
         
         SEQKIT_REPLACE_NC(ch_all_consensus_fasta)
 
@@ -39,5 +41,6 @@ workflow RUN_NEXTCLADE {
     
     emit:
         versions = NEXTCLADE_RUN.out.versions
-        nextclade_tsv = NEXTCLADE_RUN.out.tsv.map {_meta, tsv -> tsv}
+        tsv = NEXTCLADE_RUN.out.tsv
+                .map { _meta, tsv ->  tsv }
 }
