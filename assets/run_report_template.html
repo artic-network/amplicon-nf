@@ -263,10 +263,15 @@
           <thead>
             <tr>
               <th><strong>Sample</strong></th>
-              <th><strong>QC status</strong></th>
-              <th><strong>QC Score</strong></th>
+              <th><strong>QC Overall Status</strong></th>
               <th><strong>Clade</strong></th>
               <th><strong>Lineage</strong></th>
+              <th><strong>Missing Data</strong></th>
+              <th><strong>Mixed Sites</strong></th>
+              <th><strong>Private Mutations</strong></th>
+              <th><strong>SNP Cluster</strong></th>
+              <th><strong>Frame Shift</strong></th>
+              <th><strong>Stop Codon</strong></th>
 
             </tr>
           </thead>
@@ -274,10 +279,86 @@
             {% for sample, results in nextclade_table.items() %}
             <tr>
               <td>{{ sample }}</td>
-              <td>{{ results.qc_status }}</td>
-              <td>{{ results.qc_score }}</td>
-              <td>{{ results.clade }}</td>
-              <td>{{ results.lineage }}</td>
+              <td>
+                {% if results.qc_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">No result - Failed</span>
+                {% endif %}
+              </td>
+              <td> {{ results.clade }}</td>
+              <td> {{ results.lineage }}</td>
+              <td>
+                {% if results.qc_missing_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_missing_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_missing_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">NA</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if results.qc_mixedsites_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_mixedsites_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_mixedsites_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">NA</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if results.qc_privatemut_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_privatemut_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_privatemut_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">NA</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if results.qc_snpclust_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_snpclust_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_snpclust_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">NA</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if results.qc_framshift_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_framshift_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_framshift_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">NA</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if results.qc_stopcodon_status == "good" %}
+                <span class="badge badge-pass">Good</span>
+                {% elif results.qc_stopcodon_status == "mediocre" %}
+                <span class="badge badge-warning">Mediocre</span>
+                {% elif results.qc_stopcodon_status == "fail" %}
+                <span class="badge badge-fail">Fail</span>
+                {% else %}
+                <span class="badge badge-fail">NA</span>
+                {% endif %}
+              </td>
+
             </tr>
             {% endfor %}
           </tbody>
