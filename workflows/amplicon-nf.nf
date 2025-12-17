@@ -324,55 +324,28 @@ workflow AMPLICON_NF {
 
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
-    // // optional reporting outputs
-    // ch_msas_opt       = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
+    // massage optional inputs
+    ch_msas_opt       = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
     ch_nextclade_opt  = params.nextclade ? ch_nextclade_tsv :  channel.fromPath("$projectDir/assets/NO_FILE")
-    // ch_run_report_input = ch_bed_by_scheme
-    //     // required
-    //     .join(ch_depth_tsvs_by_scheme)
-    //     .join(ch_amp_depth_tsvs_by_scheme)
-    //     .join(ch_coverage_tsvs_by_scheme)
-    //     // optional
-    //     .join(ch_msas_opt, remainder: true)
-    //     .map { meta, bed, depth, amp, cov, msas ->
-    //         [
-    //             meta,
-    //             bed,
-    //             depth,
-    //             amp,
-    //             cov,
-    //             msas ?: [],
-    //             samplesheet_csv
-    //         ]
-    //     }
-
-    if (params.primer_mismatch_plot) {
-        ch_run_report_input = ch_bed_by_scheme
-            .join(ch_depth_tsvs_by_scheme)
-            .join(ch_amp_depth_tsvs_by_scheme)
-            .join(ch_coverage_tsvs_by_scheme)
-            .join(ch_msas_by_scheme)
-            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
-                [
-                    meta,
-                    bed,
-                    depth_tsvs,
-                    amp_depth_tsvs,
-                    coverage_tsvs,
-                    msas,
-                    samplesheet_csv,
-                ]
-            }
-    }
-    else {
-        ch_run_report_input = ch_bed_by_scheme
-            .join(ch_depth_tsvs_by_scheme)
-            .join(ch_amp_depth_tsvs_by_scheme)
-            .join(ch_coverage_tsvs_by_scheme)
-            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs ->
-                [meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, [], samplesheet_csv]
-            }
-    }
+    
+    ch_run_report_input = ch_bed_by_scheme
+        // required
+        .join(ch_depth_tsvs_by_scheme)
+        .join(ch_amp_depth_tsvs_by_scheme)
+        .join(ch_coverage_tsvs_by_scheme)
+        // optional
+        .join(ch_msas_opt, remainder: true)
+        .map { meta, bed, depth, amp, cov, msas ->
+            [
+                meta,
+                bed,
+                depth,
+                amp,
+                cov,
+                msas ?: [],
+                samplesheet_csv
+            ]
+        }
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,
