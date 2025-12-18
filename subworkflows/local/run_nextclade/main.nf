@@ -40,7 +40,7 @@ workflow RUN_NEXTCLADE {
         )
     
     emit:
-        versions = NEXTCLADE_RUN.out.versions
+        versions = NEXTCLADE_DATASETGET.out.versions
         tsv = NEXTCLADE_RUN.out.tsv
                 .map { _meta, tsv ->  tsv }
 }
