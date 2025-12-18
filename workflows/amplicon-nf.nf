@@ -178,6 +178,7 @@ workflow AMPLICON_NF {
     if (params.nextclade) {
         RUN_NEXTCLADE(ch_reheadered_consensus_fasta)
         ch_nextclade_tsv = RUN_NEXTCLADE.out.tsv
+        ch_versions = ch_versions.mix(RUN_NEXTCLADE.out.versions)
     }
 
     //
