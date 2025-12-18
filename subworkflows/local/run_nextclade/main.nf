@@ -13,22 +13,24 @@ include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC }     from "../../../modules/nf-co
     RUN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-workflow CALL_LINEAGES {
+workflow RUN_NEXTCLADE {
     take: 
         ch_consensus // channel from amplicon-nf.nf 
     
     main:
-        nextclade_tag_ch = Channel.of(params.nextclade_tag ?: "")
+        nextclade_tag = params.nextclade_tag ?: ""
         
         NEXTCLADE_DATASETGET (
             params.nextclade,
-            nextclade_tag_ch
+            nextclade_tag
         )
 
         ch_all_consensus_fasta = ch_consensus
-            .map { _meta, fasta -> fasta }
-            .collectFile(name: 'all_consensus.fasta')
-            .map { multi_fasta ->[[id: 'all_consensus.fasta'], multi_fasta]}
+            .collectFile(name: 'all_consensus.fasta') { _meta, fasta -> fasta }
+            .map { fasta ->
+                def meta = [id: fasta.getName()]
+                tuple(meta, fasta)
+            }
         
         SEQKIT_REPLACE_NC(ch_all_consensus_fasta)
 
@@ -38,6 +40,7 @@ workflow CALL_LINEAGES {
         )
     
     emit:
-        versions = NEXTCLADE_RUN.out.versions
-        nextclade_tsv = NEXTCLADE_RUN.out.tsv.map {_meta, tsv -> tsv}
+        versions = NEXTCLADE_DATASETGET.out.versions
+        tsv = NEXTCLADE_RUN.out.tsv
+                .map { _meta, tsv ->  tsv }
 }

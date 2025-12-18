@@ -3,14 +3,15 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MULTIQC                                   } from'../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                          } from'plugin/nf-schema'
+include { MULTIQC                                   } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                          } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                    } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 
 include { ONT_ASSEMBLY                              } from '../subworkflows/local/ont_assembly/main'
 include { ILLUMINA_ASSEMBLY                         } from '../subworkflows/local/illumina_assembly/main'
+include { RUN_NEXTCLADE                             } from '../subworkflows/local/run_nextclade'
 
 include { SAMTOOLS_DEPTH                            } from '../modules/nf-core/samtools/depth/main'
 include { SAMTOOLS_COVERAGE                         } from '../modules/nf-core/samtools/coverage/main'
@@ -172,6 +173,15 @@ workflow AMPLICON_NF {
     )
 
     //
+    // Run nextclade - optional
+    //
+    if (params.nextclade) {
+        RUN_NEXTCLADE(ch_reheadered_consensus_fasta)
+        ch_nextclade_tsv = RUN_NEXTCLADE.out.tsv
+        ch_versions = ch_versions.mix(RUN_NEXTCLADE.out.versions)
+    }
+
+    //
     // Generate report for each sample
     //
     ch_primertrimmed_bam = ONT_ASSEMBLY.out.primertrimmed_normalised_bam.mix(
@@ -315,36 +325,32 @@ workflow AMPLICON_NF {
 
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
-    if (params.primer_mismatch_plot) {
-        ch_run_report_input = ch_bed_by_scheme
-            .join(ch_depth_tsvs_by_scheme)
-            .join(ch_amp_depth_tsvs_by_scheme)
-            .join(ch_coverage_tsvs_by_scheme)
-            .join(ch_msas_by_scheme)
-            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, msas ->
-                [
-                    meta,
-                    bed,
-                    depth_tsvs,
-                    amp_depth_tsvs,
-                    coverage_tsvs,
-                    msas,
-                    samplesheet_csv,
-                ]
-            }
-    }
-    else {
-        ch_run_report_input = ch_bed_by_scheme
-            .join(ch_depth_tsvs_by_scheme)
-            .join(ch_amp_depth_tsvs_by_scheme)
-            .join(ch_coverage_tsvs_by_scheme)
-            .map { meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs ->
-                [meta, bed, depth_tsvs, amp_depth_tsvs, coverage_tsvs, [], samplesheet_csv]
-            }
-    }
+    // massage optional inputs
+    ch_msas_opt       = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
+    ch_nextclade_opt  = params.nextclade ? ch_nextclade_tsv :  channel.fromPath("$projectDir/assets/NO_FILE")
+    
+    ch_run_report_input = ch_bed_by_scheme
+        // required
+        .join(ch_depth_tsvs_by_scheme)
+        .join(ch_amp_depth_tsvs_by_scheme)
+        .join(ch_coverage_tsvs_by_scheme)
+        // optional
+        .join(ch_msas_opt, remainder: true)
+        .map { meta, bed, depth, amp, cov, msas ->
+            [
+                meta,
+                bed,
+                depth,
+                amp,
+                cov,
+                msas ?: [],
+                samplesheet_csv
+            ]
+        }
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,
+        ch_nextclade_opt,
         run_report_template,
         artic_logo_svg,
         bootstrap_bundle_min_js,
