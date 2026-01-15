@@ -5,5 +5,4 @@ channels:
   - bioconda
   - nanoporetech
 dependencies:
-  # TODO nf-core: List required Conda package(s).
   - nanoporetech::fastcat=0.24.2
