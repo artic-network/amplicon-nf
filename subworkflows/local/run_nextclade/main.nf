@@ -22,6 +22,6 @@ workflow RUN_NEXTCLADE {
         NEXTCLADE_RUN(ch_consensus, NEXTCLADE_DATASETGET.out.dataset)
     
     emit:
-        versions = NEXTCLADE_RUN.out.versions
+        versions = NEXTCLADE_DATASETGET.out.versions
         tsv = NEXTCLADE_RUN.out.tsv
 }
