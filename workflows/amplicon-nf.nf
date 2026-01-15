@@ -187,7 +187,6 @@ workflow AMPLICON_NF {
                     tsv,
             ]
         }.groupTuple()
-         ch_versions = ch_versions.mix(RUN_NEXTCLADE.out.versions)
     }
 
     //
