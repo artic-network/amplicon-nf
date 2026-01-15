@@ -852,11 +852,13 @@ for tsv_path in amp_depth_tsvs:
         else len(primer_pairs)
     )
 
-nextclade_tsv = Path("nextclade.tsv")
-if nextclade_tsv.is_file():
-    with open(nextclade_tsv, "r") as file:
+# nextclade parsing tsv
+for tsv in glob("nextclade_tsv/*.tsv"):
+    print(tsv)
+    with open(tsv, "r") as file:
         for row in csv.DictReader(file, delimiter="	"):
-            payload["nextclade_table"][row.get("seqName", "")] = {
+            sample_name = row.get("seqName", "").split(" ")[0]
+            payload["nextclade_table"][sample_name] = {
                 "qc_status": row.get("qc.overallStatus", ""),
                 "qc_score": row.get("qc.overallScore", ""),
                 "clade": row.get("clade_display", ""),

@@ -176,9 +176,18 @@ workflow AMPLICON_NF {
     // Run nextclade - optional
     //
     if (params.nextclade) {
+
         RUN_NEXTCLADE(ch_reheadered_consensus_fasta)
-        ch_nextclade_tsv = RUN_NEXTCLADE.out.tsv
         ch_versions = ch_versions.mix(RUN_NEXTCLADE.out.versions)
+
+        ch_nextclade_tsv = RUN_NEXTCLADE.out.tsv
+            .map {meta, tsv ->
+            [
+                    meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                    tsv,
+            ]
+        }.groupTuple()
+         ch_versions = ch_versions.mix(RUN_NEXTCLADE.out.versions)
     }
 
     //
@@ -327,7 +336,7 @@ workflow AMPLICON_NF {
 
     // massage optional inputs
     ch_msas_opt       = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
-    ch_nextclade_opt  = params.nextclade ? ch_nextclade_tsv :  channel.fromPath("$projectDir/assets/NO_FILE")
+    ch_nextclade_opt  = params.nextclade ? ch_nextclade_tsv :  channel.empty()
     
     ch_run_report_input = ch_bed_by_scheme
         // required
@@ -336,7 +345,8 @@ workflow AMPLICON_NF {
         .join(ch_coverage_tsvs_by_scheme)
         // optional
         .join(ch_msas_opt, remainder: true)
-        .map { meta, bed, depth, amp, cov, msas ->
+        .join(ch_nextclade_opt, remainder: true)
+        .map { meta, bed, depth, amp, cov, msas, nc ->
             [
                 meta,
                 bed,
@@ -344,13 +354,14 @@ workflow AMPLICON_NF {
                 amp,
                 cov,
                 msas ?: [],
+                nc ?: [],
                 samplesheet_csv
             ]
         }
+        ch_run_report_input.view()
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,
-        ch_nextclade_opt,
         run_report_template,
         artic_logo_svg,
         bootstrap_bundle_min_js,

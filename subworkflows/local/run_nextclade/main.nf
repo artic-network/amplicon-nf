@@ -4,9 +4,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { CAT_CAT }                                 from '../../../modules/nf-core/cat/cat'
-include { NEXTCLADE_DATASETGET }                    from '../../../modules/nf-core/nextclade/datasetget'
 include { NEXTCLADE_RUN }                           from '../../../modules/nf-core/nextclade/run'
-include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC }     from "../../../modules/nf-core/seqkit/replace"
+include { NEXTCLADE_DATASETGET }                    from '../../../modules/nf-core/nextclade/datasetget'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -15,32 +14,14 @@ include { SEQKIT_REPLACE as SEQKIT_REPLACE_NC }     from "../../../modules/nf-co
 */
 workflow RUN_NEXTCLADE {
     take: 
-        ch_consensus // channel from amplicon-nf.nf 
+        ch_consensus
     
     main:
         nextclade_tag = params.nextclade_tag ?: ""
-        
-        NEXTCLADE_DATASETGET (
-            params.nextclade,
-            nextclade_tag
-        )
-
-        ch_all_consensus_fasta = ch_consensus
-            .collectFile(name: 'all_consensus.fasta') { _meta, fasta -> fasta }
-            .map { fasta ->
-                def meta = [id: fasta.getName()]
-                tuple(meta, fasta)
-            }
-        
-        SEQKIT_REPLACE_NC(ch_all_consensus_fasta)
-
-        NEXTCLADE_RUN (
-            SEQKIT_REPLACE_NC.out.fastx,
-            NEXTCLADE_DATASETGET.out.dataset
-        )
+        NEXTCLADE_DATASETGET(params.nextclade, nextclade_tag)
+        NEXTCLADE_RUN(ch_consensus, NEXTCLADE_DATASETGET.out.dataset)
     
     emit:
-        versions = NEXTCLADE_DATASETGET.out.versions
+        versions = NEXTCLADE_RUN.out.versions
         tsv = NEXTCLADE_RUN.out.tsv
-                .map { _meta, tsv ->  tsv }
 }
