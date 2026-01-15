@@ -1,0 +1,42 @@
+nextflow_process {
+
+    name "Test Process FASTCAT"
+    script "../main.nf"
+    process "FASTCAT"
+    config "./nextflow.config"
+
+    tag "modules"
+    tag "fastcat"
+
+    test("nanopore - fastq") {
+        when {
+            params {
+                module_args = "-r test.tsv"
+            }
+            process {
+                """                
+                input[0] = [
+                    [ id:'test' ],
+				    file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true),
+
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assertAll(
+                { assert snapshot(
+                    process.out,
+                    process.out.runid,
+                    path(process.out.versions[0]).yaml,
+
+                ).match() 
+                }
+            )
+        }
+
+    }
+
+}

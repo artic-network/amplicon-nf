@@ -1,0 +1,9 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+channels:
+  - conda-forge
+  - bioconda
+  - nanoporetech
+dependencies:
+  # TODO nf-core: List required Conda package(s).
+  - nanoporetech::fastcat=0.24.2

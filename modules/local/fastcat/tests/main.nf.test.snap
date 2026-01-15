@@ -1,0 +1,65 @@
+{
+    "nanopore - fastq": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    
+                ],
+                "4": [
+                    [
+                        "FASTCAT",
+                        "fastcat",
+                        "0.24.2"
+                    ]
+                ],
+                "5": [
+                    "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
+                ],
+                "basecaller": [
+                    
+                ],
+                "read": [
+                    
+                ],
+                "runid": [
+                    
+                ],
+                "summary": [
+                    
+                ],
+                "versions": [
+                    "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
+                ],
+                "versions_fastcat": [
+                    [
+                        "FASTCAT",
+                        "fastcat",
+                        "0.24.2"
+                    ]
+                ]
+            },
+            [
+                
+            ],
+            {
+                "FASTCAT": {
+                    "fastcat": "0.24.2)"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-01-15T16:34:57.546170453"
+    }
+}
