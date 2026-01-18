@@ -357,7 +357,6 @@ workflow AMPLICON_NF {
                 samplesheet_csv
             ]
         }
-        ch_run_report_input.view()
 
     GENERATE_RUN_REPORT(
         ch_run_report_input,
