@@ -12,16 +12,49 @@ include { NEXTCLADE_DATASETGET }                    from '../../../modules/nf-co
     RUN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+
+// mimics NEXTCLADE_DATASETGET version.yml
+process grepTag {
+    input:
+    path dataset
+
+    output:
+    path "versions.yml", emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    """
+    cat <<-END_VERSIONS > versions.yml
+    NEXTCLADE_DATASETGET:
+        nextclade-tag: \$(grep "tag" $dataset/pathogen.json | sed -n 's/.*"tag": "\\([0-9-]\\+Z\\)".*/\\1/p')
+    END_VERSIONS
+    """
+}
+
 workflow RUN_NEXTCLADE {
     take: 
         ch_consensus
     
     main:
         nextclade_tag = params.nextclade_tag ?: ""
-        NEXTCLADE_DATASETGET(params.nextclade, nextclade_tag)
-        NEXTCLADE_RUN(ch_consensus, NEXTCLADE_DATASETGET.out.dataset)
-    
+        ch_versions = channel.empty()
+
+        if (file(params.nextclade).exists()) {
+            nc_dataset = params.nextclade
+            grepTag(nc_dataset)
+            nc_tag = grepTag.out.versions
+        } else if (params.input instanceof String) {
+            NEXTCLADE_DATASETGET(params.nextclade, nextclade_tag)
+            nc_dataset = NEXTCLADE_DATASETGET.out.dataset
+            nc_tag = NEXTCLADE_DATASETGET.out.versions
+        }
+        NEXTCLADE_RUN(ch_consensus, nc_dataset)
+        ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions)
+        ch_versions = ch_versions.mix(nc_tag)
+
     emit:
-        versions = NEXTCLADE_DATASETGET.out.versions
+        versions = ch_versions
         tsv = NEXTCLADE_RUN.out.tsv
 }
