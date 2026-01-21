@@ -45,7 +45,7 @@ workflow RUN_NEXTCLADE {
             nc_dataset = params.nextclade
             grepTag(nc_dataset)
             nc_tag = grepTag.out.versions
-        } else if (params.input instanceof String) {
+        } else if (params.nextclade instanceof String) {
             NEXTCLADE_DATASETGET(params.nextclade, nextclade_tag)
             nc_dataset = NEXTCLADE_DATASETGET.out.dataset
             nc_tag = NEXTCLADE_DATASETGET.out.versions
