@@ -1,5 +1,5 @@
 name: Bug report
-description: Report something that is broken or incorrect, please ensure you have checked the "Problems and Solutions" section of the readme, checked `usage.md` within the docs folder, and checked existing issues before submitting a new issue.
+description: Report something that is broken or incorrect, please ensure you have checked `usage.md` within the docs folder, and checked existing issues before submitting a new issue.
 labels: [bug]
 body:
   - type: textarea
