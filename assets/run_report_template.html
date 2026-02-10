@@ -284,8 +284,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">No result - Failed</span>
                 {% endif %}
@@ -297,8 +297,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_missing_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_missing_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_missing_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">NA</span>
                 {% endif %}
@@ -308,8 +308,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_mixedsites_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_mixedsites_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_mixedsites_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">NA</span>
                 {% endif %}
@@ -319,8 +319,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_privatemut_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_privatemut_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_privatemut_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">NA</span>
                 {% endif %}
@@ -330,8 +330,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_snpclust_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_snpclust_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_snpclust_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">NA</span>
                 {% endif %}
@@ -341,8 +341,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_framshift_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_framshift_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_framshift_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">NA</span>
                 {% endif %}
@@ -352,8 +352,8 @@
                 <span class="badge badge-pass">Good</span>
                 {% elif results.qc_stopcodon_status == "mediocre" %}
                 <span class="badge badge-warning">Mediocre</span>
-                {% elif results.qc_stopcodon_status == "fail" %}
-                <span class="badge badge-fail">Fail</span>
+                {% elif results.qc_stopcodon_status == "bad" %}
+                <span class="badge badge-fail">Bad</span>
                 {% else %}
                 <span class="badge badge-fail">NA</span>
                 {% endif %}
