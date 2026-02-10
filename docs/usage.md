@@ -195,19 +195,23 @@ The `-profile` parameter accepts multiple profiles separated by a comma so provi
 
 ### Running Nextclade post run
 
-To run nextclade on all samples, specify the dataset name and optionally the tag (version):
+> [!WARNING]
+> The current implementation is *not* compatible with data runs that include different viruses. Nextclade has been integrated into `amplicon-nf` to run on **all** samples.
+
+To run nextclade, specify the dataset name and optionally the tag (dataset version) as follows
 
 ```bash
 nextflow run artic-network/amplicon-nf \
-   -profile low_resource,<docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR> \
-   --store_dir <store_dir> \
+...
    --nextclade <dataset> \
    --nextcade_tag <tag>
 ```
 
-Where for example `<dataset>` is eg `nextstrain/mpox/lineage-b.1` and `<tag>` is `2025-09-09--12-13-13Z`. See https://clades.nextstrain.org/ (click `Change Dataset`) to see available datasets and tag versions.
+When specifying the dataset name (`--nextclade 'sars-cov-2'`) the dataset will be automatically downloaded. Alternatively, if you have a predownloaded dataset specify the path `--nextclade /home/datasets/sars-cov-2`, when specifying the path to the dataset `--tag` is ignored.
+
+> [!TIP]
+> To see the available supported viruses, dataset names and tag information go to https://clades.nextstrain.org
+
 
 ### Updating the pipeline
 
