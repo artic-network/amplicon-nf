@@ -8,7 +8,14 @@ process GENERATE_RUN_REPORT {
         : 'community.wave.seqera.io/library/primalbedtools_biopython_jinja2_numpy_pruned:d3e3819de3f6e323'}"
 
     input:
-    tuple val(meta), path(bed), path(depth_tsvs, stageAs: "depth_tsvs/*"), path(amp_depth_tsvs, stageAs: "amplicon_depth_tsvs/*"), path(coverage_tsvs, stageAs: "coverage_tsvs/*"), path(msas, stageAs: "msas/*"), path(samplesheet_csv)
+    tuple val(meta),
+        path(bed),
+        path(depth_tsvs, stageAs: "depth_tsvs/*"),
+        path(amp_depth_tsvs, stageAs: "amplicon_depth_tsvs/*"),
+        path(coverage_tsvs, stageAs: "coverage_tsvs/*"),
+        path(msas, stageAs: "msas/*"),
+        path(nextclade, stageAs: "nextclade_tsv/*"),
+        path(samplesheet_csv)
     path report_template
     path artic_logo_svg
     path bootstrap_bundle_min_js

@@ -193,6 +193,26 @@ nextflow run artic-network/amplicon-nf \
 
 The `-profile` parameter accepts multiple profiles separated by a comma so providing a parameter such as `-profile low_resource,docker` will use both profiles at the same time.
 
+### Running Nextclade post run
+
+> [!WARNING]
+> The current implementation is *not* compatible with data runs that include different viruses. Nextclade has been integrated into `amplicon-nf` to run on **all** samples.
+
+To run nextclade, specify the dataset name and optionally the tag (dataset version) as follows
+
+```bash
+nextflow run artic-network/amplicon-nf \
+...
+   --nextclade <dataset> \
+   --nextcade_tag <tag>
+```
+
+When specifying the dataset name (`--nextclade 'sars-cov-2'`) the dataset will be automatically downloaded. Alternatively, if you have a predownloaded dataset specify the path `--nextclade /home/datasets/sars-cov-2`, when specifying the path to the dataset `--tag` is ignored.
+
+> [!TIP]
+> To see the available supported viruses, dataset names and tag information go to https://clades.nextstrain.org
+
+
 ### Updating the pipeline
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
