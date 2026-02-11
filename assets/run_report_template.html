@@ -227,40 +227,42 @@
     <div class="tab-content border p-3 bg-white" id="contigTabsContent" style="border-top: none">
       <!-- QC Table Tab -->
       <div class="tab-pane fade show active" id="qc-table" role="tabpanel">
-        <table class="table table-sm mt-2">
-          <thead>
-            <tr>
-              <th><strong>Sample</strong></th>
-              <th><strong>Primer Scheme</strong></th>
-              <th><strong>Total Reads</strong></th>
-              <th><strong>Coverage Above {{minimum_coverage_depth}}x</strong></th>
-              <th><strong>Mean Depth</strong></th>
-              <th><strong>Total Amplicon Dropouts</strong></th>
-              <th><strong>QC Result</strong></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for sample, results in qc_table_info.items() %}
-            <tr>
-              <td>{{ sample }}</td>
-              <td>{{ results.primer_scheme }}</td>
-              <td>{{ results.total_reads }}</td>
-              <td>{{ results.coverage }}</td>
-              <td>{{ results.mean_depth }}</td>
-              <td>{{ results.total_amp_dropouts }}</td>
-              <td>
-                {% if results.qc_result == "pass" %}
-                  <span class="badge badge-pass">HIGH PASS</span>
-                {% elif results.qc_result == "warning" %}
-                  <span class="badge badge-warning">LOW PASS</span>
-                {% else %}
-                  <span class="badge badge-fail">FAIL</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table table-sm mt-2">
+            <thead>
+              <tr>
+                <th><strong>Sample</strong></th>
+                <th><strong>Primer Scheme</strong></th>
+                <th><strong>Total Reads</strong></th>
+                <th><strong>Coverage Above {{minimum_coverage_depth}}x</strong></th>
+                <th><strong>Mean Depth</strong></th>
+                <th><strong>Total Amplicon Dropouts</strong></th>
+                <th><strong>QC Result</strong></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sample, results in qc_table_info.items() %}
+              <tr>
+                <td>{{ sample }}</td>
+                <td>{{ results.primer_scheme }}</td>
+                <td>{{ results.total_reads }}</td>
+                <td>{{ results.coverage }}</td>
+                <td>{{ results.mean_depth }}</td>
+                <td>{{ results.total_amp_dropouts }}</td>
+                <td>
+                  {% if results.qc_result == "pass" %}
+                    <span class="badge badge-pass">HIGH PASS</span>
+                  {% elif results.qc_result == "warning" %}
+                    <span class="badge badge-warning">LOW PASS</span>
+                  {% else %}
+                    <span class="badge badge-fail">FAIL</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Single Plots -->
