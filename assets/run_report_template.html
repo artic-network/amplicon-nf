@@ -167,6 +167,27 @@
     }
   </style>
 
+  <style>
+    @media print {
+      /* Force colors to print */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Prevent Bootstrap from hiding backgrounds */
+      .table, .table * {
+        background-color: inherit !important;
+      }
+
+      /* Fix layout collapse */
+      .container {
+        width: 100% !important;
+        max-width: none !important;
+      }
+    }
+  </style>
+
   <script type="text/javascript">
     {{ plotly_js | safe }}
   </script>
