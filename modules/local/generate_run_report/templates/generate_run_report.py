@@ -854,7 +854,6 @@ for tsv_path in amp_depth_tsvs:
 
 # nextclade parsing tsv
 for tsv in glob("nextclade_tsv/*.tsv"):
-    print(tsv)
     with open(tsv, "r") as file:
         for row in csv.DictReader(file, delimiter="	"):
             sample_name = row.get("seqName", "").split(" ")[0]
@@ -870,6 +869,13 @@ for tsv in glob("nextclade_tsv/*.tsv"):
                 "qc_framshift_status": row.get("qc.frameShifts.status", ""),
                 "qc_stopcodon_status": row.get("qc.stopCodons.status", ""),
             }
+
+payload["nextclade_table"] = dict(
+    sorted(
+        payload["nextclade_table"].items(),
+        key=lambda item: item[0],
+    )
+)
 
 for row in scheme_samplesheet_df.itertuples():
     if not payload["qc_table_info"].get(row.sample):
