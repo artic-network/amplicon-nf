@@ -165,6 +165,13 @@
       font-weight: bold;
       border-bottom-color: white;
     }
+
+    .table-header th,
+    .table-header td {
+      color: var(--color-cream) !important;
+      border-color: var(--color-teal-light) !important; /* optional */
+      border: none !important;
+    }
   </style>
 
   <style>
@@ -396,13 +403,14 @@
       </button>
     </div>
 
-    <table class="table table-sm mt-3">
-      <tbody>
-        <tr><th scope="row">Pipeline Version</th><td>{{ pipeline_version }}</td></tr>
-        <tr><th scope="row">Primer Scheme</th><td>{{ primer_scheme_version }}</td></tr>
-        <tr><th scope="row">Timestamp</th><td>{{ timestamp }}</td></tr>
-      </tbody>
-    </table>
+      <table class="table table-sm table-header">
+        <tbody>
+          <tr><th scope="row">Pipeline Version</th><td>{{ pipeline_version }}</td></tr>
+          <tr><th scope="row">Primer Scheme</th><td>{{ primer_scheme_version }}</td></tr>
+          <tr><th scope="row">Timestamp</th><td>{{ timestamp }}</td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <ul class="nav nav-tabs" id="plotTabs" role="tablist">
       <li class="nav-item" role="presentation">

@@ -4,8 +4,8 @@ process ARTIC_MINION {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.8.4--1f9246bebdff8da5'
-        : 'community.wave.seqera.io/library/artic:1.8.4--464dd0e425a760e9'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.8.5--d5026f87d9e1e6e6'
+        : 'community.wave.seqera.io/library/artic:1.8.5--fed9329dee39f489'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)

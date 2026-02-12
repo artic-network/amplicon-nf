@@ -10,9 +10,9 @@ import pandas as pd
 import csv
 from importlib.metadata import version
 
-import primalbedtools
-import primalbedtools.bedfiles
-import primalbedtools.primerpairs
+from primalbedtools.scheme import Scheme
+from primalbedtools.amplicons import create_amplicons
+
 
 from pathlib import Path
 from datetime import datetime
@@ -115,6 +115,9 @@ def read_depth_plot(
     for chrom in chroms:
         depth_df_chrom = depth_df[depth_df["chrom"] == chrom]
         chrom_primer_pairs = [x for x in primer_pairs if x.chrom == chrom]
+        chrom_alias = scheme_df[scheme_df["chrom"] == chrom]["chrom_alias"].values[0]
+
+        chrom_label = f"{chrom_alias} ({chrom})" if chrom_alias else chrom
 
         fig = subplots.make_subplots(
             cols=1,
@@ -133,7 +136,7 @@ def read_depth_plot(
                 depth_df_chrom,
                 x="pos",
                 y="depth",
-                title=f"Read Depth for reference: {chrom}",
+                title=f"Read Depth for reference: {chrom_label}",
                 labels={"pos": "Position", "depth": "Read Depth"},
             ).data[0],
             row=1,
@@ -198,7 +201,7 @@ def read_depth_plot(
                 x1=pp.coverage_start,
                 fillcolor="LightSalmon",
                 line=dict(color="darksalmon", width=3),
-                name=pp.fbedlines[0].primername,
+                name=pp.left[0].primername,
                 row=2,
                 col=1,
             )
@@ -210,7 +213,7 @@ def read_depth_plot(
                 x1=pp.amplicon_end,
                 fillcolor="LightSalmon",
                 line=dict(color="darksalmon", width=3),
-                name=pp.rbedlines[0].primername,
+                name=pp.right[0].primername,
                 row=2,
                 col=1,
             )
@@ -221,7 +224,7 @@ def read_depth_plot(
                 y=[x.pool for x in chrom_primer_pairs],
                 opacity=0,
                 name="Forward Primer",
-                hovertext=[f"{x.fbedlines[0].primername}" for x in chrom_primer_pairs],
+                hovertext=[f"{x.left[0].primername}" for x in chrom_primer_pairs],
                 showlegend=False,
             ),
             row=2,
@@ -233,7 +236,7 @@ def read_depth_plot(
                 y=[x.pool for x in chrom_primer_pairs],
                 opacity=0,
                 name="Reverse Primer",
-                hovertext=[f"{x.rbedlines[0].primername}" for x in chrom_primer_pairs],
+                hovertext=[f"{x.right[0].primername}" for x in chrom_primer_pairs],
                 showlegend=False,
             ),
             row=2,
@@ -284,16 +287,32 @@ with open("${coverage_report}", "rt") as f:
     reader = csv.DictReader(f, delimiter="\\t")
     reads = {x["#rname"]: x["numreads"] for x in reader}
 
-header_lines, bed_lines = primalbedtools.bedfiles.BedLineParser.from_file("${bed}")
+scheme = Scheme.from_file("${bed}")
 
-primer_pairs = primalbedtools.primerpairs.create_primerpairs(bed_lines)
+scheme_headers = scheme.header_dict
+
+primer_pairs = create_amplicons(scheme.bedlines)
 
 scheme_df = pd.DataFrame(
     data=[
-        [x.chrom, x.amplicon_number, x.pool, x.coverage_start, x.coverage_end]
+        [
+            x.chrom,
+            scheme_headers.get(x.chrom),
+            x.amplicon_number,
+            x.pool,
+            x.coverage_start,
+            x.coverage_end,
+        ]
         for x in primer_pairs
     ],
-    columns=["chrom", "amplicon", "pool", "amplicon_start", "amplicon_end"],
+    columns=[
+        "chrom",
+        "chrom_alias",
+        "amplicon",
+        "pool",
+        "amplicon_start",
+        "amplicon_end",
+    ],
 )
 
 depth_df = pd.read_csv("${depth_tsv}", sep="\\t", names=["chrom", "pos", "depth"])
@@ -352,8 +371,8 @@ payload = {
     "sequencing_platform": "${meta.platform}",
     "tool_name": "amplicon-nf",
     "tool_version": "${workflow.manifest.version}",
-    "citation_link": "https://github.com/artic-network/amplicon-nf",
-    "contact_email": "",
+    "citation_link": "https://doi.org/10.5281/zenodo.17522200",
+    "contact_email": "s.a.j.wilkinson@bham.ac.uk",
     "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",
     "timestamp": datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
     "contigs": [],
@@ -391,9 +410,14 @@ for chrom, fig in plot.items():
         else 0.0
     )
 
+    contig_alias = scheme_df[scheme_df["chrom"] == chrom]["chrom_alias"].values[0]
+    contig_label = f"{contig_alias} ({chrom})" if contig_alias else chrom
+
     # payload["contigs"].append(
     contig_payload = {
         "name": chrom,
+        "contig_alias": contig_alias,
+        "contig_label": contig_label,
         "percent_coverage": round(percent_coverage, 2),
         "amplicon_dropouts": amplicon_dropouts,
         "total_amplicon_dropouts": len(amplicon_dropouts),
@@ -404,8 +428,8 @@ for chrom, fig in plot.items():
         },
         "amplicon_coords": {
             str(x.amplicon_number): {
-                "start": str(x.amplicon_start),
-                "end": str(x.amplicon_end),
+                "start": str(x.coverage_start),
+                "end": str(x.coverage_end),
                 "pool": str(x.pool),
             }
             for x in primer_pairs
