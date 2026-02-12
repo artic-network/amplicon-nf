@@ -168,29 +168,222 @@
   </style>
 
   <style>
-    @media print {
-      /* Force colors to print */
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
 
-      /* Prevent Bootstrap from hiding backgrounds */
-      .table, .table * {
-        background-color: inherit !important;
-      }
+  @media print {
 
-      /* Fix layout collapse */
-      .container {
-        width: 100% !important;
-        max-width: none !important;
-      }
+    @page {
+      margin: 0;                    /* Zero page margins */
+      size: landscape;              /* Landscape orientation 【0】 */
     }
+
+    html, body {
+      background-color: var(--color-cream) !important;
+      color: #102a33 !important;
+      font-family: "Roboto", sans-serif !important;
+    }
+
+    body {
+      margin: 0 !important;
+      background-color: white !important;
+      padding: 0.5cm !important;    /* Small padding to prevent edge clipping */
+      font-size: 9pt !important;      /* Slightly smaller base font for landscape width */
+    }
+
+    .container, .container-fluid {
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .row {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      margin: 0 !important;
+    }
+
+    [class*="col-"] {
+      float: left !important;
+      padding: 0.3cm !important;
+    }
+
+    /* Force specific column widths for print */
+    .col-md-1, .col-lg-1 { width: 8.333333% !important; }
+    .col-md-2, .col-lg-2 { width: 16.666667% !important; }
+    .col-md-3, .col-lg-3 { width: 25% !important; }
+    .col-md-4, .col-lg-4 { width: 33.333333% !important; }
+    .col-md-5, .col-lg-5 { width: 41.666667% !important; }
+    .col-md-6, .col-lg-6 { width: 50% !important; }
+    .col-md-7, .col-lg-7 { width: 58.333333% !important; }
+    .col-md-8, .col-lg-8 { width: 66.666667% !important; }
+    .col-md-9, .col-lg-9 { width: 75% !important; }
+    .col-md-10, .col-lg-10 { width: 83.333333% !important; }
+    .col-md-11, .col-lg-11 { width: 91.666667% !important; }
+    .col-md-12, .col-lg-12 { width: 100% !important; }
+
+    .table {
+      width: 100% !important;
+      table-layout: fixed !important;
+      font-size: 8pt !important;        /* Smaller font for more content */
+      margin-bottom: 0.5em !important;
+    }
+
+    .table th, .table td {
+      padding: 4px 6px !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      max-width: none !important;
+    }
+
+    /* Remove responsive wrapper constraints */
+    .table-responsive {
+      overflow: visible !important;
+      display: table !important;
+      width: 100% !important;
+    }
+
+    /* Prevent table breaking across pages where possible */
+    .table tr {
+      page-break-inside: avoid;
+    }
+
+    figure, .figure {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 0 0.5cm 0 !important;
+      page-break-inside: avoid;
+    }
+
+    figure img, .figure-img, .img-fluid {
+      max-width: 100% !important;
+      height: auto !important;
+      max-height: 16cm !important;      /* Prevent overly tall images in landscape */
+      display: block !important;
+    }
+
+    /* Hide tab navigation */
+    .nav-tabs, .nav-pills {
+      display: none !important;
+    }
+
+    /* Show all tab content */
+    .tab-pane {
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      width: 100% !important;
+      page-break-after: always;
+      margin-bottom: 0.5cm;
+    }
+
+    /* Remove page break from last tab */
+    .tab-pane:last-child {
+      page-break-after: auto;
+    }
+
+    /* Print tab titles from data attribute */
+    .tab-pane[data-tab-title]::before {
+      content: attr(data-tab-title);
+      display: block;
+      font-size: 14pt;
+      font-weight: bold;
+      margin-bottom: 0.3cm;
+      padding-bottom: 0.2cm;
+      border-bottom: 1.5pt solid #000;
+      color: #000 !important;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .no-print, .hidden-print {
+      display: none !important;
+    }
+  }
   </style>
+
 
   <script type="text/javascript">
     {{ plotly_js | safe }}
   </script>
+
+  <script>
+    function printAllTabs() {
+      // Store current active tab
+      const activeTab = document.querySelector('.tab-pane.active');
+      const activeTabId = activeTab ? activeTab.id : null;
+
+      // Get all tab panes and their corresponding button labels
+      const allTabs = document.querySelectorAll('.tab-pane');
+      const tabLabels = {};
+
+      // Map tab IDs to their button text
+      document.querySelectorAll('.nav-tabs .nav-link, .nav-pills .nav-link').forEach(btn => {
+        const target = btn.getAttribute('data-bs-target') || btn.getAttribute('href');
+        if (target) {
+          const tabId = target.replace('#', '');
+          tabLabels[tabId] = btn.textContent.trim();
+        }
+      });
+
+      // Add print-only titles to each tab
+      allTabs.forEach(tab => {
+        // Create or update title element
+        let titleEl = tab.querySelector('.print-tab-title');
+        if (!titleEl) {
+          titleEl = document.createElement('h2');
+          titleEl.className = 'print-tab-title';
+          tab.insertBefore(titleEl, tab.firstChild);
+        }
+        titleEl.textContent = tabLabels[tab.id] || tab.id;
+      });
+
+      // Temporarily show all tab content
+      allTabs.forEach(tab => {
+        tab.classList.add('active', 'show');
+        tab.style.display = 'block';
+        tab.style.opacity = '1';
+        tab.style.visibility = 'visible';
+      });
+
+      // Hide tab navigation
+      const tabNavs = document.querySelectorAll('.nav-tabs, .nav-pills');
+      tabNavs.forEach(nav => {
+        nav.setAttribute('data-original-display', nav.style.display || '');
+        nav.style.display = 'none';
+      });
+
+      // Trigger print
+      window.print();
+
+      // Restore original state
+      setTimeout(() => {
+        // Restore tab navigation
+        tabNavs.forEach(nav => {
+          nav.style.display = nav.getAttribute('data-original-display') || '';
+          nav.removeAttribute('data-original-display');
+        });
+
+        // Restore only original active tab
+        allTabs.forEach(tab => {
+          if (tab.id === activeTabId) {
+            tab.classList.add('active', 'show');
+          } else {
+            tab.classList.remove('active', 'show');
+          }
+        });
+      }, 100);
+    }
+  </script>
+
+
+
+
+
 </head>
 
 <body>
@@ -198,6 +391,9 @@
     <div class="header-bar d-flex align-items-center">
       <div class="logo-container me-3">{{ embedded_logo_svg | safe }}</div>
       <h1 class="h4 mb-0">artic-network/amplicon-nf QC Run Report</h1>
+      <button type="button" class="btn btn-warning ms-auto" onclick="printAllTabs()">
+        <i class="bi bi-printer"></i> Print
+      </button>
     </div>
 
     <table class="table table-sm mt-3">
