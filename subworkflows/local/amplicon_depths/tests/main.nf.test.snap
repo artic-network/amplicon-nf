@@ -1,0 +1,36 @@
+{
+    "nanopore test - single fastq": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.perfile.tsv:md5,13ad6da168ad7622dbe033b15b0e6a2f"
+                ]
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-02-20T18:43:04.320959"
+    },
+    "nanopore test - single fastq1": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.perfile.tsv:md5,13ad6da168ad7622dbe033b15b0e6a2f"
+                ]
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-02-20T18:44:40.432504"
+    }
+}
