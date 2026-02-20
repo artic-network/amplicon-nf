@@ -3,40 +3,61 @@ nextflow_process {
     name "Test Process FASTCAT"
     script "../main.nf"
     process "FASTCAT"
-    config "./nextflow.config"
+    config "nextflow.config"
 
     tag "modules"
     tag "fastcat"
 
-    test("nanopore - fastq") {
+    test("nanopore") {
         when {
-            params {
-                module_args = "-r test.tsv"
-            }
             process {
                 """                
                 input[0] = [
                     [ id:'test' ],
 				    file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true),
-
                 ]
                 """
             }
         }
-
         then {
             assert process.success
+            assert process.out.perfile != null  // Correct channel name
+            assert process.out.perfile.size() == 1  // Ensure one output emitted
             assertAll(
                 { assert snapshot(
                     process.out,
                     process.out.runid,
                     path(process.out.versions[0]).yaml,
-
                 ).match() 
                 }
             )
         }
-
     }
 
+    test("illumina") {
+        when {
+            process {
+                """                
+                input[0] = [
+                    [ id:'test' ],
+				    [ file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
+				      file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true) ]
+                ]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.perfile != null  // Correct channel name
+            assert process.out.perfile.size() == 1  // Ensure one output emitted            
+            assertAll(
+                { assert snapshot(
+                    process.out,
+                    process.out.runid,
+                    path(process.out.versions[0]).yaml,
+                ).match() 
+                }
+            )
+        }
+    }
 }

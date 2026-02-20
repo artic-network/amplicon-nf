@@ -1,4 +1,270 @@
 {
+    "illumina": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.perfile.tsv:md5,541e956d7cfb37e59a0305ff70e9a85e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.runids.tsv:md5,f14af12b0167d60e1b134ac568da3d17"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.basecaller.tsv:md5,76ee332b7e6a5b5c5945d7a698a061d7"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.read.tsv:md5,753eb798bbe0792bb1e38c21340a5fa1"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "length.hist:md5,5777c584ef7c9aa58d7c34ea7b7e946d"
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "quality.hist:md5,2b10ee1ebb71130a1ab17c15f10c229f"
+                    ]
+                ],
+                "6": [
+                    [
+                        "FASTCAT",
+                        "fastcat",
+                        "0.24.2"
+                    ]
+                ],
+                "7": [
+                    "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
+                ],
+                "basecaller": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.basecaller.tsv:md5,76ee332b7e6a5b5c5945d7a698a061d7"
+                    ]
+                ],
+                "hist_length": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "length.hist:md5,5777c584ef7c9aa58d7c34ea7b7e946d"
+                    ]
+                ],
+                "hist_quality": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "quality.hist:md5,2b10ee1ebb71130a1ab17c15f10c229f"
+                    ]
+                ],
+                "perfile": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.perfile.tsv:md5,541e956d7cfb37e59a0305ff70e9a85e"
+                    ]
+                ],
+                "read": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.read.tsv:md5,753eb798bbe0792bb1e38c21340a5fa1"
+                    ]
+                ],
+                "runids": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.runids.tsv:md5,f14af12b0167d60e1b134ac568da3d17"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
+                ],
+                "versions_fastcat": [
+                    [
+                        "FASTCAT",
+                        "fastcat",
+                        "0.24.2"
+                    ]
+                ]
+            },
+            null,
+            {
+                "FASTCAT": {
+                    "fastcat": "0.24.2)"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-02-20T16:56:52.265951"
+    },
+    "nanopore": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.perfile.tsv:md5,13ad6da168ad7622dbe033b15b0e6a2f"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.runids.tsv:md5,2c2c91a2c1335052ab8d7f06c4de2dfc"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.basecaller.tsv:md5,350bacbee91893881ace9168340ddbf0"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.read.tsv:md5,416d556b7ead444c60728d44e9709f5e"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "length.hist:md5,f94f498dcfab968dbace71099611050c"
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "quality.hist:md5,19de7852e890e3a50a9f6bd63d784443"
+                    ]
+                ],
+                "6": [
+                    [
+                        "FASTCAT",
+                        "fastcat",
+                        "0.24.2"
+                    ]
+                ],
+                "7": [
+                    "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
+                ],
+                "basecaller": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.basecaller.tsv:md5,350bacbee91893881ace9168340ddbf0"
+                    ]
+                ],
+                "hist_length": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "length.hist:md5,f94f498dcfab968dbace71099611050c"
+                    ]
+                ],
+                "hist_quality": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "quality.hist:md5,19de7852e890e3a50a9f6bd63d784443"
+                    ]
+                ],
+                "perfile": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.perfile.tsv:md5,13ad6da168ad7622dbe033b15b0e6a2f"
+                    ]
+                ],
+                "read": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.read.tsv:md5,416d556b7ead444c60728d44e9709f5e"
+                    ]
+                ],
+                "runids": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.runids.tsv:md5,2c2c91a2c1335052ab8d7f06c4de2dfc"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
+                ],
+                "versions_fastcat": [
+                    [
+                        "FASTCAT",
+                        "fastcat",
+                        "0.24.2"
+                    ]
+                ]
+            },
+            null,
+            {
+                "FASTCAT": {
+                    "fastcat": "0.24.2)"
+                }
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-02-20T16:56:28.893841"
+    },
     "nanopore - fastq": {
         "content": [
             {
