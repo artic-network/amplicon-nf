@@ -15,16 +15,28 @@
                     
                 ],
                 "4": [
+                    
+                ],
+                "5": [
+                    
+                ],
+                "6": [
                     [
                         "FASTCAT",
                         "fastcat",
                         "0.24.2"
                     ]
                 ],
-                "5": [
+                "7": [
                     "versions.yml:md5,fd85d40e89afb7693d8a7957636436c4"
                 ],
                 "basecaller": [
+                    
+                ],
+                "hist_length": [
+                    
+                ],
+                "hist_quality": [
                     
                 ],
                 "read": [
@@ -60,6 +72,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.2"
         },
-        "timestamp": "2026-01-15T16:34:57.546170453"
+        "timestamp": "2026-02-20T14:46:17.888373"
     }
 }

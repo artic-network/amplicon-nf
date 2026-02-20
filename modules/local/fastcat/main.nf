@@ -11,10 +11,12 @@ process FASTCAT {
     tuple val(meta), path(fastq)
 
     output:
-    tuple val(meta), path("${prefix}.perfile.tsv"),     optional:true, emit: summary
-    tuple val(meta), path("${prefix}.runid.tsv"),       optional:true, emit: runid
-    tuple val(meta), path("${prefix}.basecaller.tsv"),  optional:true, emit: basecaller
-    tuple val(meta), path("${prefix}.read.tsv"),        optional:true, emit: read
+    tuple val(meta), path("${prefix}.perfile.tsv"),             optional:true, emit: summary
+    tuple val(meta), path("${prefix}.runid.tsv"),               optional:true, emit: runid
+    tuple val(meta), path("${prefix}.basecaller.tsv"),          optional:true, emit: basecaller
+    tuple val(meta), path("${prefix}.read.tsv"),                optional:true, emit: read
+    tuple val(meta), path("${prefix}/histograms/length.hist"),  optional:true, emit: hist_length
+    tuple val(meta), path("${prefix}/histograms/quality.hist"), optional:true, emit: hist_quality
     tuple val("${task.process}"), val('fastcat'), eval("fastcat --version"), topic: versions, emit: versions_fastcat
     path "versions.yml", emit: versions
 
