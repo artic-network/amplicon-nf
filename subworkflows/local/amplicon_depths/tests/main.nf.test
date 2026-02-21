@@ -2,6 +2,7 @@ nextflow_workflow {
 
     name "Test Subworkflow AMPLICON_DEPTHS"
     script "../main.nf"
+    config "./nextflow.config"
     workflow "AMPLICON_DEPTHS"
 
     tag "subworkflows"
@@ -10,9 +11,7 @@ nextflow_workflow {
     tag "fastcat"
     tag "mosdepth"
 
-
-    // TODO nf-core: Change the test name preferably indicating the test-data and file-format used
-    test("test - single fastq1") {
+    test("test - ont") {
 
         when {
             workflow {
@@ -32,10 +31,63 @@ nextflow_workflow {
         }
     then {
         assert workflow.success
-        // assertAll(
-        //     // { assert snapshot(workflow.out.perfile).match() },
-        //     // { assert snapshot(workflow.out.bed).match() }
-        // )
+        assert workflow.out.summary != null
+        assert workflow.out.bed != null        
+        assert snapshot(
+            workflow.out.results,
+            workflow.out.versions,
+            path(workflow.out.versions[0]).yaml
+        ).match()
+        }
     }
-    }
+
+    test("test - illumina") {
+        when {
+            workflow {
+                """
+                input[0] = Channel.of(
+                    [
+                        [id:'sample1'],
+                        [ 
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
+                        ]
+                    ],
+                    [
+                        [id:'sample2'],
+                        [
+                         file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
+                         file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
+                        ]
+                    ]
+                )
+
+                input[1] = Channel.of(
+                    [
+                        [id:'sample1'],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                        []
+                    ],
+                    [
+                        [id:'sample2'],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                        []
+                    ]
+                )
+                """
+            }
+        }
+        then {
+            assert workflow.success
+            assert workflow.out.summary != null
+            assert workflow.out.bed != null
+            assert snapshot(
+                workflow.out.results,
+                workflow.out.versions,
+                path(workflow.out.versions[0]).yaml
+            ).match()
+            }
+        }
 }

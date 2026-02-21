@@ -1,36 +1,41 @@
 {
-    "nanopore test - single fastq": {
+    "test - ont": {
         "content": [
+            null,
             [
-                [
-                    {
-                        "id": "test"
-                    },
-                    "test.perfile.tsv:md5,13ad6da168ad7622dbe033b15b0e6a2f"
-                ]
-            ]
+                "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5",
+                "versions.yml:md5,9f3afba01b06f9ffc98dcc7b167d8d56"
+            ],
+            {
+                "AMPLICON_DEPTHS:FASTCAT": {
+                    "fastcat": "0.24.2)"
+                }
+            }
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.2"
         },
-        "timestamp": "2026-02-20T18:43:04.320959"
+        "timestamp": "2026-02-22T00:48:26.988158"
     },
-    "nanopore test - single fastq1": {
+    "test - illumina": {
         "content": [
+            null,
             [
-                [
-                    {
-                        "id": "test"
-                    },
-                    "test.perfile.tsv:md5,13ad6da168ad7622dbe033b15b0e6a2f"
-                ]
-            ]
+                "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5",
+                "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5",
+                "versions.yml:md5,9f3afba01b06f9ffc98dcc7b167d8d56"
+            ],
+            {
+                "AMPLICON_DEPTHS:FASTCAT": {
+                    "fastcat": "0.24.2)"
+                }
+            }
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.2"
         },
-        "timestamp": "2026-02-20T18:44:40.432504"
+        "timestamp": "2026-02-22T00:48:59.532643"
     }
 }
