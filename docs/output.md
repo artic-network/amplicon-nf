@@ -68,7 +68,7 @@ The consensus FASTA contains the genome sequence of the sample based on the read
 <details markdown="1">
 <summary>Output files</summary>
 
-- `<CHROM>.<SCHEME_NAME>.consensus.fasta`: A consensus FASTA for each segment of the sequenced virus (just one for non-segmented viruses) for each scheme included in the run.
+- `<CHROM>.<SCHEME_NAME>.combined_consensus.fasta`: A consensus FASTA for each segment of the sequenced virus (just one for non-segmented viruses) for each scheme included in the run.
 </details>
 
 The combined consensus FASTA contains the genome sequence of all samples for a specific genome segment based on the reads provided. This is based on the reference sequence provided, and areas not covered by sufficient reads to determine the contents of the genome are replaced with `N` indicating that any base may be present.
