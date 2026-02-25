@@ -246,30 +246,31 @@ workflow AMPLICON_NF {
         }
         .unique()
 
+    ch_chroms = ch_bed_by_scheme
+        .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
+        .filter { _meta, bed_row ->
+            !bed_row[0].toString().startsWith("#")
+        }
+        .map { meta, bed_row -> [meta, bed_row[0]] }
+        .unique()
+
+    ch_consensus_by_chrom = ch_chroms
+        .combine(
+            ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
+            by: 0
+        )
+        .map { meta, chrom, fasta ->
+            [
+                meta + [chrom: chrom] + [id: chrom],
+                fasta,
+            ]
+        }
+        .groupTuple()
+
+    CAT_CAT(ch_consensus_by_chrom)
+    ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
+
     if (params.primer_mismatch_plot) {
-        ch_chroms = ch_bed_by_scheme
-            .splitCsv(elem: 1, header: false, sep: "\t", strip: true)
-            .filter { _meta, bed_row ->
-                !bed_row[0].toString().startsWith("#")
-            }
-            .map { meta, bed_row -> [meta, bed_row[0]] }
-            .unique()
-
-        ch_consensus_by_chrom = ch_chroms
-            .combine(
-                ch_reheadered_consensus_fasta.map { meta, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), fasta] },
-                by: 0
-            )
-            .map { meta, chrom, fasta ->
-                [
-                    meta + [chrom: chrom] + [id: chrom],
-                    fasta,
-                ]
-            }
-            .groupTuple()
-
-        CAT_CAT(ch_consensus_by_chrom)
-        ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
 
         SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
         ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
