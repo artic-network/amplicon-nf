@@ -98,6 +98,11 @@
                         "git_sha": "e89ff68a46b848c4d8aabb8569767516d46db319",
                         "installed_by": ["modules"]
                     },
+                    "samtools/view": {
+                        "branch": "master",
+                        "git_sha": "b2e78932ef01165fd85829513eaca29eff8e640a",
+                        "installed_by": ["modules"]
+                    },
                     "seqkit/grep": {
                         "branch": "master",
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
