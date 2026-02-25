@@ -1,0 +1,190 @@
+{
+    "mutate": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.csv:md5,06d3d6b47ce9fc173a364477a056f6a4"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "2": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.csv:md5,06d3d6b47ce9fc173a364477a056f6a4"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "versions_csvtk": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-02-24T23:06:26.829043",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "mutate2": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.tsv:md5,64745b164921f3002b1cfa782146eb52"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "2": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.tsv:md5,64745b164921f3002b1cfa782146eb52"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "versions_csvtk": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-02-25T12:10:56.401635",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "mutate3": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.tsv:md5,370505b81d53904b3dcd4487889731ae"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "2": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.tsv:md5,370505b81d53904b3dcd4487889731ae"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "versions_csvtk": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-02-25T12:13:17.658007",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "mutate - tsv": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.tsv:md5,9db267773e69cf5ba949963cf1d2eb38"
+                    ]
+                ],
+                "1": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "2": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ],
+                "csv": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.tsv:md5,9db267773e69cf5ba949963cf1d2eb38"
+                    ]
+                ],
+                "versions": [
+                    "versions.yml:md5,87480582619f363365f892fbc3aff078"
+                ],
+                "versions_csvtk": [
+                    [
+                        "CSVTK_MUTATE",
+                        "csvtk",
+                        "csvtk v0.31.0"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-02-24T23:24:21.141304",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}
