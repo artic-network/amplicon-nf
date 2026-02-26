@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+# # TODO nf-core: Add a description of the module and list keywords
+name: "pooldepth"
+description: write your description here
+keywords:
+  - sort
+  - example
+  - genomics
+tools:
+  ## TODO nf-core: Add a description and other details for the software below
+  - "pooldepth":
+      description: "Tools for dealing with SAM, BAM and CRAM files"
+      homepage: "None"
+      documentation: "None"
+      tool_dev_url: "None"
+      doi: ""
+      licence: ["MIT"]
+      identifier: biotools:samtools
+
+input:
+  # TODO nf-core: Update the information obtained from bio.tools and make sure that it is correct
+  - - meta:
+        type: map
+        description: Groovy Map containing sample information. e.g. `[
+          id:'sample1' ]`
+    - sequence_trace:
+        type: file
+        description: sequence_trace file
+        pattern: "*.{cram,sam,bam}"
+        ontologies:
+          - edam: http://edamontology.org/data_0924 # Sequence trace
+          - edam: http://edamontology.org/format_3462 # CRAM
+          - edam: http://edamontology.org/format_2573 # SAM
+          - edam: http://edamontology.org/format_2572 # BAM
+output:
+  # TODO nf-core: Update the information obtained from bio.tools and make sure that it is correct
+  sequence_trace:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information. e.g. `[
+            id:'sample1' ]`
+      - "*.{cram,sam,bam}":
+          type: file
+          description: sequence_trace file
+          pattern: "*.{cram,sam,bam}"
+          ontologies:
+            - edam: http://edamontology.org/data_0924 # Sequence trace
+            - edam: http://edamontology.org/format_3462 # CRAM
+            - edam: http://edamontology.org/format_2573 # SAM
+            - edam: http://edamontology.org/format_2572 # BAM
+  versions_pooldepth:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - pooldepth:
+          type: string
+          description: The name of the tool
+      - pooldepth --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - pooldepth:
+          type: string
+          description: The name of the tool
+      - pooldepth --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@ammaraziz"
+maintainers:
+  - "@ammaraziz"
