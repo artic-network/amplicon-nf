@@ -200,17 +200,20 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="qc-table-tab" data-bs-toggle="tab" data-bs-target="#qc-table" type="button" role="tab">QC Summary Table</button>
       </li>
+      
       <!-- amplicon plots -->
       {% if amplicon_depth_plots %}
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="nextclade-table-tab" data-bs-toggle="tab" data-bs-target="#amplicon-depth-plots" type="button" role="tab">Amplicon Depth Plots</button>
       </li>
       {% endif %}
+
       {% for plot in single_plots %}
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="single-plot-{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#single-plot-{{ loop.index }}" type="button" role="tab">{{ plot.name }}</button>
       </li>
       {% endfor %}
+
       {% for plot_type in nested_plots %}
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="nested-plot-{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#nested-plot-{{ loop.index }}" type="button" role="tab">{{ plot_type.name }}</button>
