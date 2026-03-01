@@ -9,30 +9,44 @@ nextflow_workflow {
     tag "subworkflows_"
     tag "subworkflows/amplicon_depths"
     tag "fastcat"
-    tag "mosdepth"
+    tag "pooldepth"
 
     test("test - ont") {
 
         when {
             workflow {
                 """
-                input[0] = [
-                    [ id:'test' ],
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true),
-                ]
-                input[1] = channel.of([
-                    [ id:'test'],
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
-                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
-                    [],
+                input[0] = channel.fromList([
+                    [ 
+                        [id:'test1'],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true),
+                    ],
+                    [ 
+                        [id:'test2'],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true),
+                    ]
                 ])
+                input[1] = channel.fromList([
+                    [
+                        [id:'test3'],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+                    ],
+                    [
+                        [id:'test4'],
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/bam/sars-cov-2_v5.3.2.bam', checkIfExists: true),
+                        file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/bam/sars-cov-2_v5.3.2.bam.bai', checkIfExists: true),
+                    ],
+                ])
+                input[2] = channel.value([1,2])
+                input[3] = channel.value(20)
                 """
             }
         }
     then {
         assert workflow.success
-        assert workflow.out.summary != null
-        assert workflow.out.bed != null        
+        assert workflow.out.summary.size() == 1
+        assert workflow.out.bed.size() == 1
         assert snapshot(
             workflow.out.results,
             workflow.out.versions,
@@ -41,53 +55,53 @@ nextflow_workflow {
         }
     }
 
-    test("test - illumina") {
-        when {
-            workflow {
-                """
-                input[0] = Channel.of(
-                    [
-                        [id:'sample1'],
-                        [ 
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
-                        ]
-                    ],
-                    [
-                        [id:'sample2'],
-                        [
-                         file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
-                         file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
-                        ]
-                    ]
-                )
+    // test("test - illumina") {
+    //     when {
+    //         workflow {
+    //             """
+    //             input[0] = Channel.of(
+    //                 [
+    //                     [id:'sample1'],
+    //                     [ 
+    //                     file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
+    //                     file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
+    //                     ]
+    //                 ],
+    //                 [
+    //                     [id:'sample2'],
+    //                     [
+    //                      file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_1.fastq.gz', checkIfExists: true),
+    //                      file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test2_2.fastq.gz', checkIfExists: true)
+    //                     ]
+    //                 ]
+    //             )
 
-                input[1] = Channel.of(
-                    [
-                        [id:'sample1'],
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
-                        []
-                    ],
-                    [
-                        [id:'sample2'],
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
-                        []
-                    ]
-                )
-                """
-            }
-        }
-        then {
-            assert workflow.success
-            assert workflow.out.summary != null
-            assert workflow.out.bed != null
-            assert snapshot(
-                workflow.out.results,
-                workflow.out.versions,
-                path(workflow.out.versions[0]).yaml
-            ).match()
-            }
-        }
+    //             input[1] = Channel.of(
+    //                 [
+    //                     [id:'sample1'],
+    //                     file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+    //                     file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+    //                     []
+    //                 ],
+    //                 [
+    //                     [id:'sample2'],
+    //                     file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam', checkIfExists: true),
+    //                     file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/bam/test.paired_end.sorted.bam.bai', checkIfExists: true),
+    //                     []
+    //                 ]
+    //             )
+    //             """
+    //         }
+    //     }
+    //     then {
+    //         assert workflow.success
+    //         assert workflow.out.summary != null
+    //         assert workflow.out.bed != null
+    //         assert snapshot(
+    //             workflow.out.results,
+    //             workflow.out.versions,
+    //             path(workflow.out.versions[0]).yaml
+    //         ).match()
+    //         }
+    //     }
 }

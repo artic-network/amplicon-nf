@@ -3,20 +3,23 @@
         "content": [
             null,
             [
+                "versions.yml:md5,242639f5719e77eafe24e0d680085d28",
+                "versions.yml:md5,242639f5719e77eafe24e0d680085d28",
+                "versions.yml:md5,71d5811202201c17c7078bd18cb53ba7",
                 "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5",
-                "versions.yml:md5,9f3afba01b06f9ffc98dcc7b167d8d56"
+                "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5"
             ],
             {
-                "AMPLICON_DEPTHS:FASTCAT": {
-                    "fastcat": "0.24.2)"
+                "AMPLICON_DEPTHS:POOLDEPTH": {
+                    "mosdepth": "mosdepth 0.3.13)"
                 }
             }
         ],
+        "timestamp": "2026-03-01T23:05:24.838374",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.2"
-        },
-        "timestamp": "2026-02-22T00:48:26.988158"
+        }
     },
     "test - illumina": {
         "content": [
@@ -32,10 +35,10 @@
                 }
             }
         ],
+        "timestamp": "2026-02-22T00:48:59.532643",
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.2"
-        },
-        "timestamp": "2026-02-22T00:48:59.532643"
+        }
     }
 }

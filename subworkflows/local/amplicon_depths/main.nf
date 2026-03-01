@@ -1,12 +1,14 @@
 include { FASTCAT } from '../../../modules/local/fastcat/main'
-include { MOSDEPTH } from '../../../modules/nf-core/mosdepth/main'
-include { CSVTK_CONCAT } from '../../../modules/nf-core/csvtk/concat/main'
-include { CAT_CAT } from "../../../modules/nf-core/cat/cat/main"
+include { CSVTK_CONCAT as CONCAT_SUMMARY } from '../../../modules/nf-core/csvtk/concat/main'
+include { CSVTK_CONCAT as CONCAT_DEPTH } from '../../../modules/nf-core/csvtk/concat/main'
+include { POOLDEPTH } from "../../../modules/local/pooldepth/main"
 
 workflow AMPLICON_DEPTHS {
     take:
     ch_reads // chnalle [meta, *fastq] 
-    ch_bam_bai_bed // channel [meta, bam, bai, []]
+    ch_bam_bai // channel [meta, bam, bai]
+    pools // channel.of([1,2])
+    window // val(20)
 
     main:
     ch_versions = channel.empty()
@@ -15,20 +17,21 @@ workflow AMPLICON_DEPTHS {
     perfile_collected = FASTCAT.out.perfile
         .collect { it[1] }
         .map { [[id: "all"], it] }
-    CSVTK_CONCAT(perfile_collected, "tsv", "tsv")
+    CONCAT_SUMMARY(perfile_collected, "tsv", "tsv")
 
-    MOSDEPTH(ch_bam_bai_bed, [[], []])
-    beds_collected = MOSDEPTH.out.per_base_bed
+    POOLDEPTH(ch_bam_bai, pools, window)
+    depth_collected = POOLDEPTH.out.tsv
         .collect { it[1] }
         .map { [[id: "all"], it] }
-    CAT_CAT(beds_collected)
+    CONCAT_DEPTH(depth_collected, "tsv", "tsv")
 
     ch_versions = ch_versions
         .mix(FASTCAT.out.versions)
-        .mix(CAT_CAT.out.versions)
+        .mix(CONCAT_SUMMARY.out.versions)
+        .mix(POOLDEPTH.out.versions)
 
     emit:
-    summary = CSVTK_CONCAT.out.csv
-    bed = CAT_CAT.out.file_out
+    summary = CONCAT_SUMMARY.out.csv
+    bed = CONCAT_DEPTH.out.csv
     versions = ch_versions
 }
