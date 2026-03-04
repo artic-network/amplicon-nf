@@ -84,10 +84,15 @@
                     "help_text": "This will generate a plot showing the number of mismatches in the primers for each sample within the per-primer-scheme run report, this may be useful in cases where you have amplicon dropouts and are uncertain of the cause. This requires aligning all sample consensus sequences to a reference which may be prohibitive for some schemes / species hence this being optional.",
                     "fa_icon": "fas fa-chart-bar"
                 },
-               "amplicon_plot": {
+               "amplicon_plots": {
                     "type": "boolean",
                     "description": "Whether to generate wf-artic style amplicon plots and statistics.",
                     "help_text": "This will generate a bar plots representing depths which colored by amplicon pool. It will also create generate per sample statistics such as number of reads and mean quality.",
+                    "fa_icon": "fas fa-chart-bar"
+                },
+               "pools": {
+                    "type": "array",
+                    "description": "The primer pool names, usually 1,2",
                     "fa_icon": "fas fa-chart-bar"
                 },
                 "min_coverage_depth": {
