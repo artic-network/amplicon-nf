@@ -2,12 +2,12 @@ nextflow_workflow {
 
     name "Test Subworkflow AMPLICON_DEPTHS"
     script "../main.nf"
-    config "./nextflow.config"
-    workflow "AMPLICON_DEPTHS"
+
+    workflow "WF_AMPLICON_DEPTHS"
 
     tag "subworkflows"
     tag "subworkflows_"
-    tag "subworkflows/amplicon_depths"
+    tag "subworkflows/wf_amplicon_depths"
     tag "fastcat"
     tag "pooldepth"
 

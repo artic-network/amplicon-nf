@@ -3,19 +3,19 @@
         "content": [
             null,
             [
-                "versions.yml:md5,242639f5719e77eafe24e0d680085d28",
-                "versions.yml:md5,242639f5719e77eafe24e0d680085d28",
-                "versions.yml:md5,71d5811202201c17c7078bd18cb53ba7",
-                "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5",
-                "versions.yml:md5,9d919b7c2ea0b8209b49a754dd9b89a5"
+                "versions.yml:md5,254425799c742d4a3e559a5052abfb66",
+                "versions.yml:md5,7588322f858cd7b25843af8a28a012cb",
+                "versions.yml:md5,7588322f858cd7b25843af8a28a012cb",
+                "versions.yml:md5,bd05e6796061d606c64df61d7d968f5c",
+                "versions.yml:md5,bd05e6796061d606c64df61d7d968f5c"
             ],
             {
-                "AMPLICON_DEPTHS:POOLDEPTH": {
-                    "mosdepth": "mosdepth 0.3.13)"
+                "WF_AMPLICON_DEPTHS:CONCAT_SUMMARY": {
+                    "csvtk": "0.31.0"
                 }
             }
         ],
-        "timestamp": "2026-03-01T23:05:24.838374",
+        "timestamp": "2026-03-05T18:36:26.426536",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.2"
