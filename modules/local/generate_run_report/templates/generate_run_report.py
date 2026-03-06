@@ -1,28 +1,262 @@
 #!/usr/bin/env python3
 
-import plotly.graph_objects as go
-import plotly.io as pio
-import plotly.express as px
-
-import numpy as np
-import pathlib
-from importlib.metadata import version
-
-from primalbedtools.scheme import Scheme
-from primalbedtools.amplicons import create_amplicons
-from primalbedtools.bedfiles import BedLine
-
-from collections import Counter
-import pandas as pd
-from Bio import SeqIO
 import csv
+import pathlib
+from collections import Counter
+from datetime import datetime
 from enum import Enum
 from glob import glob
-import math
-
+from importlib.metadata import version
 from pathlib import Path
-from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+from Bio import SeqIO
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from plotly.subplots import make_subplots
+from primalbedtools.amplicons import create_amplicons
+from primalbedtools.bedfiles import BedLine
+from primalbedtools.scheme import Scheme
+
+
+def summary_plots(fastcat_per_read_file):
+    """
+    Returns three Plotly Figure objects:
+      fig_len  - box plot of read lengths
+      fig_qual - box plot of mean quality
+      fig_cnt  - bar plot of read counts
+    """
+
+    df = pd.read_csv(fastcat_per_read_file, sep="\t")
+
+    def _filter_outlier(df, sample_col, value_col):
+        grouper = df.groupby(by=sample_col)
+        qs = grouper[value_col].quantile([0.25, 0.5, 0.75]).unstack().reset_index()
+        qs.columns = [sample_col, "q1", "q2", "q3"]
+        iqr = qs.q3 - qs.q1
+        qs["upper"] = qs.q3 + 1.5 * iqr
+        df = pd.merge(df, qs, on=sample_col, how="left")
+        df = df[df[value_col] <= df["upper"]]
+        return df
+
+    def _box_plotly(df_in, sample_col, value_col, yaxis, title, color):
+
+        df_in = df_in[df_in[sample_col] != "Unknown"]
+        df_in = _filter_outlier(df_in, sample_col, value_col)
+        df_in[sample_col] = df_in[sample_col].astype(str)
+        df_in = df_in.sort_values(by=sample_col)
+        samples = df_in[sample_col].unique()
+        fig = go.Figure()
+        for s in samples:
+            fig.add_trace(
+                go.Box(
+                    y=df_in.loc[df_in[sample_col] == s, value_col].tolist(),
+                    name=s,
+                    boxmean=False,
+                    marker_color=color,
+                    line_color="black",
+                    line_width=1,
+                    fillcolor=color,
+                    showlegend=False,
+                    hoverinfo="skip",
+                )
+            )
+        fig.update_traces(boxpoints=False)
+        fig.update_layout(
+            title=title,
+            xaxis_title="Sample Name",
+            yaxis_title=yaxis,
+            xaxis_tickangle=-90,
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            yaxis=dict(
+                rangemode="tozero",
+                gridcolor="#d3d3d3",
+                gridwidth=0.3,
+            ),
+            bargap=0.01,
+            bargroupgap=0.01,
+            width=794,
+            height=365,
+        )
+        return fig
+
+    def _bar_plotly(df_in, sample_col, title):
+        df_in = df_in[df_in[sample_col] != "Unknown"]
+        counts = (
+            df_in.groupby(sample_col)
+            .size()
+            .reset_index(name="reads_count")
+            .sort_values(by=sample_col)
+        )
+
+        fig = go.Figure(
+            go.Bar(
+                x=counts[sample_col].tolist(),
+                y=counts["reads_count"].tolist(),
+                marker_color="steelblue",
+                hovertemplate="%{y}<extra></extra>",
+                showlegend=False,
+            )
+        )
+        fig.update_layout(
+            title=title,
+            xaxis_title="Sample Name",
+            yaxis_title="Number of Reads",
+            xaxis_tickangle=-90,
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            yaxis=dict(
+                rangemode="tozero",
+                gridcolor="#d3d3d3",
+                gridwidth=0.3,
+            ),
+            bargap=0.01,
+            width=794,
+            height=365,
+        )
+        return fig
+
+    # build figures
+    fig_len = _box_plotly(
+        df,
+        "sample_name",
+        "read_length",
+        yaxis="Read Length",
+        title="Boxplot for Read Length",
+        color="#A53F96",
+    )
+
+    fig_qual = _box_plotly(
+        df,
+        "sample_name",
+        "mean_quality",
+        yaxis="Qscore",
+        title="Boxplot for Read Quality",
+        color="#0084A9",
+    )
+    fig_cnt = _bar_plotly(df, "sample_name", title="Bar Plot for Read Count")
+
+    return fig_len, fig_qual, fig_cnt
+
+
+def coverage_plots(
+    bed_path: str,
+    threshold: float,
+    xlim: float,
+    ylim: float,
+    ncols: int,
+):
+    """
+    Returns a single Plotly Figure containing the grid of coverage plots.
+    """
+
+    cols = ["chrome", "start", "end", "depth", "pool", "sample"]
+    try:
+        df = pd.read_csv(bed_path, sep="\t", header=None, names=cols)
+        if df.iloc[0, 0] == "chrome":  # header row present
+            df = pd.read_csv(bed_path, sep="\t")
+    except Exception:
+        raise ValueError(f"Error loading bed file {bed_path}; check format")
+
+    df["pos"] = (df["start"] + df["end"]) / 2
+
+    samples = sorted(df["sample"].unique())
+    nplots = len(samples)
+    nrows = (nplots + ncols - 1) // ncols
+
+    fig = make_subplots(
+        rows=nrows,
+        cols=ncols,
+        subplot_titles=[f"sample{i}" for i in range(nplots)],
+        shared_xaxes=False,
+        shared_yaxes=False,
+        horizontal_spacing=0.1,
+        vertical_spacing=0.09,
+    )
+
+    for idx, sample in enumerate(samples):
+        row = (idx // ncols) + 1
+        col = (idx % ncols) + 1
+
+        df_sub = df[df["sample"] == sample].copy()
+        df_sum = (
+            df_sub[["start", "end", "depth", "pos"]]
+            .groupby(["start", "end", "pos"])
+            .sum()
+            .reset_index()
+        )
+        mean_depth = df_sum["depth"].mean()
+        pass_ratio = 100 * (df_sum["depth"] >= threshold).sum() / len(df_sum)
+        title = f"{sample}: {mean_depth:.0f}X, {pass_ratio:.1f}% > {threshold}X"
+
+        # pool-1 area + line
+        p1 = df_sub[df_sub["pool"] == 1]
+        fig.add_trace(
+            go.Scatter(
+                x=p1["pos"].tolist(),
+                y=p1["depth"].tolist(),
+                mode="lines",
+                line=dict(color="#B5AEA7"),
+                showlegend=False,
+                hovertemplate="Position: %{x}<br>Pool-1: %{y}<extra></extra>",
+            ),
+            row=row,
+            col=col,
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=p1["pos"].tolist(),
+                y=p1["depth"].tolist(),
+                mode="none",
+                fill="tozeroy",
+                fillcolor="#B5AEA7",
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+            row=row,
+            col=col,
+        )
+
+        # pool-2 area + line
+        p2 = df_sub[df_sub["pool"] == 2]
+        fig.add_trace(
+            go.Scatter(
+                x=p2["pos"].tolist(),
+                y=p2["depth"].tolist(),
+                mode="lines",
+                line=dict(color="#54B8B1"),
+                showlegend=False,
+                hovertemplate="Position: %{x}<br>Pool-2: %{y}<extra></extra>",
+            ),
+            row=row,
+            col=col,
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=p2["pos"].tolist(),
+                y=p2["depth"].tolist(),
+                mode="none",
+                fill="tozeroy",
+                fillcolor="#54B8B1",
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+            row=row,
+            col=col,
+        )
+
+        fig.update_xaxes(range=[0, xlim], title="position", row=row, col=col)
+        fig.update_yaxes(range=[0, ylim], title="depth", row=row, col=col)
+        fig.update_annotations(font_size=10)
+        fig.layout.annotations[idx].text = title  # set subplot title
+
+    fig.update_layout(height=300 * nrows, width=250 * ncols)
+    return fig
+
 
 ALL_DNA = {
     "A": "A",
@@ -890,7 +1124,8 @@ payload["qc_table_info"] = dict(
         key=lambda item: item[0],
     )
 )
-with open(f"{scheme_version_str.replace("/", "_")}_qc_results.tsv", "w") as f:
+
+with open(f"{scheme_version_str.replace('/', '_')}_qc_results.tsv", "w") as f:
     writer = csv.DictWriter(
         f,
         fieldnames=[
@@ -950,11 +1185,28 @@ if len(msa_list) > 0:
         )
     payload["nested_plots"].append(primer_mismatch_heatmaps)
 
+# # wf-artic style summary plots
+summary_data = Path("wf-plots-summary.tsv")
+if summary_data.exists():
+    # fig_len, fig_qual, fig_cnt
+    payload["summary_plots"] = list(summary_plots(summary_data))
+
+# wf-artic style coverage plots
+coverage_data = Path("wf-plots-bed.tsv")
+if coverage_data.exists():
+    payload["cov_plots"] = coverage_plots(
+        coverage_data,
+        threshold=20,  # min depth - params.min_coverage_depth
+        xlim=30000,  # size of genome
+        ylim=800,  # normalise depth x 2 - params.normalise_depth
+        ncols=3,  # how many columns per page
+    )
+
 render_qc_report(
     payload=payload,
     template_path=Path("${report_template}"),
     output_path=Path(
-        f"{scheme_version_str.replace("/", "_")}_amplicon-nf_run-report.html"
+        f"{scheme_version_str.replace('/', '_')}_amplicon-nf_run-report.html"
     ),
     bootstrap_css_path=Path("${bootstrap_bundle_min_css}"),
     bootstrap_bundle_js_path=Path("${bootstrap_bundle_min_js}"),
