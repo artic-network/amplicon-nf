@@ -82,7 +82,13 @@ def summary_plots(fastcat_per_read_file):
             width=794,
             height=365,
         )
-        return fig
+        return pio.to_html(
+            fig,
+            include_plotlyjs=False,
+            full_html=False,
+            default_height="100%",
+            default_width="100%",
+        )
 
     def _bar_plotly(df_in, sample_col, title):
         df_in = df_in[df_in[sample_col] != "Unknown"]
@@ -118,7 +124,13 @@ def summary_plots(fastcat_per_read_file):
             width=794,
             height=365,
         )
-        return fig
+        return pio.to_html(
+            fig,
+            include_plotlyjs=False,
+            full_html=False,
+            default_height="100%",
+            default_width="100%",
+        )
 
     # build figures
     fig_len = _box_plotly(
@@ -255,7 +267,14 @@ def coverage_plots(
         fig.layout.annotations[idx].text = title  # set subplot title
 
     fig.update_layout(height=300 * nrows, width=250 * ncols)
-    return fig
+
+    return pio.to_html(
+        fig,
+        include_plotlyjs=False,
+        full_html=False,
+        default_height="100%",
+        default_width="100%",
+    )
 
 
 ALL_DNA = {
@@ -980,6 +999,8 @@ payload = {
     "qc_table_info": {},
     "single_plots": [],
     "nested_plots": [],
+    "wf_summary_plots": [],
+    "wf_cov_plots": [],
 }
 
 samples = set()
@@ -1189,18 +1210,19 @@ if len(msa_list) > 0:
 summary_data = Path("wf-plots-summary.tsv")
 if summary_data.exists():
     # fig_len, fig_qual, fig_cnt
-    payload["summary_plots"] = list(summary_plots(summary_data))
+    payload["wf_summary_plots"] = list(summary_plots(summary_data))
 
 # wf-artic style coverage plots
 coverage_data = Path("wf-plots-bed.tsv")
 if coverage_data.exists():
-    payload["cov_plots"] = coverage_plots(
+    payload["wf_cov_plots"] = coverage_plots(
         coverage_data,
         threshold=20,  # min depth - params.min_coverage_depth
         xlim=30000,  # size of genome
         ylim=800,  # normalise depth x 2 - params.normalise_depth
         ncols=3,  # how many columns per page
     )
+print(payload["wf_cov_plots"])
 
 render_qc_report(
     payload=payload,
