@@ -280,7 +280,13 @@
       <!-- Amplicon Plots -->
       {% if amplicon_depth_plots %}
       <div class="tab-pane fade" id="amplicon-depth-plots" role="tabpanel">
-        {{ plot.plot_html | safe }}
+        <div style="display: flex;justify-content: center;"> {{ summary_plots[0] | safe }} </div>
+        <div style="display: flex;justify-content: center;"> {{ summary_plots[1] | safe }} </div>
+        <div style="display: flex;justify-content: center;"> {{ summary_plots[2] | safe }} </div>
+        <div style="display: flex;justify-content: center;">
+          <h2  style="text-align: center;">Amplicon Coverage Plots</h2>
+            {{ divs[3] | safe }}
+        </div>
       </div>
       {% endif %}
 
