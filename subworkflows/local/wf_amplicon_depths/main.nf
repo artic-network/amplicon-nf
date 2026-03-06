@@ -14,14 +14,23 @@ workflow WF_AMPLICON_DEPTHS {
     ch_versions = channel.empty()
 
     FASTCAT(ch_reads)
-    perfile_collected = FASTCAT.out.perfile
-        .collect { it[1] }
-        .map { [[id: "all"], it] }
-    CONCAT_SUMMARY(perfile_collected, "tsv", "tsv")
+    fastcat_collected = FASTCAT.out.read
+        .map { meta, msa ->
+            [
+                [id: 'all'] + meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                msa,
+            ]
+        }.groupTuple()
+    CONCAT_SUMMARY(fastcat_collected, "tsv", "tsv")
+
     POOLDEPTH(ch_bam_bai, pools, window)
     depth_collected = POOLDEPTH.out.tsv
-        .collect { it[1] }
-        .map { [[id: "all"], it] }
+        .map { meta, msa ->
+            [
+                [id: 'all'] + meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
+                msa,
+            ]
+        }.groupTuple()
     CONCAT_DEPTH(depth_collected, "tsv", "tsv")
 
     ch_versions = ch_versions
@@ -30,7 +39,7 @@ workflow WF_AMPLICON_DEPTHS {
         .mix(POOLDEPTH.out.versions)
 
     emit:
-    summary = CONCAT_SUMMARY.out.csv
+    read_summary = CONCAT_SUMMARY.out.csv
     bed = CONCAT_DEPTH.out.csv
     versions = ch_versions
 }
