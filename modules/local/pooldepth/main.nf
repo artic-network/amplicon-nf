@@ -32,13 +32,13 @@ process POOLDEPTH {
     gunzip -c pool${pools[0]}/${prefix}.regions.bed.gz \\
     | csvtk mutate2 -H -t -n sample -e '"${prefix}"' \\
     | csvtk mutate2 -H -t -n pool -e '"${pools[0]}"' \\
-    | csvtk add-header -H -t -n chrome,start,end,depth,pool,sample \\
+    | csvtk add-header -H -t -n chrome,start,end,depth,sample,pool \\
     --out-file ${prefix}.${pools[0]}.depth.txt
     
     gunzip -c pool${pools[1]}/${prefix}.regions.bed.gz \\
     | csvtk mutate2 -H -t -n sample -e '"${prefix}"' \\
     | csvtk mutate2 -H -t -n pool -e '"${pools[1]}"' \\
-    | csvtk add-header -H -t -n chrome,start,end,depth,pool,sample \\
+    | csvtk add-header -H -t -n chrome,start,end,depth,sample,pool \\
     --out-file ${prefix}.${pools[1]}.depth.txt
 
     csvtk concat ${prefix}.${pools[0]}.depth.txt ${prefix}.${pools[1]}.depth.txt > ${prefix}.depth.tsv
