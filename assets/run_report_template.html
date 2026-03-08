@@ -280,9 +280,9 @@
       <!-- wf-style amplicon Plots -->
       {% if wf_summary_plots %}
       <div class="tab-pane fade" id="wf-artic-plots" role="tabpanel">
-        <div style="display: flex;justify-content: center;"> {{ wf_summary_plots[0] | safe }} </div>
-        <div style="display: flex;justify-content: center;"> {{ wf_summary_plots[1] | safe }} </div>
-        <div style="display: flex;justify-content: center;"> {{ wf_summary_plots[2] | safe }} </div>
+        <div style="display: flex; justify-content: center; height: 400px !important;"> {{ wf_summary_plots[0] | safe }} </div>
+        <div style="display: flex; justify-content: center; height: 400px !important;"> {{ wf_summary_plots[1] | safe }} </div>
+        <div style="display: flex; justify-content: center; height: 400px !important;"> {{ wf_summary_plots[2] | safe }} </div>
         <div style="display: flex;justify-content: center;">
           <h2  style="text-align: center;">Per Pool Coverage Plots</h2>
             {{ wf_cov_plots[0] | safe }}
