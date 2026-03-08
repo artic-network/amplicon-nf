@@ -22,7 +22,7 @@ from primalbedtools.bedfiles import BedLine
 from primalbedtools.scheme import Scheme
 
 
-def summary_plots(fastcat_per_read_file):
+def wf_summary_plots(fastcat_per_read_file):
     """
     Returns three Plotly Figure objects:
       fig_len  - box plot of read lengths
@@ -81,6 +81,7 @@ def summary_plots(fastcat_per_read_file):
             bargroupgap=0.01,
             width=794,
             height=365,
+            autosize=False,
         )
         return pio.to_html(
             fig,
@@ -123,12 +124,13 @@ def summary_plots(fastcat_per_read_file):
             bargap=0.01,
             width=794,
             height=365,
+            autosize=False,
         )
         return pio.to_html(
             fig,
             include_plotlyjs=False,
             full_html=False,
-            default_height="100%",
+            default_height="50px",
             default_width="100%",
         )
 
@@ -155,7 +157,7 @@ def summary_plots(fastcat_per_read_file):
     return fig_len, fig_qual, fig_cnt
 
 
-def coverage_plots(
+def wf_coverage_plots(
     bed_path: str,
     threshold: float,
     xlim: float,
@@ -1215,14 +1217,13 @@ if summary_data.exists():
 # wf-artic style coverage plots
 coverage_data = Path("wf-plots-bed.tsv")
 if coverage_data.exists():
-    payload["wf_cov_plots"] = coverage_plots(
+    payload["wf_cov_plots"] = wf_coverage_plots(
         coverage_data,
         threshold=20,  # min depth - params.min_coverage_depth
         xlim=30000,  # size of genome
         ylim=800,  # normalise depth x 2 - params.normalise_depth
         ncols=3,  # how many columns per page
     )
-print(payload["wf_cov_plots"])
 
 render_qc_report(
     payload=payload,
