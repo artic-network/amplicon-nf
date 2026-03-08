@@ -1212,7 +1212,7 @@ if len(msa_list) > 0:
 summary_data = Path("wf-plots-summary.tsv")
 if summary_data.exists():
     # fig_len, fig_qual, fig_cnt
-    payload["wf_summary_plots"] = list(summary_plots(summary_data))
+    payload["wf_summary_plots"] = list(wf_summary_plots(summary_data))
 
 # wf-artic style coverage plots
 coverage_data = Path("wf-plots-bed.tsv")
