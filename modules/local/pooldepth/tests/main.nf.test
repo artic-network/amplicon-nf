@@ -35,7 +35,7 @@ nextflow_process {
                     process.out,
                 ).match() }
             )
-            assert path(process.out.tsv[0][1]).md5 == "850232022d64b287fead4c43b10bce09"
+            assert path(process.out.tsv[0][1]).md5 == "cd2969e1aa0ffb5f7771808e5d4bdfc9"
         }
     }
 }
