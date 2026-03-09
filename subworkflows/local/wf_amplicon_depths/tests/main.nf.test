@@ -45,7 +45,7 @@ nextflow_workflow {
         }
     then {
         assert workflow.success
-        assert workflow.out.summary.size() == 1
+        assert workflow.out.read_summary.size() == 1
         assert workflow.out.bed.size() == 1
         assert snapshot(
             workflow.out.results,
