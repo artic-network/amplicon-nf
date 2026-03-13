@@ -90,7 +90,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.7.2"
+                    "artic-network/amplicon-nf": "v0.7.3"
                 }
             },
             [
@@ -202,7 +202,7 @@
             true,
             true
         ],
-        "timestamp": "2026-03-13T12:39:57.399594",
+        "timestamp": "2026-03-13T15:02:12.309999",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
