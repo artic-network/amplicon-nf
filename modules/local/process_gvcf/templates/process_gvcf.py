@@ -211,6 +211,7 @@ def main():
                 file=sys.stderr,
             )
             record.chrom = current_ref
+            v_end = v_start
         current_ref = record.chrom
 
         # disallow gvcf records that are longer than a single base
