@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 
-import plotly.graph_objects as go
-import plotly.io as pio
-import plotly.express as px
-
-import numpy as np
-import pathlib
-from importlib.metadata import version
-
-from primalbedtools.scheme import Scheme
-from primalbedtools.amplicons import create_amplicons
-from primalbedtools.bedfiles import BedLine
-
-from collections import Counter
-import pandas as pd
-from Bio import SeqIO
 import csv
+import pathlib
+from collections import Counter
+from datetime import datetime
 from enum import Enum
 from glob import glob
-import math
-
+from importlib.metadata import version
 from pathlib import Path
-from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+from Bio import SeqIO
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from primalbedtools.amplicons import create_amplicons
+from primalbedtools.bedfiles import BedLine
+from primalbedtools.scheme import Scheme
 
 ALL_DNA = {
     "A": "A",
@@ -443,7 +439,6 @@ def render_qc_report(
 def amplicon_depth_heatmap(
     amplicon_depths: pd.DataFrame, scheme_str: str, chrom_name: str
 ) -> str:
-
     # Hovertemplate string
     # if include_seqs:
     #     hovertemplatestr = "%{text}<br>" + "<b>Mismatches: %{z}</b><br>"
@@ -746,6 +741,7 @@ payload = {
     "qc_table_info": {},
     "single_plots": [],
     "nested_plots": [],
+    "nextclade_table": {},
 }
 
 samples = set()
@@ -856,6 +852,31 @@ for tsv_path in amp_depth_tsvs:
         else len(primer_pairs)
     )
 
+# nextclade parsing tsv
+for tsv in glob("nextclade_tsv/*.tsv"):
+    with open(tsv, "r") as file:
+        for row in csv.DictReader(file, delimiter="	"):
+            sample_name = row.get("seqName", "").split(" ")[0]
+            payload["nextclade_table"][sample_name] = {
+                "qc_status": row.get("qc.overallStatus", ""),
+                "qc_score": row.get("qc.overallScore", ""),
+                "clade": row.get("clade_display", ""),
+                "lineage": row.get("Nextclade_pango", ""),
+                "qc_missing_status": row.get("qc.missingData.status", ""),
+                "qc_mixedsites_status": row.get("qc.mixedSites.status", ""),
+                "qc_privatemut_status": row.get("qc.privateMutations.status", ""),
+                "qc_snpclust_status": row.get("qc.snpClusters.status", ""),
+                "qc_framshift_status": row.get("qc.frameShifts.status", ""),
+                "qc_stopcodon_status": row.get("qc.stopCodons.status", ""),
+            }
+
+payload["nextclade_table"] = dict(
+    sorted(
+        payload["nextclade_table"].items(),
+        key=lambda item: item[0],
+    )
+)
+
 for row in scheme_samplesheet_df.itertuples():
     if not payload["qc_table_info"].get(row.sample):
         samples.add(row.sample)
@@ -890,7 +911,8 @@ payload["qc_table_info"] = dict(
         key=lambda item: item[0],
     )
 )
-with open(f"{scheme_version_str.replace("/", "_")}_qc_results.tsv", "w") as f:
+
+with open(f"{scheme_version_str.replace('/', '_')}_qc_results.tsv", "w") as f:
     writer = csv.DictWriter(
         f,
         fieldnames=[
@@ -954,7 +976,7 @@ render_qc_report(
     payload=payload,
     template_path=Path("${report_template}"),
     output_path=Path(
-        f"{scheme_version_str.replace("/", "_")}_amplicon-nf_run-report.html"
+        f"{scheme_version_str.replace('/', '_')}_amplicon-nf_run-report.html"
     ),
     bootstrap_css_path=Path("${bootstrap_bundle_min_css}"),
     bootstrap_bundle_js_path=Path("${bootstrap_bundle_min_js}"),

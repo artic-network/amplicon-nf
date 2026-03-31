@@ -51,6 +51,18 @@
                     "help_text": "This only needs to be set if you are not providing FASTQ files (or directories for Nanopore) in the samplesheet CSV. If you are providing FASTQ files in the samplesheet CSV, then this parameter will be ignored. Illumina: The pipeline will look for FASTQ file pairs which are named with the sample name, e.g. `sample1_R1.fastq.gz` and `sample1_R2.fastq.gz`.\nNanopore: The pipeline will look for directories named with the barcode, e.g. `fastq_pass/barcode01/` containing FASTQ files.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "nextclade": {
+                    "type": "string",
+                    "title": "Specify the name or path to Nextclade dataset.",
+                    "description": "Run Nextclade for clade assignment, mutation calling, and sequence quality checks for genome consensus sequence. Name of Nextclade dataset to retrieve (eg: sars-cov-2) or path to predownloaded Nextclade dataset. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_tag":{
+                    "type": "string",
+                    "title": "Nextclade dataset tag.",
+                    "description": "Version tag of the dataset to download. If not specified, Nextclade will retrieve the latest version.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",

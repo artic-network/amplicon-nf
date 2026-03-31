@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::artic=1.9.0
+  - bioconda::nextclade=3.11.0
