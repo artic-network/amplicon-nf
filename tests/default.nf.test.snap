@@ -4,19 +4,19 @@
             111,
             {
                 "ARTIC_ALIGNTRIM": {
-                    "align_trim": "1.0.2"
+                    "align_trim": "1.1.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.9.0"
+                    "artic": "1.10.0"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.9.0"
+                    "artic": "1.10.0"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.9.0"
+                    "artic": "1.10.0"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.9.0"
+                    "artic": "1.10.0"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": 1.21
@@ -90,7 +90,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.7.5"
+                    "artic-network/amplicon-nf": "v0.8.0"
                 }
             },
             [
@@ -202,9 +202,9 @@
             true,
             true
         ],
-        "timestamp": "2026-03-27T09:48:31.812418",
+        "timestamp": "2026-04-10T13:52:58.671185",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }

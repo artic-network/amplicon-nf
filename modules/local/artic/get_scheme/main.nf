@@ -3,8 +3,8 @@ process ARTIC_GET_SCHEME {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.9.0--4bfb8149af4d3e92'
-        : 'community.wave.seqera.io/library/artic:1.9.0--ed3ab66c9589cea3'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.10.0--d292cd6ceee17811'
+        : 'artic/fieldbioinformatics:1.10.0'}"
 
     input:
     tuple val(meta), path(fastq_1), path(fastq_2)

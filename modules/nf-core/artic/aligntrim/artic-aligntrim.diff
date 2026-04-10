@@ -1,0 +1,31 @@
+Changes in component 'nf-core/artic/aligntrim'
+'modules/nf-core/artic/aligntrim/environment.yml' is unchanged
+'modules/nf-core/artic/aligntrim/meta.yml' is unchanged
+Changes in 'artic/aligntrim/main.nf':
+--- modules/nf-core/artic/aligntrim/main.nf
++++ modules/nf-core/artic/aligntrim/main.nf
+@@ -15,7 +15,7 @@
+     tuple val(meta), path("*.primertrimmed*.bam"),    emit: primertrimmed_bam
+     tuple val(meta), path("*.align_trim_report.tsv"), emit: align_trim_report
+     tuple val(meta), path("*.amp_depth_report.tsv"),  emit: amp_depth_report
+-    tuple val("${task.process}"), val('align_trim'), eval("align_trim --version | sed 's/align_trim //'"), emit: versions_align_trim, topic: versions
++    path "versions.yml",                              emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+@@ -36,6 +36,11 @@
+         ${scheme_bed}
+ 
+     ${sort_bam_cmd}
++
++    cat <<-END_VERSIONS > versions.yml
++    "${task.process}":
++        align_trim: \$(align_trim --version | sed 's/align_trim //')
++    END_VERSIONS
+     """
+ 
+     stub:
+
+'modules/nf-core/artic/aligntrim/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/artic/aligntrim/tests/main.nf.test' is unchanged
+************************************************************
