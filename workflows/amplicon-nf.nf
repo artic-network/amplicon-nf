@@ -19,7 +19,7 @@ include { SEQKIT_REPLACE as SEQKIT_REPLACE_ILLUMINA } from '../modules/nf-core/s
 include { MAFFT_ALIGN                               } from '../modules/nf-core/mafft/align/main'
 include { SEQKIT_GREP as SEQKIT_GREP_FASTAS         } from '../modules/nf-core/seqkit/grep/main'
 include { SEQKIT_GREP as SEQKIT_GREP_REFS           } from '../modules/nf-core/seqkit/grep/main'
-include { CAT_CAT                                   } from '../modules/nf-core/cat/cat/main'
+include { FIND_CONCATENATE                          } from '../modules/nf-core/find/concatenate/main'
 
 include { GENERATE_SAMPLE_REPORT                    } from '../modules/local/generate_sample_report/main'
 include { GENERATE_RUN_REPORT                       } from '../modules/local/generate_run_report/main'
@@ -150,22 +150,16 @@ workflow AMPLICON_NF {
     ONT_ASSEMBLY(
         ch_nanopore_input,
         ch_store_directory,
-        ch_versions,
     )
-    ch_versions = ch_versions.mix(ONT_ASSEMBLY.out.versions)
 
     SEQKIT_REPLACE_ONT(ONT_ASSEMBLY.out.consensus_fasta)
-    ch_versions = ch_versions.mix(SEQKIT_REPLACE_ONT.out.versions.first())
 
     ILLUMINA_ASSEMBLY(
         ch_illumina_input,
         ch_store_directory,
-        ch_versions,
     )
-    ch_versions = ch_versions.mix(ILLUMINA_ASSEMBLY.out.versions)
 
     SEQKIT_REPLACE_ILLUMINA(ILLUMINA_ASSEMBLY.out.consensus_fasta)
-    ch_versions = ch_versions.mix(SEQKIT_REPLACE_ILLUMINA.out.versions.first())
 
     ch_reheadered_consensus_fasta = SEQKIT_REPLACE_ILLUMINA.out.fastx.mix(
         SEQKIT_REPLACE_ONT.out.fastx
@@ -186,15 +180,9 @@ workflow AMPLICON_NF {
         ILLUMINA_ASSEMBLY.out.amplicon_depths
     )
 
-    SAMTOOLS_COVERAGE(ch_primertrimmed_bam, [[:], []], [[:], []])
-    ch_versions = ch_versions.mix(SAMTOOLS_COVERAGE.out.versions.first())
+    SAMTOOLS_COVERAGE(ch_primertrimmed_bam, [[:], [], []])
 
-    ch_samtools_depth_input = ch_primertrimmed_bam.map { meta, bam, _bai ->
-        [meta, bam]
-    }
-
-    SAMTOOLS_DEPTH(ch_samtools_depth_input, [[:], []])
-    ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())
+    SAMTOOLS_DEPTH(ch_primertrimmed_bam, [[:], []])
 
     ch_sample_report_input = ch_primer_scheme
         .map { meta, bed, _ref -> [meta, bed] }
@@ -267,20 +255,17 @@ workflow AMPLICON_NF {
         }
         .groupTuple()
 
-    CAT_CAT(ch_consensus_by_chrom)
-    ch_versions = ch_versions.mix(CAT_CAT.out.versions.first())
+    FIND_CONCATENATE(ch_consensus_by_chrom)
 
     if (params.primer_mismatch_plot) {
 
-        SEQKIT_GREP_FASTAS(CAT_CAT.out.file_out, [])
-        ch_versions = ch_versions.mix(SEQKIT_GREP_FASTAS.out.versions.first())
+        SEQKIT_GREP_FASTAS(FIND_CONCATENATE.out.file_out, [])
 
         ch_refs_per_chrom = ch_chroms
             .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
             .map { meta, chrom, ref -> [meta + [chrom: chrom, id: chrom], ref] }
 
         SEQKIT_GREP_REFS(ch_refs_per_chrom, [])
-        ch_versions = ch_versions.mix(SEQKIT_GREP_REFS.out.versions.first())
 
         ch_mafft_align_input = SEQKIT_GREP_FASTAS.out.filter
             .join(SEQKIT_GREP_REFS.out.filter)
@@ -290,7 +275,6 @@ workflow AMPLICON_NF {
             }
 
         MAFFT_ALIGN(ch_mafft_align_input.reference, [[:], []], ch_mafft_align_input.fastas, [[:], []], [[:], []], [[:], []], false)
-        ch_versions = ch_versions.mix(MAFFT_ALIGN.out.versions.first())
 
         ch_msas_by_scheme = MAFFT_ALIGN.out.fas
             .map { meta, msa ->
@@ -357,15 +341,32 @@ workflow AMPLICON_NF {
     //
     // Collate and save software versions
     //
-    softwareVersionsToYAML(ch_versions)
+    def topic_versions = channel
+        .topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [process[process.lastIndexOf(':') + 1..-1], "  ${tool}: ${version}"]
+        }
+        .groupTuple(by: 0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
             name: 'amplicon-nf_software_' + 'mqc_' + 'versions.yml',
             sort: true,
             newLine: true,
         )
-        .set { ch_collated_versions }
-
 
     //
     // MODULE: MultiQC

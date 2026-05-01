@@ -20,7 +20,6 @@ workflow ILLUMINA_ASSEMBLY {
     take:
     ch_input
     ch_store_directory
-    ch_versions
 
     main:
 
@@ -37,7 +36,6 @@ workflow ILLUMINA_ASSEMBLY {
         ch_branched_input.remote_scheme,
         ch_store_directory,
     )
-    ch_versions = ch_versions.mix(ARTIC_GET_SCHEME.out.versions.first())
 
     ch_reads_and_scheme = ARTIC_GET_SCHEME.out.reads_and_scheme.mix(ch_custom_scheme_input)
 
@@ -46,7 +44,6 @@ workflow ILLUMINA_ASSEMBLY {
     }
 
     TRIMMOMATIC(ch_trimmomatic_input)
-    ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions.first())
 
     ch_trimmed_fastq = TRIMMOMATIC.out.trimmed_reads
         .map { meta, trimmed_fastq ->
@@ -68,7 +65,6 @@ workflow ILLUMINA_ASSEMBLY {
     BWAMEM2_INDEX(
         ch_refs_only
     )
-    ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions.first())
 
     // Join the index with the per-sample metadata
     ch_rejoined_bwamem2_indices = BWAMEM2_INDEX.out.index
@@ -96,7 +92,6 @@ workflow ILLUMINA_ASSEMBLY {
         ch_bwamem2_mem_input.ref_fasta,
         true,
     )
-    ch_versions = ch_versions.mix(BWAMEM2_MEM.out.versions.first())
 
     ch_sorted_bam = BWAMEM2_MEM.out.bam.join(
         ch_trimmed_fastq.map { meta, _fastq_1, _fastq_2, scheme_bed, scheme_ref ->
@@ -110,13 +105,14 @@ workflow ILLUMINA_ASSEMBLY {
 
     // Sort the output BAMfile
     ARTIC_ALIGNTRIM(ch_aligntrim_input, true)
-    ch_versions = ch_versions.mix(ARTIC_ALIGNTRIM.out.versions.first())
 
     SAMTOOLS_INDEX(ARTIC_ALIGNTRIM.out.primertrimmed_bam)
-    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
 
-    SAMTOOLS_FAIDX(ch_refs_only, [[:], []], false)
-    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions.first())
+    ch_samtools_faidx_input = ch_refs_only.map { meta, scheme_ref ->
+        [meta, scheme_ref, []]
+    }
+
+    SAMTOOLS_FAIDX(ch_samtools_faidx_input, false)
 
     // Join the fai with the per-sample metadata
     ch_rejoined_ref_fais = SAMTOOLS_FAIDX.out.fai
@@ -131,7 +127,7 @@ workflow ILLUMINA_ASSEMBLY {
         }
 
     ch_freebayes_input = ARTIC_ALIGNTRIM.out.primertrimmed_bam
-        .join(SAMTOOLS_INDEX.out.bai)
+        .join(SAMTOOLS_INDEX.out.index)
         .join(
             ch_sorted_bam.map { meta, _sorted_bam, scheme_bed, scheme_ref ->
                 [meta, scheme_bed, scheme_ref]
@@ -146,12 +142,10 @@ workflow ILLUMINA_ASSEMBLY {
 
     // LOTS of stuff to do in modules.conf for this to work
     FREEBAYES(ch_freebayes_input.sam_input, ch_freebayes_input.ref_input, ch_freebayes_input.ref_fai_input, [[:], []], [[:], []], [[:], []])
-    ch_versions = ch_versions.mix(FREEBAYES.out.versions.first())
 
     PROCESS_GVCF(
         FREEBAYES.out.vcf
     )
-    ch_versions = ch_versions.mix(PROCESS_GVCF.out.versions.first())
 
     ch_bcftools_norm_input = PROCESS_GVCF.out.consensus_vcf
         .join(ch_freebayes_input.ref_input)
@@ -161,7 +155,6 @@ workflow ILLUMINA_ASSEMBLY {
         }
 
     BCFTOOLS_NORM(ch_bcftools_norm_input.vcf_input, ch_bcftools_norm_input.ref_input)
-    ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
 
     ch_vartype = Channel.of("fixed", "ambiguous")
 
@@ -174,7 +167,6 @@ workflow ILLUMINA_ASSEMBLY {
 
 
     BCFTOOLS_VIEW(ch_bcftools_view_input, [], [], [])
-    ch_versions = ch_versions.mix(BCFTOOLS_VIEW.out.versions.first())
 
     ch_bcftools_consensus_reference = ch_bcftools_norm_input.ref_input
         .combine(ch_vartype)
@@ -203,7 +195,6 @@ workflow ILLUMINA_ASSEMBLY {
     }
 
     BCFTOOLS_CONSENSUS_AMBIGUOUS(ch_bcftools_consensus_input_ambiguous)
-    ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS_AMBIGUOUS.out.versions.first())
 
     ch_preconsensus_fasta = BCFTOOLS_CONSENSUS_AMBIGUOUS.out.fasta.map { meta, fasta ->
         [meta - meta.subMap("vartype"), fasta]
@@ -219,11 +210,10 @@ workflow ILLUMINA_ASSEMBLY {
         }
 
     BCFTOOLS_CONSENSUS_FIXED(ch_bcftools_consensus_input_fixed)
-    ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS_FIXED.out.versions.first())
 
     // Join the primertrimmed bam with its index
     ch_primertrimmed_bam = ARTIC_ALIGNTRIM.out.primertrimmed_bam.join(
-        SAMTOOLS_INDEX.out.bai
+        SAMTOOLS_INDEX.out.index
     )
 
     ch_primer_scheme = ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, scheme_bed, scheme_ref ->
@@ -236,5 +226,4 @@ workflow ILLUMINA_ASSEMBLY {
     sorted_bam                   = BWAMEM2_MEM.out.bam
     primertrimmed_normalised_bam = ch_primertrimmed_bam
     primer_scheme                = ch_primer_scheme
-    versions                     = ch_versions
 }

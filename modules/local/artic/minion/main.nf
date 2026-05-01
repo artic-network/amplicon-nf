@@ -3,9 +3,9 @@ process ARTIC_MINION {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.10.0--d292cd6ceee17811'
-        : 'artic/fieldbioinformatics:1.10.0'}"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+        ? 'oras://community.wave.seqera.io/library/artic:1.10.1--194b4fac7363edea'
+        : 'artic/fieldbioinformatics:1.10.1'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)
@@ -19,7 +19,7 @@ process ARTIC_MINION {
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
     tuple val(meta), path("${prefix}.primer.bed"), path("${prefix}.reference.fasta"), emit: primer_scheme
     tuple val(meta), path("${prefix}.minion.log.txt"), emit: minion_log
-    path "versions.yml", emit: versions
+    tuple val("${task.process}"), val('artic'), eval('artic -v 2>&1 | sed "s/^.*artic //; s/ .*$//"'), emit: versions_artic, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -44,11 +44,6 @@ process ARTIC_MINION {
         ${prefix}
 
     ${scheme_copy_string}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        artic: \$(artic -v 2>&1 | sed 's/^.*artic //; s/ .*\$//')
-    END_VERSIONS
     """
 
     stub:
