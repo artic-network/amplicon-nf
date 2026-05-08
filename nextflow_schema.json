@@ -71,12 +71,12 @@
             "description": "General settings which change the behaviour of the pipeline for both ONT and Illumina workflows.",
             "default": "",
             "properties": {
-                "linearise_fasta": {
+                "multiline_fasta": {
                     "type": "boolean",
-                    "description": "Whether to linearise the reference FASTA file.",
-                    "help_text": "Output linear FASTA consensus sequences rather than wrapped (multiline) FASTA files.",
+                    "description": "Whether to output wrapped (multiline) FASTA files.",
+                    "help_text": "Output wrapped (multiline) FASTA consensus sequences rather than linear FASTA files.",
                     "fa_icon": "fas fa-file-alt",
-                    "default": true
+                    "default": false
                 },
                 "normalise_depth": {
                     "type": "integer",
