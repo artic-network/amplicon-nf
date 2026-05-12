@@ -7,38 +7,40 @@
                     "align_trim": "1.1.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.10.0"
+                    "artic": "1.10.1"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.10.0"
+                    "artic": "1.10.1"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.10.0"
+                    "artic": "1.10.1"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.10.0"
+                    "artic": "1.10.1"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
-                    "bcftools": 1.21
+                    "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_CONSENSUS_FIXED": {
-                    "bcftools": 1.21
+                    "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_NORM": {
-                    "bcftools": 1.21
+                    "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_VIEW": {
-                    "bcftools": 1.21
+                    "bcftools": "1.23.1"
                 },
                 "BWAMEM2_INDEX": {
                     "bwamem2": "2.2.1"
                 },
                 "BWAMEM2_MEM": {
                     "bwamem2": "2.2.1",
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
-                "CAT_CAT": {
-                    "pigz": "2.3.4"
+                "FIND_CONCATENATE": {
+                    "coreutils": 9.4,
+                    "find": "4.6.0",
+                    "pigz": 2.8
                 },
                 "FREEBAYES": {
                     "freebayes": "1.3.10"
@@ -56,23 +58,20 @@
                     "jinja2": "3.1.6"
                 },
                 "MAFFT_ALIGN": {
-                    "mafft": 7.52,
-                    "pigz": "2.8)"
-                },
-                "PROCESS_GVCF": {
-                    "pysam": "0.23.0"
+                    "mafft": "v7.520 (2023/Mar/22)",
+                    "pigz": 2.8
                 },
                 "SAMTOOLS_COVERAGE": {
-                    "samtools": 1.21
+                    "samtools": "1.23.1"
                 },
                 "SAMTOOLS_DEPTH": {
-                    "samtools": 1.21
+                    "samtools": "1.23.1"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": 1.21
+                    "samtools": "1.23.1"
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": 1.21
+                    "samtools": "1.23.1"
                 },
                 "SEQKIT_GREP_FASTAS": {
                     "seqkit": "2.9.0"
@@ -90,7 +89,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.8.0"
+                    "artic-network/amplicon-nf": "v0.8.1"
                 }
             },
             [
@@ -202,10 +201,10 @@
             true,
             true
         ],
-        "timestamp": "2026-04-10T13:52:58.671185",
+        "timestamp": "2026-05-11T12:21:50.844083",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.04.0"
         }
     }
 }
