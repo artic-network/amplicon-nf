@@ -205,7 +205,7 @@ def read_depth_plot(
                 ]
 
         fig.add_trace(
-            go.Scattergl(
+            go.Scatter(
                 x=backbone_x,
                 y=backbone_y,
                 mode="lines",
