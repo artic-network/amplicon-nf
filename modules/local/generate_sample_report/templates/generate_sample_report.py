@@ -176,61 +176,60 @@ def read_depth_plot(
             title="Read Depth",
         )
 
+        chrom_max_pos = int(depth_df_chrom["pos"].max()) if not depth_df_chrom.empty else 0
+
+        backbone_x: list = []
+        backbone_y: list = []
+        primer_x: list = []
+        primer_y: list = []
+
         for pp in chrom_primer_pairs:
-            fig.add_shape(
-                type="line",
-                y0=pp.pool,
-                y1=pp.pool,
-                x0=pp.amplicon_start,
-                x1=(
-                    pp.amplicon_end
-                    if not pp.is_circular
-                    else depth_df_chrom["pos"].max()
-                ),
-                line=dict(color="LightSeaGreen", width=5),
-                name=f"amplicon {pp.amplicon_number}",
-                row=2,
-                col=1,
-            )
-            # Handle circular genomes
+            x_end = chrom_max_pos if pp.is_circular else pp.amplicon_end
+            backbone_x += [pp.amplicon_start, x_end, None]
+            backbone_y += [pp.pool, pp.pool, None]
             if pp.is_circular:
-                fig.add_shape(
-                    type="line",
-                    y0=pp.pool,
-                    y1=pp.pool,
-                    x0=0,
-                    x1=pp.amplicon_end,
-                    line=dict(color="LightSeaGreen", width=5),
-                    name=f"amplicon {pp.amplicon_number}",
-                    row=2,
-                    col=1,
-                )
+                backbone_x += [0, pp.amplicon_end, None]
+                backbone_y += [pp.pool, pp.pool, None]
+            for x0, x1 in [
+                (pp.amplicon_start, pp.coverage_start),
+                (pp.coverage_end, pp.amplicon_end),
+            ]:
+                primer_x += [x0, x1, x1, x0, x0, None]
+                primer_y += [
+                    pp.pool - 0.05,
+                    pp.pool - 0.05,
+                    pp.pool + 0.05,
+                    pp.pool + 0.05,
+                    pp.pool - 0.05,
+                    None,
+                ]
 
-            fig.add_shape(
-                type="rect",
-                y0=pp.pool - 0.05,
-                y1=pp.pool + 0.05,
-                x0=pp.amplicon_start,
-                x1=pp.coverage_start,
+        fig.add_trace(
+            go.Scattergl(
+                x=backbone_x,
+                y=backbone_y,
+                mode="lines",
+                line=dict(color="LightSeaGreen", width=5),
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+            row=2,
+            col=1,
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=primer_x,
+                y=primer_y,
+                mode="lines",
+                fill="toself",
                 fillcolor="LightSalmon",
-                line=dict(color="darksalmon", width=3),
-                name=pp.left[0].primername,
-                row=2,
-                col=1,
-            )
-            fig.add_shape(
-                type="rect",
-                y0=pp.pool - 0.05,
-                y1=pp.pool + 0.05,
-                x0=pp.coverage_end,
-                x1=pp.amplicon_end,
-                fillcolor="LightSalmon",
-                line=dict(color="darksalmon", width=3),
-                name=pp.right[0].primername,
-                row=2,
-                col=1,
-            )
-
+                line=dict(color="darksalmon", width=1),
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+            row=2,
+            col=1,
+        )
         fig.add_trace(
             go.Scattergl(
                 x=[x.coverage_start for x in chrom_primer_pairs],
