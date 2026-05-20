@@ -847,6 +847,8 @@ for tsv_path in amp_depth_tsvs:
         else len(primer_pairs)
     )
 
+samples_with_amp_depths = {row["sample"] for row in amplicon_depth_rows}
+
 for row in scheme_samplesheet_df.itertuples():
     if not payload["qc_table_info"].get(row.sample):
         samples.add(row.sample)
@@ -868,8 +870,6 @@ for row in scheme_samplesheet_df.itertuples():
                     "mean_depth": 0.0,
                 }
             )
-
-samples_with_amp_depths = {row["sample"] for row in amplicon_depth_rows}
 
 amplicon_depth_rows = sorted(
     amplicon_depth_rows,
