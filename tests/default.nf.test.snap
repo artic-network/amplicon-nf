@@ -89,7 +89,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.8.1"
+                    "artic-network/amplicon-nf": "v0.8.2"
                 }
             },
             [
@@ -107,6 +107,7 @@
                 "illumina_amplicon_test/illumina_amplicon_test.sorted.bam",
                 "illumina_amplicon_test/illumina_amplicon_test.vcf.gz",
                 "illumina_amplicon_test/illumina_amplicon_test.vcf.gz.tbi",
+                "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_qc-report.tsv",
                 "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_sample-report.html",
                 "illumina_custom_scheme_Test",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.align_trim_report.tsv",
@@ -116,6 +117,7 @@
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.sorted.bam",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz.tbi",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test_amplicon-nf_qc-report.tsv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test_amplicon-nf_sample-report.html",
                 "illumina_fuzzy_lane_match",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.align_trim_report.tsv",
@@ -125,6 +127,7 @@
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.sorted.bam",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.vcf.gz",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.vcf.gz.tbi",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match_amplicon-nf_qc-report.tsv",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match_amplicon-nf_sample-report.html",
                 "illumina_fuzzy_match",
                 "illumina_fuzzy_match/illumina_fuzzy_match.align_trim_report.tsv",
@@ -134,6 +137,7 @@
                 "illumina_fuzzy_match/illumina_fuzzy_match.sorted.bam",
                 "illumina_fuzzy_match/illumina_fuzzy_match.vcf.gz",
                 "illumina_fuzzy_match/illumina_fuzzy_match.vcf.gz.tbi",
+                "illumina_fuzzy_match/illumina_fuzzy_match_amplicon-nf_qc-report.tsv",
                 "illumina_fuzzy_match/illumina_fuzzy_match_amplicon-nf_sample-report.html",
                 "nanopore_amplicon_test",
                 "nanopore_amplicon_test/nanopore_amplicon_test.amplicon_depths.tsv",
@@ -147,6 +151,7 @@
                 "nanopore_amplicon_test/nanopore_amplicon_test.sorted.bam",
                 "nanopore_amplicon_test/nanopore_amplicon_test.sorted.bam.bai",
                 "nanopore_amplicon_test/nanopore_amplicon_test.vcf.gz",
+                "nanopore_amplicon_test/nanopore_amplicon_test_amplicon-nf_qc-report.tsv",
                 "nanopore_amplicon_test/nanopore_amplicon_test_amplicon-nf_sample-report.html",
                 "nanopore_custom_scheme_test",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.amplicon_depths.tsv",
@@ -160,6 +165,7 @@
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.sorted.bam",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.sorted.bam.bai",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.vcf.gz",
+                "nanopore_custom_scheme_test/nanopore_custom_scheme_test_amplicon-nf_qc-report.tsv",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test_amplicon-nf_sample-report.html",
                 "nanopore_empty_files",
                 "nanopore_empty_files/nanopore_empty_files.fastq.gz",
@@ -175,6 +181,7 @@
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.sorted.bam",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.sorted.bam.bai",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.vcf.gz",
+                "nanopore_fuzzy_match/nanopore_fuzzy_match_amplicon-nf_qc-report.tsv",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match_amplicon-nf_sample-report.html",
                 "pipeline_info",
                 "pipeline_info/amplicon-nf_software_mqc_versions.yml",
@@ -201,7 +208,7 @@
             true,
             true
         ],
-        "timestamp": "2026-05-11T12:21:50.844083",
+        "timestamp": "2026-05-20T14:09:03.063813",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
