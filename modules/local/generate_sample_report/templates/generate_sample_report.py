@@ -480,6 +480,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
         fieldnames=[
             "sample",
             "contig",
+            "contig_alias",
             "primer_scheme",
             "coverage",
             "mean_depth",
@@ -495,6 +496,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
             {
                 "sample": payload["sample_id"],
                 "contig": contig["name"],
+                "contig_alias": contig["contig_alias"],
                 "primer_scheme": payload["primer_scheme_version"],
                 "coverage": contig["percent_coverage"],
                 "mean_depth": contig["average_depth"],

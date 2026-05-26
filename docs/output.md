@@ -50,7 +50,7 @@ A TSV ([tab-separated-values](https://en.wikipedia.org/wiki/Tab-separated_values
 
 </details>
 
-amplicon-nf generates custom per-sample reports with QC metrics and a read depth plot per genome segment (just one for non-segmented viruses) which is useful for investigating any issues encountered. A companion TSV is also written for each sample containing the QC summary table (`sample`, `contig`, `primer_scheme`, `coverage`, `mean_depth`, `total_reads`, `total_amp_dropouts`, `qc_result`), with one row per genome segment.
+amplicon-nf generates custom per-sample reports with QC metrics and a read depth plot per genome segment (just one for non-segmented viruses) which is useful for investigating any issues encountered. A companion TSV is also written for each sample containing the QC summary table (`sample`, `contig`, `contig_alias`, `primer_scheme`, `coverage`, `mean_depth`, `total_reads`, `total_amp_dropouts`, `qc_result`), with one row per genome segment.
 
 ### Consensus FASTAs
 
