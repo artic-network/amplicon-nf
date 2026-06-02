@@ -257,9 +257,9 @@ workflow AMPLICON_NF {
 
     FIND_CONCATENATE(ch_consensus_by_chrom)
 
-    if (params.primer_mismatch_plot) {
+    SEQKIT_GREP_FASTAS(FIND_CONCATENATE.out.file_out, [])
 
-        SEQKIT_GREP_FASTAS(FIND_CONCATENATE.out.file_out, [])
+    if (params.primer_mismatch_plot) {
 
         ch_refs_per_chrom = ch_chroms
             .combine(ch_primer_scheme.map { meta, _bed, ref -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), ref] }, by: 0)
