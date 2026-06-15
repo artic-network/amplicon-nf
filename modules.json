@@ -64,12 +64,12 @@
                     },
                     "nextclade/datasetget": {
                         "branch": "master",
-                        "git_sha": "0c1e446891bfc2cab6eaa69a9bbe91b75e8e0eea",
+                        "git_sha": "c302a1ab2512b6791535e1fe971b8cc52efe411d",
                         "installed_by": ["modules"]
                     },
                     "nextclade/run": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "c302a1ab2512b6791535e1fe971b8cc52efe411d",
                         "installed_by": ["modules"]
                     },
                     "samtools/coverage": {

@@ -454,7 +454,7 @@ def amplicon_depth_heatmap(
 
     amplicon_depths = amplicon_depths.pivot(index="sample", columns="amplicon")[
         "mean_depth"
-    ].fillna(0)
+    ].fillna(0) # type: ignore
 
     # amplicon_depths.reindex(columns=columns)
 
@@ -527,7 +527,7 @@ def primer_mismatch_heatmap(
     """
     # Read in the bedfile
 
-    primer_scheme = Scheme.from_file(bedfile)
+    primer_scheme = Scheme.from_file(bedfile) # type: ignore
 
     scheme_headers = primer_scheme.header_dict
 
@@ -848,17 +848,25 @@ for tsv in glob("nextclade_tsv/*.tsv"):
     with open(tsv, "r") as file:
         for row in csv.DictReader(file, delimiter="	"):
             sample_name = row.get("seqName", "").split(" ")[0]
+            raw_coverage = row.get("coverage", "")
             payload["nextclade_table"][sample_name] = {
                 "qc_status": row.get("qc.overallStatus", ""),
                 "qc_score": row.get("qc.overallScore", ""),
                 "clade": row.get("clade_display", ""),
                 "lineage": row.get("Nextclade_pango", ""),
+                "coverage": f"{round(float(raw_coverage) * 100, 2)}%" if raw_coverage else "",
                 "qc_missing_status": row.get("qc.missingData.status", ""),
+                "qc_missing_count": row.get("qc.missingData.totalMissing", ""),
                 "qc_mixedsites_status": row.get("qc.mixedSites.status", ""),
+                "qc_mixedsites_count": row.get("qc.mixedSites.totalMixedSites", ""),
                 "qc_privatemut_status": row.get("qc.privateMutations.status", ""),
+                "qc_privatemut_count": row.get("qc.privateMutations.total", ""),
                 "qc_snpclust_status": row.get("qc.snpClusters.status", ""),
+                "qc_snpclust_count": row.get("qc.snpClusters.totalSNPs", ""),
                 "qc_framshift_status": row.get("qc.frameShifts.status", ""),
+                "qc_framshift_count": row.get("qc.frameShifts.totalFrameShifts", ""),
                 "qc_stopcodon_status": row.get("qc.stopCodons.status", ""),
+                "qc_stopcodon_count": row.get("qc.stopCodons.totalStopCodons", ""),
             }
 
 payload["nextclade_table"] = dict(
@@ -952,14 +960,14 @@ msa_list = glob("msas/*.fa*")
 if len(msa_list) > 0:
     primer_mismatch_heatmaps = {"name": "Primer Mismatches", "plots": []}
     for msa_path in msa_list:
-        msa, seqdict = parse_msa(msa_path)
+        msa, seqdict = parse_msa(msa_path) # type: ignore
         contig_name = msa_path.split("/")[-1].split("_")[0]
 
         primer_mismatch_heatmaps["plots"].append(
             {
                 "name": contig_name,
                 "plot_html": primer_mismatch_heatmap(
-                    array=msa, seqdict=seqdict, bedfile="${bed}"
+                    array=msa, seqdict=seqdict, bedfile="${bed}" # type: ignore
                 ),
             }
         )
