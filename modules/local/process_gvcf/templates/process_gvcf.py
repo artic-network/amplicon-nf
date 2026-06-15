@@ -17,9 +17,10 @@ def intervals_extract(iterable):
         group = list(group)
         yield [group[0][1], group[-1][1]]
 
+
 # write the depth mask used with bcftools to turn consensus positions into Ns
 def write_depth_mask(out_filename, contig_depths, min_coverage):
-    maskfh = open(out_filename, 'w')
+    maskfh = open(out_filename, "w")
     for contig_name, depths in contig_depths.items():
         # from artic-mask, create list of positions that fail the depth check
         mask_vector = []
@@ -31,8 +32,9 @@ def write_depth_mask(out_filename, contig_depths, min_coverage):
         intervals = list(intervals_extract(mask_vector))
 
         for i in intervals:
-            maskfh.write("%s\\t%s\\t%s\\n" % (contig_name, i[0]+1, i[1]+1))
+            maskfh.write("%s\\t%s\\t%s\\n" % (contig_name, i[0] + 1, i[1] + 1))
     maskfh.close()
+
 
 # calculate the variant allele fraction for each alt allele using freebayes' read/alt observation tags
 def calculate_vafs(record):
@@ -44,16 +46,18 @@ def calculate_vafs(record):
         vafs.append(vaf)
     return vafs
 
+
 # make a simple VCF record with the minimal information needed to make the consensus sequence
 def make_simple_record(vcf_header, parent_record, position, ref, alt, vaf):
     r = vcf_header.new_record()
     r.chrom = parent_record.chrom
     r.pos = position
     r.ref = ref
-    r.alts = [ alt ]
+    r.alts = [alt]
     r.info["DP"] = parent_record.info["DP"]
     r.info["VAF"] = vaf
     return r
+
 
 # process indel variants found by freebayes into a variant that should be
 # applied to the consensus sequence
@@ -77,9 +81,12 @@ def handle_indel(vcf_header, record):
             max_vaf = value
             max_idx = idx
 
-    r = make_simple_record(vcf_header, record, record.pos, record.ref, record.alts[max_idx], [ max_vaf ])
+    r = make_simple_record(
+        vcf_header, record, record.pos, record.ref, record.alts[max_idx], [max_vaf]
+    )
     output.append(r)
     return output
+
 
 # return the base with the highest value in vaf_by_base,
 # optionally skipping a character (eg. the reference base)
@@ -91,6 +98,7 @@ def base_max(vaf_by_base, skip=None):
             max_vaf = vaf_by_base[b]
             max_b = b
     return max_b
+
 
 def handle_sub(vcf_header, record):
     output = list()
@@ -104,11 +112,11 @@ def handle_sub(vcf_header, record):
     # calculate the VAF of each base at each position of the MNP
     base_frequency = list()
     for i in range(0, sub_length):
-        base_frequency.append({ "A":0.0, "C":0.0, "G":0.0, "T":0.0 })
+        base_frequency.append({"A": 0.0, "C": 0.0, "G": 0.0, "T": 0.0})
 
     for alt, vaf in zip(record.alts, vafs):
-        assert(len(alt) == sub_length)
-        for i,b in enumerate(alt):
+        assert len(alt) == sub_length
+        for i, b in enumerate(alt):
             base_frequency[i][b] += vaf
 
     # construct output records
@@ -118,34 +126,61 @@ def handle_sub(vcf_header, record):
         max_b = base_max(base_frequency[i], record.ref[i])
         if max_b is None:
             continue
-        r = make_simple_record(vcf_header, record, record.pos + i, record.ref[i], max_b, base_frequency[i][max_b])
+        r = make_simple_record(
+            vcf_header,
+            record,
+            record.pos + i,
+            record.ref[i],
+            max_b,
+            base_frequency[i][max_b],
+        )
         output.append(r)
     return output
 
+
 def main():
 
-    args = SimpleNamespace(mask_output="mask.txt", variants_output="variants.vcf", consensus_sites_output="consensus.vcf",
-                            min_depth=${params.min_coverage_depth}, lower_ambiguity_frequency=${params.lower_ambiguity_frequency}, upper_ambiguity_frequency=${params.upper_ambiguity_frequency})
+    args = SimpleNamespace(
+        mask_output="mask.txt",
+        variants_output="variants.vcf",
+        consensus_sites_output="consensus.vcf",
+        min_depth=int("${params.min_coverage_depth}"),
+        lower_ambiguity_frequency=float("${params.lower_ambiguity_frequency}"),
+        upper_ambiguity_frequency=float("${params.upper_ambiguity_frequency}"),
+    )
 
-    vcf = pysam.VariantFile(open("${gvcf}","r"))
+    vcf = pysam.VariantFile(open("${gvcf}", "r"))
 
     # Initalize depth mask to all zeros for all contigs
     contig_depth = defaultdict(list)
     for r in vcf.header.records:
         if r.type == "CONTIG":
-            contig_depth[r['ID']] = [0] * int(r['length'])
+            contig_depth[r["ID"]] = [0] * int(r["length"])
 
     out_header = vcf.header
 
     # open the output file with the filtered variant sites
-    out_header.info.add("VAF", number="A", type='Float', description="Variant allele fraction, called from observed reference/alt reads")
-    variants_out = pysam.VariantFile(args.variants_output, 'w', header=out_header)
+    out_header.info.add(
+        "VAF",
+        number="A",
+        type="Float",
+        description="Variant allele fraction, called from observed reference/alt reads",
+    )
+    variants_out = pysam.VariantFile(args.variants_output, "w", header=out_header)
 
     # open the output file with the changes to apply to the consensus fasta
     # this includes an additional tag in the VCF file
-    out_header.info.add("ConsensusTag", number=1, type='String', description="The type of base to be included in the consensus sequence (IUPAC or Fixed)")
-    consensus_sites_out = pysam.VariantFile(args.consensus_sites_output, 'w', header=out_header)
+    out_header.info.add(
+        "ConsensusTag",
+        number=1,
+        type="String",
+        description="The type of base to be included in the consensus sequence (IUPAC or Fixed)",
+    )
+    consensus_sites_out = pysam.VariantFile(
+        args.consensus_sites_output, "w", header=out_header
+    )
 
+    current_ref = None
     for record in vcf:
 
         is_gvcf_ref = record.alts[0] == "<*>"
@@ -157,12 +192,34 @@ def main():
         v_end = record.stop
         depth = record.info["DP"]
 
+        # handle freebayes gvcf bug with multi-fasta references where chromosome
+        # boundary positions are incorrectly assigned to the next chromosome
+        # https://github.com/freebayes/freebayes/issues/561
+        # https://github.com/freebayes/freebayes/issues/639
+        # https://github.com/freebayes/freebayes/issues/276
+
+        if not current_ref:
+            current_ref = record.chrom
+
+        current_ref_len = len(contig_depth[current_ref])
+
+        # Check to see if the variant is erroneously assigned to the next ref and re-assign if so
+        if current_ref != record.chrom and v_end == current_ref_len:
+            print(
+                f"Warning: Reassigning record at {record.chrom}:{record.pos} to {current_ref}:{record.pos} due to freebayes gvcf bug (https://github.com/freebayes/freebayes/issues/276) with multi-fasta references. ",
+                f"(REF={record.ref}, v_start={v_start}, v_end={v_end}, contig_length={current_ref_len}). ",
+                file=sys.stderr,
+            )
+            record.chrom = current_ref
+            v_end = v_start
+        current_ref = record.chrom
+
         # disallow gvcf records that are longer than a single base
-        assert(not is_gvcf_ref or v_start == v_end)
+        assert not is_gvcf_ref or v_start == v_end
 
         # update depth mask
         for i in range(v_start, v_end + 1):
-            assert(i > 0)
+            assert i > 0
             # VCF coordinates are 1-based, we record the depth vector as 0-based
             # to be consistent with artic-mask
             contig_depth[record.chrom][i - 1] = depth
@@ -189,7 +246,7 @@ def main():
         for out_r in out_records:
 
             # at this point we should have resolved multi-allelic variants
-            assert(len(out_r.alts) == 1)
+            assert len(out_r.alts) == 1
 
             vaf = out_r.info["VAF"][0]
             is_indel = len(out_r.ref) != len(out_r.alts[0])

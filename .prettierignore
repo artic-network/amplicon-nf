@@ -13,3 +13,4 @@ bin/
 ro-crate-metadata.json
 **/*.html
 modules/nf-core/**
+.nf-test/

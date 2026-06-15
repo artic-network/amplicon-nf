@@ -18,6 +18,7 @@ process GENERATE_SAMPLE_REPORT {
 
     output:
     path "*_amplicon-nf_sample-report.html", emit: sample_report_html
+    path "*_amplicon-nf_qc-report.tsv", emit: sample_qc_tsv
     path "versions.yml", emit: versions
 
     when:

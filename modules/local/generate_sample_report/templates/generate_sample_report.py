@@ -103,21 +103,34 @@ def amplicon_depth_plot(amplicon_depth_tsv_path: str, min_depth: int = 20):
 
 
 def read_depth_plot(
-    depth_df: pd.DataFrame,
+    depth_by_chrom: dict,
     scheme_df: pd.DataFrame,
     primer_pairs: list,
     min_depth: int = 20,
+    max_plot_points: int = 5000,
 ):
 
     chroms = scheme_df["chrom"].unique()
     figs = {}
 
     for chrom in chroms:
-        depth_df_chrom = depth_df[depth_df["chrom"] == chrom]
+        depth_df_chrom = depth_by_chrom.get(
+            chrom, pd.DataFrame(columns=["chrom", "pos", "depth"])
+        )
         chrom_primer_pairs = [x for x in primer_pairs if x.chrom == chrom]
         chrom_alias = scheme_df[scheme_df["chrom"] == chrom]["chrom_alias"].values[0]
 
         chrom_label = f"{chrom_alias} ({chrom})" if chrom_alias else chrom
+
+        bin_size = max(1, len(depth_df_chrom) // max_plot_points)
+        if bin_size > 1:
+            depth_plot_df = (
+                depth_df_chrom.assign(bin=depth_df_chrom["pos"] // bin_size)
+                .groupby("bin", as_index=False)
+                .agg(pos=("pos", "first"), depth=("depth", "mean"))
+            )
+        else:
+            depth_plot_df = depth_df_chrom
 
         fig = subplots.make_subplots(
             cols=1,
@@ -132,13 +145,13 @@ def read_depth_plot(
         )
 
         fig.add_trace(
-            px.line(
-                depth_df_chrom,
-                x="pos",
-                y="depth",
-                title=f"Read Depth for reference: {chrom_label}",
-                labels={"pos": "Position", "depth": "Read Depth"},
-            ).data[0],
+            go.Scattergl(
+                x=depth_plot_df["pos"],
+                y=depth_plot_df["depth"],
+                mode="lines",
+                line=dict(color="steelblue", width=1),
+                name="Read Depth",
+            ),
             row=1,
             col=1,
         )
@@ -163,61 +176,60 @@ def read_depth_plot(
             title="Read Depth",
         )
 
+        chrom_max_pos = int(depth_df_chrom["pos"].max()) if not depth_df_chrom.empty else 0
+
+        backbone_x: list = []
+        backbone_y: list = []
+        primer_x: list = []
+        primer_y: list = []
+
         for pp in chrom_primer_pairs:
-            fig.add_shape(
-                type="line",
-                y0=pp.pool,
-                y1=pp.pool,
-                x0=pp.amplicon_start,
-                x1=(
-                    pp.amplicon_end
-                    if not pp.is_circular
-                    else depth_df_chrom["pos"].max()
-                ),
-                line=dict(color="LightSeaGreen", width=5),
-                name=f"amplicon {pp.amplicon_number}",
-                row=2,
-                col=1,
-            )
-            # Handle circular genomes
+            x_end = chrom_max_pos if pp.is_circular else pp.amplicon_end
+            backbone_x += [pp.amplicon_start, x_end, None]
+            backbone_y += [pp.pool, pp.pool, None]
             if pp.is_circular:
-                fig.add_shape(
-                    type="line",
-                    y0=pp.pool,
-                    y1=pp.pool,
-                    x0=0,
-                    x1=pp.amplicon_end,
-                    line=dict(color="LightSeaGreen", width=5),
-                    name=f"amplicon {pp.amplicon_number}",
-                    row=2,
-                    col=1,
-                )
+                backbone_x += [0, pp.amplicon_end, None]
+                backbone_y += [pp.pool, pp.pool, None]
+            for x0, x1 in [
+                (pp.amplicon_start, pp.coverage_start),
+                (pp.coverage_end, pp.amplicon_end),
+            ]:
+                primer_x += [x0, x1, x1, x0, x0, None]
+                primer_y += [
+                    pp.pool - 0.05,
+                    pp.pool - 0.05,
+                    pp.pool + 0.05,
+                    pp.pool + 0.05,
+                    pp.pool - 0.05,
+                    None,
+                ]
 
-            fig.add_shape(
-                type="rect",
-                y0=pp.pool - 0.05,
-                y1=pp.pool + 0.05,
-                x0=pp.amplicon_start,
-                x1=pp.coverage_start,
+        fig.add_trace(
+            go.Scatter(
+                x=backbone_x,
+                y=backbone_y,
+                mode="lines",
+                line=dict(color="LightSeaGreen", width=5),
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+            row=2,
+            col=1,
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=primer_x,
+                y=primer_y,
+                mode="lines",
+                fill="toself",
                 fillcolor="LightSalmon",
-                line=dict(color="darksalmon", width=3),
-                name=pp.left[0].primername,
-                row=2,
-                col=1,
-            )
-            fig.add_shape(
-                type="rect",
-                y0=pp.pool - 0.05,
-                y1=pp.pool + 0.05,
-                x0=pp.coverage_end,
-                x1=pp.amplicon_end,
-                fillcolor="LightSalmon",
-                line=dict(color="darksalmon", width=3),
-                name=pp.right[0].primername,
-                row=2,
-                col=1,
-            )
-
+                line=dict(color="darksalmon", width=1),
+                showlegend=False,
+                hoverinfo="skip",
+            ),
+            row=2,
+            col=1,
+        )
         fig.add_trace(
             go.Scattergl(
                 x=[x.coverage_start for x in chrom_primer_pairs],
@@ -243,7 +255,10 @@ def read_depth_plot(
             col=1,
         )
 
-        fig.update_layout(plot_bgcolor="whitesmoke")
+        fig.update_layout(
+            plot_bgcolor="whitesmoke",
+            title=f"Read Depth for reference: {chrom_label}",
+        )
 
         fig.update_xaxes(
             showline=True,
@@ -328,18 +343,10 @@ with open("${amp_depth_tsv}", "rt") as f:
         for row in reader
     ]
 
+    existing_amplicons = {(y["chrom"], y["amplicon"]) for y in amplicon_depths}
     for x in primer_pairs:
-        if (
-            len(
-                [
-                    y
-                    for y in amplicon_depths
-                    if y["chrom"] == str(x.chrom)
-                    and y["amplicon"] == str(x.amplicon_number)
-                ]
-            )
-            == 0
-        ):
+        key = (str(x.chrom), str(x.amplicon_number))
+        if key not in existing_amplicons:
             amplicon_depths.append(
                 {
                     "chrom": str(x.chrom),
@@ -350,8 +357,13 @@ with open("${amp_depth_tsv}", "rt") as f:
 
 amplicon_depths.sort(key=lambda x: (x["chrom"], int(x["amplicon"])))
 
+depth_by_chrom = {
+    chrom: grp.reset_index(drop=True)
+    for chrom, grp in depth_df.groupby("chrom")
+}
+
 plot = read_depth_plot(
-    depth_df=depth_df,
+    depth_by_chrom=depth_by_chrom,
     scheme_df=scheme_df,
     primer_pairs=primer_pairs,
     min_depth=int("${params.min_coverage_depth}"),
@@ -379,6 +391,9 @@ payload = {
 }
 
 for chrom, fig in plot.items():
+    depth_df_chrom = depth_by_chrom.get(
+        chrom, pd.DataFrame(columns=["chrom", "pos", "depth"])
+    )
 
     contig_plot_html = pio.to_html(
         fig,
@@ -388,11 +403,9 @@ for chrom, fig in plot.items():
         default_width="100%",
     )
 
-    bases_above_min_depth = depth_df[
-        (depth_df["chrom"] == chrom)
-        & (depth_df["depth"] >= int("${params.min_coverage_depth}"))
-    ].shape[0]
-    total_bases = depth_df[depth_df["chrom"] == chrom].shape[0]
+    min_depth_threshold = int("${params.min_coverage_depth}")
+    bases_above_min_depth = (depth_df_chrom["depth"] >= min_depth_threshold).sum()
+    total_bases = len(depth_df_chrom)
 
     percent_coverage = (
         (bases_above_min_depth / total_bases) * 100 if total_bases > 0 else 0.0
@@ -401,12 +414,12 @@ for chrom, fig in plot.items():
     amplicon_dropouts = [
         str(x["amplicon"])
         for x in amplicon_depths
-        if x["chrom"] == chrom and x["mean_depth"] < int("${params.min_coverage_depth}")
+        if x["chrom"] == chrom and x["mean_depth"] < min_depth_threshold
     ]
 
     mean_depth = (
-        round(depth_df[depth_df["chrom"] == chrom]["depth"].mean(), 2)
-        if not depth_df[depth_df["chrom"] == chrom].empty
+        round(depth_df_chrom["depth"].mean(), 2)
+        if not depth_df_chrom.empty
         else 0.0
     )
 
@@ -460,6 +473,38 @@ render_qc_report(
     plotly_js_path=Path("${plotly_js}"),
     svg_logo_path=Path("${artic_logo_svg}"),
 )
+
+with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
+    writer = csv.DictWriter(
+        f,
+        fieldnames=[
+            "sample",
+            "contig",
+            "contig_alias",
+            "primer_scheme",
+            "coverage",
+            "mean_depth",
+            "total_reads",
+            "total_amp_dropouts",
+            "qc_result",
+        ],
+        delimiter="\t",
+    )
+    writer.writeheader()
+    for contig in payload["contigs"]:
+        writer.writerow(
+            {
+                "sample": payload["sample_id"],
+                "contig": contig["name"],
+                "contig_alias": contig["contig_alias"],
+                "primer_scheme": payload["primer_scheme_version"],
+                "coverage": contig["percent_coverage"],
+                "mean_depth": contig["average_depth"],
+                "total_reads": contig["total_reads"],
+                "total_amp_dropouts": contig["total_amplicon_dropouts"],
+                "qc_result": contig["qc_status"],
+            }
+        )
 
 with open("versions.yml", "w") as f:
     f.write("${task.process}:\\n")

@@ -11,3 +11,4 @@ null/
 store_dir/
 amplicon-nf/
 .vscode/
+output/
