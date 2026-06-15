@@ -196,7 +196,7 @@ The `-profile` parameter accepts multiple profiles separated by a comma so provi
 ### Running Nextclade
 
 > [!WARNING]
-> The current implementation is *not* compatible with data runs that include different viruses. Nextclade has been integrated into `amplicon-nf` to run on **all** samples.
+> The current implementation is *not* compatible with data runs that include multiple viruses. Nextclade has been integrated into `amplicon-nf` to run on **all** samples using the same nextclade dataset.
 
 To run nextclade, specify the dataset name and optionally the tag (dataset version) as follows
 
