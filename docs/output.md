@@ -116,7 +116,7 @@ Indicates that the position may be either `C` or `T` (IUPAC `Y`) not that a `C -
 
 ### Reference IUPAC masking (Illumina only)
 
-Some primer scheme reference sequences contain [IUPAC ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation#IUPAC_notation) (e.g. `R`, `Y`, `W`, `S`, `K`, `M`, `B`, `D`, `H`, `V`) to indicate positions where the reference itself is not a single definitive base. The variant caller used for Illumina samples ([Freebayes](https://github.com/freebayes/freebayes)) does not support IUPAC codes in the reference and will fail or produce incorrect results if they are present.
+Some primer scheme reference sequences contain [IUPAC ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation#IUPAC_notation) (e.g. `R`, `Y`, `W`, `S`, `K`, `M`, `B`, `D`, `H`, `V`) to indicate positions where the reference itself is not a single definitive base. The variant caller used for Illumina samples ([Freebayes](https://github.com/freebayes/freebayes)) does not support IUPAC codes in the reference and will fail if they are present.
 
 When the pipeline detects IUPAC ambiguity codes in a reference sequence it automatically replaces them with `N` before alignment and variant calling, and prints the following warning to the pipeline log:
 
