@@ -114,6 +114,18 @@ MN908947.3      1875    .       C       T       .       .       DP=38;VAF=0.2105
 ```
 Indicates that the position may be either `C` or `T` (IUPAC `Y`) not that a `C -> T` SNP was observed, the `VAF` field indicates the variant allele frequency observed.
 
+### Reference IUPAC masking (Illumina only)
+
+Some primer scheme reference sequences contain [IUPAC ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation#IUPAC_notation) (e.g. `R`, `Y`, `W`, `S`, `K`, `M`, `B`, `D`, `H`, `V`) to indicate positions where the reference itself is not a single definitive base. The variant caller used for Illumina samples ([Freebayes](https://github.com/freebayes/freebayes)) does not support IUPAC codes in the reference and will fail or produce incorrect results if they are present.
+
+When the pipeline detects IUPAC ambiguity codes in a reference sequence it automatically replaces them with `N` before alignment and variant calling, and prints the following warning to the pipeline log:
+
+```
+WARN: IUPAC ambiguity codes were detected in one or more reference sequences and have been replaced with N...
+```
+
+This masking affects alignment sensitivity at those positions — reads covering a masked base are slightly less likely to map with high confidence because `N` matches any base equally — but this is preferable to incorrect variant calls or a pipeline failure. If your reference contains a large number of IUPAC positions you may wish to resolve them to definitive bases manually before running the pipeline.
+
 ### Amplicon depth TSV files
 
 <details markdown="1">
