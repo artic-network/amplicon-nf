@@ -1,7 +1,7 @@
 {
     "-profile test": {
         "content": [
-            107,
+            115,
             {
                 "ARTIC_ALIGNTRIM": {
                     "align_trim": "1.1.0"
@@ -98,7 +98,7 @@
                     "trimmomatic": 0.39
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.8.3"
+                    "artic-network/amplicon-nf": "v0.9.0"
                 }
             },
             [
@@ -240,7 +240,7 @@
             false,
             false
         ],
-        "timestamp": "2026-06-16T07:58:29.307657",
+        "timestamp": "2026-06-16T09:38:07.977816",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
