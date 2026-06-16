@@ -3,8 +3,8 @@ process ARTIC_GET_MODELS {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.10.1--194b4fac7363edea'
-        : 'artic/fieldbioinformatics:1.10.1'}"
+        ? 'oras://community.wave.seqera.io/library/artic:1.10.3--aa87beb2acab0fa4'
+        : 'artic/fieldbioinformatics:1.10.3'}"
 
     input:
     path store_directory

@@ -14,6 +14,7 @@ include { BCFTOOLS_VIEW                                      } from '../../../mo
 include { ARTIC_GET_SCHEME                                   } from '../../../modules/local/artic/get_scheme/main'
 include { ARTIC_ALIGNTRIM                                    } from '../../../modules/nf-core/artic/aligntrim/main'
 include { PROCESS_GVCF                                       } from '../../../modules/local/process_gvcf/main'
+include { SEQKIT_REPLACE_IUPAC                               } from '../../../modules/local/seqkit/replace_iupac/main'
 
 
 workflow ILLUMINA_ASSEMBLY {
@@ -60,7 +61,27 @@ workflow ILLUMINA_ASSEMBLY {
         .map { meta, _fastq_1, _fastq_2, _scheme_bed, scheme_ref ->
             [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), scheme_ref]
         }
-        .unique()
+        .groupTuple()
+        .map { meta, refs -> [meta, refs[0]] }
+
+    // Replace IUPAC ambiguity codes in reference FASTA — freebayes does not support them
+    SEQKIT_REPLACE_IUPAC(ch_refs_only)
+
+    SEQKIT_REPLACE_IUPAC.out.iupac_replaced.subscribe { _flag ->
+        log.warn("IUPAC ambiguity codes were detected in one or more reference sequences and have been replaced with N. This is because Freebayes does not support IUPAC ambiguity codes. Please check the output FASTA files to ensure that this is acceptable for your analysis.")
+    }
+
+    ch_refs_only = SEQKIT_REPLACE_IUPAC.out.fasta
+
+    // Propagate cleaned reference into ch_trimmed_fastq so all downstream tools (bwa-mem2, freebayes, bcftools) receive it
+    ch_trimmed_fastq = ch_trimmed_fastq
+        .map { meta, fastq_1, fastq_2, scheme_bed, _old_ref ->
+            [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta, fastq_1, fastq_2, scheme_bed]
+        }
+        .combine(ch_refs_only, by: 0)
+        .map { _scheme_meta, meta, fastq_1, fastq_2, scheme_bed, cleaned_ref ->
+            [meta, fastq_1, fastq_2, scheme_bed, cleaned_ref]
+        }
 
     BWAMEM2_INDEX(
         ch_refs_only
