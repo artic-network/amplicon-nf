@@ -1,22 +1,22 @@
 {
     "-profile test": {
         "content": [
-            111,
+            107,
             {
                 "ARTIC_ALIGNTRIM": {
                     "align_trim": "1.1.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.10.1"
+                    "artic": "1.10.3"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.10.1"
+                    "artic": "1.10.3"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.10.1"
+                    "artic": "1.10.3"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.10.1"
+                    "artic": "1.10.3"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": "1.23.1"
@@ -80,6 +80,9 @@
                     "seqkit": "2.9.0"
                 },
                 "SEQKIT_REPLACE_ILLUMINA": {
+                    "seqkit": "2.9.0"
+                },
+                "SEQKIT_REPLACE_IUPAC": {
                     "seqkit": "2.9.0"
                 },
                 "SEQKIT_REPLACE_ONT": {
@@ -208,7 +211,7 @@
             true,
             true
         ],
-        "timestamp": "2026-06-02T11:47:46.447512",
+        "timestamp": "2026-06-16T07:58:29.307657",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
