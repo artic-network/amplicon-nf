@@ -62,6 +62,16 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/multiqc/multiqc.diff"
                     },
+                    "nextclade/datasetget": {
+                        "branch": "master",
+                        "git_sha": "c302a1ab2512b6791535e1fe971b8cc52efe411d",
+                        "installed_by": ["modules"]
+                    },
+                    "nextclade/run": {
+                        "branch": "master",
+                        "git_sha": "c302a1ab2512b6791535e1fe971b8cc52efe411d",
+                        "installed_by": ["modules"]
+                    },
                     "samtools/coverage": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
