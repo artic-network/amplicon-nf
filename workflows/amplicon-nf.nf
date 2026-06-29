@@ -13,7 +13,6 @@ include { ONT_ASSEMBLY                              } from '../subworkflows/loca
 include { ILLUMINA_ASSEMBLY                         } from '../subworkflows/local/illumina_assembly/main'
 include { RUN_NEXTCLADE                             } from '../subworkflows/local/run_nextclade'
 
-include { SAMTOOLS_DEPTH                            } from '../modules/nf-core/samtools/depth/main'
 include { SAMTOOLS_COVERAGE                         } from '../modules/nf-core/samtools/coverage/main'
 include { SEQKIT_REPLACE as SEQKIT_REPLACE_ONT      } from '../modules/nf-core/seqkit/replace/main'
 include { SEQKIT_REPLACE as SEQKIT_REPLACE_ILLUMINA } from '../modules/nf-core/seqkit/replace/main'
@@ -198,15 +197,25 @@ workflow AMPLICON_NF {
         ILLUMINA_ASSEMBLY.out.amplicon_depths
     )
 
-    SAMTOOLS_COVERAGE(ch_primertrimmed_bam, [[:], [], []])
+    ch_pre_norm_coverage = ONT_ASSEMBLY.out.pre_normalisation_coverage.mix(
+        ILLUMINA_ASSEMBLY.out.pre_normalisation_coverage
+    )
 
-    SAMTOOLS_DEPTH(ch_primertrimmed_bam, [[:], []])
+    ch_post_norm_coverage = ONT_ASSEMBLY.out.post_normalisation_coverage.mix(
+        ILLUMINA_ASSEMBLY.out.post_normalisation_coverage
+    )
+
+    SAMTOOLS_COVERAGE(ch_primertrimmed_bam, [[:], [], []])
 
     ch_sample_report_input = ch_primer_scheme
         .map { meta, bed, _ref -> [meta, bed] }
-        .join(SAMTOOLS_DEPTH.out.tsv)
+        .join(ch_pre_norm_coverage)
+        .join(ch_post_norm_coverage, remainder: true)
         .join(ch_amp_depth_tsv)
         .join(SAMTOOLS_COVERAGE.out.coverage)
+        .map { meta, bed, pre_norm, post_norm, amp_depth, coverage ->
+            [meta, bed, pre_norm, post_norm ?: [], amp_depth, coverage]
+        }
 
     sample_report_template = file(
         "${projectDir}/assets/sample_report_template.html",
@@ -308,7 +317,11 @@ workflow AMPLICON_NF {
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
         .groupTuple()
 
-    ch_depth_tsvs_by_scheme = SAMTOOLS_DEPTH.out.tsv
+    ch_pre_norm_tsvs_by_scheme = ch_pre_norm_coverage
+        .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
+        .groupTuple()
+
+    ch_post_norm_tsvs_by_scheme = ch_post_norm_coverage
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
         .groupTuple()
 
@@ -322,19 +335,23 @@ workflow AMPLICON_NF {
     ch_msas_opt       = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
     ch_nextclade_opt  = params.nextclade ? ch_nextclade_tsv :  channel.empty()
     
+    ch_post_norm_opt = params.normalise_depth ? ch_post_norm_tsvs_by_scheme : channel.empty()
+
     ch_run_report_input = ch_bed_by_scheme
         // required
-        .join(ch_depth_tsvs_by_scheme)
+        .join(ch_pre_norm_tsvs_by_scheme)
         .join(ch_amp_depth_tsvs_by_scheme)
         .join(ch_coverage_tsvs_by_scheme)
         // optional
+        .join(ch_post_norm_opt, remainder: true)
         .join(ch_msas_opt, remainder: true)
         .join(ch_nextclade_opt, remainder: true)
-        .map { meta, bed, depth, amp, cov, msas, nc ->
+        .map { meta, bed, pre_norm, amp, cov, post_norm, msas, nc ->
             [
                 meta,
                 bed,
-                depth,
+                pre_norm,
+                post_norm ?: [],
                 amp,
                 cov,
                 msas ?: [],

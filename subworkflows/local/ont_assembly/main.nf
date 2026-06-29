@@ -29,6 +29,8 @@ workflow ONT_ASSEMBLY {
     emit:
     consensus_fasta              = ARTIC_MINION.out.fasta
     amplicon_depths              = ARTIC_MINION.out.amplicon_depths
+    pre_normalisation_coverage   = ARTIC_MINION.out.pre_normalisation_coverage_report
+    post_normalisation_coverage  = ARTIC_MINION.out.post_normalisation_coverage_report
     sorted_bam                   = ARTIC_MINION.out.sorted_bam
     primertrimmed_normalised_bam = ARTIC_MINION.out.primertrimmed_normalised_bam
     primer_scheme                = ARTIC_MINION.out.primer_scheme
