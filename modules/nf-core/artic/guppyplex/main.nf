@@ -26,9 +26,7 @@ process ARTIC_GUPPYPLEX {
         ${args} \\
         --threads ${task.cpus} \\
         --directory ${fastq_dir} \\
-        --output ${prefix}.fastq
-
-    pigz -p ${task.cpus} *.fastq
+        --output ${prefix}.fastq.gz
     """
 
     stub:
