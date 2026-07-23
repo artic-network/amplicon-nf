@@ -108,6 +108,7 @@ def read_depth_plot(
     primer_pairs: list,
     min_depth: int = 20,
     max_plot_points: int = 5000,
+    post_norm_by_chrom: dict | None = None,
 ):
 
     chroms = scheme_df["chrom"].unique()
@@ -116,6 +117,11 @@ def read_depth_plot(
     for chrom in chroms:
         depth_df_chrom = depth_by_chrom.get(
             chrom, pd.DataFrame(columns=["chrom", "pos", "depth"])
+        )
+        post_norm_df_chrom = (
+            post_norm_by_chrom.get(chrom, pd.DataFrame(columns=["chrom", "pos", "depth"]))
+            if post_norm_by_chrom is not None
+            else None
         )
         chrom_primer_pairs = [x for x in primer_pairs if x.chrom == chrom]
         chrom_alias = scheme_df[scheme_df["chrom"] == chrom]["chrom_alias"].values[0]
@@ -132,6 +138,19 @@ def read_depth_plot(
         else:
             depth_plot_df = depth_df_chrom
 
+        if post_norm_df_chrom is not None and not post_norm_df_chrom.empty:
+            post_bin_size = max(1, len(post_norm_df_chrom) // max_plot_points)
+            if post_bin_size > 1:
+                post_norm_plot_df = (
+                    post_norm_df_chrom.assign(bin=post_norm_df_chrom["pos"] // post_bin_size)
+                    .groupby("bin", as_index=False)
+                    .agg(pos=("pos", "first"), depth=("depth", "mean"))
+                )
+            else:
+                post_norm_plot_df = post_norm_df_chrom
+        else:
+            post_norm_plot_df = None
+
         fig = subplots.make_subplots(
             cols=1,
             rows=2,
@@ -144,17 +163,31 @@ def read_depth_plot(
             vertical_spacing=0.02,
         )
 
+        pre_norm_label = "Pre-normalisation Depth" if post_norm_plot_df is not None else "Read Depth"
         fig.add_trace(
             go.Scattergl(
                 x=depth_plot_df["pos"],
                 y=depth_plot_df["depth"],
                 mode="lines",
-                line=dict(color="steelblue", width=1),
-                name="Read Depth",
+                line=dict(color="sandybrown" if post_norm_plot_df is not None else "steelblue", width=1),
+                name=pre_norm_label,
             ),
             row=1,
             col=1,
         )
+
+        if post_norm_plot_df is not None:
+            fig.add_trace(
+                go.Scattergl(
+                    x=post_norm_plot_df["pos"],
+                    y=post_norm_plot_df["depth"],
+                    mode="lines",
+                    line=dict(color="steelblue", width=1),
+                    name="Post-normalisation Depth",
+                ),
+                row=1,
+                col=1,
+            )
         fig.add_hline(y=min_depth, line_color="red", line_dash="dash", row=1, col=1)
         fig.update_xaxes(
             ticks="",
@@ -166,6 +199,8 @@ def read_depth_plot(
             col=1,
         )
         fig.update_yaxes(
+            type="log",
+            dtick=1,
             ticks="outside",
             tickcolor="black",
             showticklabels=True,
@@ -330,7 +365,14 @@ scheme_df = pd.DataFrame(
     ],
 )
 
-depth_df = pd.read_csv("${depth_tsv}", sep="\\t", names=["chrom", "pos", "depth"])
+depth_df = pd.read_csv("${pre_norm_tsv}", sep="\\t")
+
+post_norm_tsv_path = "${post_norm_tsv}"
+post_norm_df = (
+    pd.read_csv(post_norm_tsv_path, sep="\\t")
+    if post_norm_tsv_path not in ("[]", "")
+    else None
+)
 
 with open("${amp_depth_tsv}", "rt") as f:
     reader = csv.DictReader(f, delimiter="\\t")
@@ -362,11 +404,18 @@ depth_by_chrom = {
     for chrom, grp in depth_df.groupby("chrom")
 }
 
+post_norm_by_chrom = (
+    {chrom: grp.reset_index(drop=True) for chrom, grp in post_norm_df.groupby("chrom")}
+    if post_norm_df is not None
+    else None
+)
+
 plot = read_depth_plot(
     depth_by_chrom=depth_by_chrom,
     scheme_df=scheme_df,
     primer_pairs=primer_pairs,
     min_depth=int("${params.min_coverage_depth}"),
+    post_norm_by_chrom=post_norm_by_chrom,
 )
 
 if "${meta.scheme}" != "[]":
@@ -391,8 +440,13 @@ payload = {
 }
 
 for chrom, fig in plot.items():
-    depth_df_chrom = depth_by_chrom.get(
+    pre_norm_df_chrom = depth_by_chrom.get(
         chrom, pd.DataFrame(columns=["chrom", "pos", "depth"])
+    )
+    post_norm_df_chrom = (
+        post_norm_by_chrom.get(chrom, pd.DataFrame(columns=["chrom", "pos", "depth"]))
+        if post_norm_by_chrom is not None
+        else None
     )
 
     contig_plot_html = pio.to_html(
@@ -404,12 +458,30 @@ for chrom, fig in plot.items():
     )
 
     min_depth_threshold = int("${params.min_coverage_depth}")
-    bases_above_min_depth = (depth_df_chrom["depth"] >= min_depth_threshold).sum()
-    total_bases = len(depth_df_chrom)
 
-    percent_coverage = (
-        (bases_above_min_depth / total_bases) * 100 if total_bases > 0 else 0.0
+    pre_norm_bases_above = (pre_norm_df_chrom["depth"] >= min_depth_threshold).sum()
+    pre_norm_total = len(pre_norm_df_chrom)
+    pre_norm_coverage = (
+        (pre_norm_bases_above / pre_norm_total) * 100 if pre_norm_total > 0 else 0.0
     )
+    pre_norm_mean_depth = (
+        round(pre_norm_df_chrom["depth"].mean(), 2)
+        if not pre_norm_df_chrom.empty
+        else 0.0
+    )
+
+    if post_norm_df_chrom is not None and not post_norm_df_chrom.empty:
+        post_norm_bases_above = (post_norm_df_chrom["depth"] >= min_depth_threshold).sum()
+        post_norm_total = len(post_norm_df_chrom)
+        post_norm_coverage = (
+            (post_norm_bases_above / post_norm_total) * 100 if post_norm_total > 0 else 0.0
+        )
+        post_norm_mean_depth = round(post_norm_df_chrom["depth"].mean(), 2)
+    else:
+        post_norm_coverage = None
+        post_norm_mean_depth = None
+
+    qc_coverage = post_norm_coverage if post_norm_coverage is not None else pre_norm_coverage
 
     amplicon_dropouts = [
         str(x["amplicon"])
@@ -417,21 +489,18 @@ for chrom, fig in plot.items():
         if x["chrom"] == chrom and x["mean_depth"] < min_depth_threshold
     ]
 
-    mean_depth = (
-        round(depth_df_chrom["depth"].mean(), 2)
-        if not depth_df_chrom.empty
-        else 0.0
-    )
-
     contig_alias = scheme_df[scheme_df["chrom"] == chrom]["chrom_alias"].values[0]
     contig_label = f"{contig_alias} ({chrom})" if contig_alias else chrom
 
-    # payload["contigs"].append(
     contig_payload = {
         "name": chrom,
         "contig_alias": contig_alias,
         "contig_label": contig_label,
-        "percent_coverage": round(percent_coverage, 2),
+        "pre_norm_coverage": round(pre_norm_coverage, 2),
+        "pre_norm_mean_depth": pre_norm_mean_depth,
+        "post_norm_coverage": round(post_norm_coverage, 2) if post_norm_coverage is not None else None,
+        "post_norm_mean_depth": post_norm_mean_depth,
+        "percent_coverage": round(qc_coverage, 2),
         "amplicon_dropouts": amplicon_dropouts,
         "total_amplicon_dropouts": len(amplicon_dropouts),
         "amplicon_mean_depths": {
@@ -450,7 +519,7 @@ for chrom, fig in plot.items():
         },
         "qc_status": "",
         "total_reads": reads[chrom],
-        "average_depth": mean_depth,
+        "average_depth": post_norm_mean_depth if post_norm_mean_depth is not None else pre_norm_mean_depth,
         "plotly_html": contig_plot_html,
     }
 
@@ -482,8 +551,10 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
             "contig",
             "contig_alias",
             "primer_scheme",
-            "coverage",
-            "mean_depth",
+            "pre_norm_coverage",
+            "pre_norm_mean_depth",
+            "post_norm_coverage",
+            "post_norm_mean_depth",
             "total_reads",
             "total_amp_dropouts",
             "qc_result",
@@ -498,8 +569,10 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
                 "contig": contig["name"],
                 "contig_alias": contig["contig_alias"],
                 "primer_scheme": payload["primer_scheme_version"],
-                "coverage": contig["percent_coverage"],
-                "mean_depth": contig["average_depth"],
+                "pre_norm_coverage": contig["pre_norm_coverage"],
+                "pre_norm_mean_depth": contig["pre_norm_mean_depth"],
+                "post_norm_coverage": contig["post_norm_coverage"] if contig["post_norm_coverage"] is not None else "",
+                "post_norm_mean_depth": contig["post_norm_mean_depth"] if contig["post_norm_mean_depth"] is not None else "",
                 "total_reads": contig["total_reads"],
                 "total_amp_dropouts": contig["total_amplicon_dropouts"],
                 "qc_result": contig["qc_status"],

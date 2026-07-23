@@ -12,7 +12,7 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- 
+-
 
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution -->
@@ -70,6 +70,7 @@ The consensus FASTA contains the genome sequence of the sample based on the read
 <summary>Output files</summary>
 
 - `<CHROM>.<SCHEME_NAME>.combined_consensus.fasta`: A consensus FASTA for each segment of the sequenced virus (just one for non-segmented viruses) for each scheme included in the run.
+
 </details>
 
 The combined consensus FASTA contains the genome sequence of all samples for a specific genome segment based on the reads provided. This is based on the reference sequence provided, and areas not covered by sufficient reads to determine the contents of the genome are replaced with `N` indicating that any base may be present.
@@ -96,7 +97,7 @@ The alignment FASTA(s) contain(s) an alignment of all consensus FASTAs to the sc
 
 </details>
 
-[BAM files](https://en.wikipedia.org/wiki/BAM_(file_format)) are an alignment format of reads aligned to one or multiple reference sequences. These can be useful to diagnose issues with your sequencing experiment.
+[BAM files](<https://en.wikipedia.org/wiki/BAM_(file_format)>) are an alignment format of reads aligned to one or multiple reference sequences. These can be useful to diagnose issues with your sequencing experiment.
 
 ### VCF files
 
@@ -109,10 +110,29 @@ The alignment FASTA(s) contain(s) an alignment of all consensus FASTAs to the sc
 </details>
 
 [VCF files](https://en.wikipedia.org/wiki/Variant_Call_Format) are a text based format which describes how the consensus sequence is different from the reference sequence. The VCF file created will be slightly different for the Illumina / Nanopore workflows due to differences in how they are generated, most importantly the Illumina workflow calls mixed positions using [IUPAC ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation#IUPAC_notation) but since IUPAC codes are not valid VCF format a `ConsensusTag` `INFO` tag field indicates whether the position is `ambiguous` or `fixed`. For example:
+
 ```
 MN908947.3      1875    .       C       T       .       .       DP=38;VAF=0.210526;ConsensusTag=ambiguous       .       .
 ```
+
 Indicates that the position may be either `C` or `T` (IUPAC `Y`) not that a `C -> T` SNP was observed, the `VAF` field indicates the variant allele frequency observed.
+
+### Read QC and trimming (Illumina only)
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<SAMPLE>/`
+  - `<SAMPLE>.fastp.json`: [fastp](https://github.com/OpenGene/fastp) report in JSON format, summarising read quality and adapter trimming statistics before/after trimming.
+  - `<SAMPLE>.fastp.html`: Standalone HTML report of the same fastp statistics.
+  - `<SAMPLE>.fastp.log`: fastp execution log.
+  - `fastqc/`
+    - `<SAMPLE>_raw_fastqc.html` / `.zip`: [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) report for the raw, untrimmed reads.
+    - `<SAMPLE>_trim_fastqc.html` / `.zip`: FastQC report for the reads after fastp trimming.
+
+</details>
+
+Illumina reads are quality- and adapter-trimmed with [fastp](https://github.com/OpenGene/fastp), which auto-detects adapter content rather than requiring a known adapter sequence. FastQC is run both before and after trimming so that the effect of trimming on read quality and adapter content can be assessed. All of these reports are summarised together in the [MultiQC](#multiqc) report.
 
 ### Reference IUPAC masking (Illumina only)
 

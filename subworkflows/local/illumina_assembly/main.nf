@@ -3,7 +3,9 @@ include { BWAMEM2_INDEX                                      } from '../../../mo
 include { SAMTOOLS_SORT                                      } from '../../../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX                                     } from '../../../modules/nf-core/samtools/index/main'
 include { TABIX_BGZIPTABIX                                   } from '../../../modules/nf-core/tabix/bgziptabix/main'
-include { TRIMMOMATIC                                        } from '../../../modules/nf-core/trimmomatic/main'
+include { FASTP                                              } from '../../../modules/nf-core/fastp/main'
+include { FASTQC as FASTQC_RAW                               } from '../../../modules/nf-core/fastqc/main'
+include { FASTQC as FASTQC_TRIM                              } from '../../../modules/nf-core/fastqc/main'
 include { SAMTOOLS_FAIDX                                     } from '../../../modules/nf-core/samtools/faidx/main'
 include { FREEBAYES                                          } from '../../../modules/nf-core/freebayes/main'
 include { BCFTOOLS_NORM                                      } from '../../../modules/nf-core/bcftools/norm/main'
@@ -40,13 +42,19 @@ workflow ILLUMINA_ASSEMBLY {
 
     ch_reads_and_scheme = ARTIC_GET_SCHEME.out.reads_and_scheme.mix(ch_custom_scheme_input)
 
-    ch_trimmomatic_input = ch_reads_and_scheme.map { meta, fastq_1, fastq_2, _scheme_bed, _scheme_ref ->
+    ch_reads = ch_reads_and_scheme.map { meta, fastq_1, fastq_2, _scheme_bed, _scheme_ref ->
         [meta, [fastq_1, fastq_2]]
     }
 
-    TRIMMOMATIC(ch_trimmomatic_input)
+    FASTQC_RAW(ch_reads)
 
-    ch_trimmed_fastq = TRIMMOMATIC.out.trimmed_reads
+    ch_fastp_input = ch_reads.map { meta, reads -> [meta, reads, []] }
+
+    FASTP(ch_fastp_input, false, false, false)
+
+    FASTQC_TRIM(FASTP.out.reads)
+
+    ch_trimmed_fastq = FASTP.out.reads
         .map { meta, trimmed_fastq ->
             [meta, trimmed_fastq[0], trimmed_fastq[1]]
         }
@@ -244,7 +252,12 @@ workflow ILLUMINA_ASSEMBLY {
     emit:
     consensus_fasta              = BCFTOOLS_CONSENSUS_FIXED.out.fasta
     amplicon_depths              = ARTIC_ALIGNTRIM.out.amp_depth_report
+    pre_normalisation_coverage   = ARTIC_ALIGNTRIM.out.pre_normalisation_coverage_report
+    post_normalisation_coverage  = ARTIC_ALIGNTRIM.out.post_normalisation_coverage_report
     sorted_bam                   = BWAMEM2_MEM.out.bam
     primertrimmed_normalised_bam = ch_primertrimmed_bam
     primer_scheme                = ch_primer_scheme
+    fastp_json                   = FASTP.out.json
+    fastqc_raw_zip               = FASTQC_RAW.out.zip
+    fastqc_trim_zip              = FASTQC_TRIM.out.zip
 }
