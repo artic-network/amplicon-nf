@@ -252,6 +252,8 @@ workflow ILLUMINA_ASSEMBLY {
     emit:
     consensus_fasta              = BCFTOOLS_CONSENSUS_FIXED.out.fasta
     amplicon_depths              = ARTIC_ALIGNTRIM.out.amp_depth_report
+    pre_normalisation_coverage   = ARTIC_ALIGNTRIM.out.pre_normalisation_coverage_report
+    post_normalisation_coverage  = ARTIC_ALIGNTRIM.out.post_normalisation_coverage_report
     sorted_bam                   = BWAMEM2_MEM.out.bam
     primertrimmed_normalised_bam = ch_primertrimmed_bam
     primer_scheme                = ch_primer_scheme

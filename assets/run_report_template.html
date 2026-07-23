@@ -226,8 +226,12 @@
               <th><strong>Sample</strong></th>
               <th><strong>Primer Scheme</strong></th>
               <th><strong>Total Reads</strong></th>
-              <th><strong>Coverage Above {{minimum_coverage_depth}}x</strong></th>
-              <th><strong>Mean Depth</strong></th>
+              <th><strong>Pre-norm Coverage &ge; {{minimum_coverage_depth}}x</strong></th>
+              <th><strong>Pre-norm Mean Depth</strong></th>
+              {% if has_post_norm %}
+              <th><strong>Post-norm Coverage &ge; {{minimum_coverage_depth}}x</strong></th>
+              <th><strong>Post-norm Mean Depth</strong></th>
+              {% endif %}
               <th><strong>Total Amplicon Dropouts</strong></th>
               <th><strong>QC Result</strong></th>
             </tr>
@@ -238,8 +242,12 @@
               <td>{{ sample }}</td>
               <td>{{ results.primer_scheme }}</td>
               <td>{{ results.total_reads }}</td>
-              <td>{{ results.coverage }}</td>
-              <td>{{ results.mean_depth }}</td>
+              <td>{{ results.pre_norm_coverage }}</td>
+              <td>{{ results.pre_norm_mean_depth }}</td>
+              {% if has_post_norm %}
+              <td>{{ results.post_norm_coverage }}</td>
+              <td>{{ results.post_norm_mean_depth }}</td>
+              {% endif %}
               <td>{{ results.total_amp_dropouts }}</td>
               <td>
                 {% if results.qc_result == "pass" %}

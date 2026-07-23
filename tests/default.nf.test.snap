@@ -4,19 +4,19 @@
             126,
             {
                 "ARTIC_ALIGNTRIM": {
-                    "align_trim": "1.1.0"
+                    "align_trim": "1.2.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": "1.23.1"
@@ -79,9 +79,6 @@
                 "SAMTOOLS_COVERAGE": {
                     "samtools": "1.23.1"
                 },
-                "SAMTOOLS_DEPTH": {
-                    "samtools": "1.23.1"
-                },
                 "SAMTOOLS_FAIDX": {
                     "samtools": "1.23.1"
                 },
@@ -104,7 +101,7 @@
                     "seqkit": "2.9.0"
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.9.0"
+                    "artic-network/amplicon-nf": "v0.10.0"
                 }
             },
             [
@@ -133,6 +130,8 @@
                 "illumina_amplicon_test/illumina_amplicon_test.fastp.log",
                 "illumina_amplicon_test/illumina_amplicon_test.nextclade_report.json",
                 "illumina_amplicon_test/illumina_amplicon_test.nextclade_report.tsv",
+                "illumina_amplicon_test/illumina_amplicon_test.post-normalisation.coverage.tsv",
+                "illumina_amplicon_test/illumina_amplicon_test.pre-normalisation.coverage.tsv",
                 "illumina_amplicon_test/illumina_amplicon_test.primertrimmed.sorted.bam",
                 "illumina_amplicon_test/illumina_amplicon_test.sorted.bam",
                 "illumina_amplicon_test/illumina_amplicon_test.vcf.gz",
@@ -158,6 +157,8 @@
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.fastp.log",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.nextclade_report.json",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.nextclade_report.tsv",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.post-normalisation.coverage.tsv",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.pre-normalisation.coverage.tsv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.primertrimmed.sorted.bam",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.sorted.bam",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz",
@@ -193,6 +194,8 @@
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.fastp.log",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.nextclade_report.json",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.nextclade_report.tsv",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.post-normalisation.coverage.tsv",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.pre-normalisation.coverage.tsv",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.primertrimmed.sorted.bam",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.sorted.bam",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.vcf.gz",
@@ -218,6 +221,8 @@
                 "illumina_fuzzy_match/illumina_fuzzy_match.fastp.log",
                 "illumina_fuzzy_match/illumina_fuzzy_match.nextclade_report.json",
                 "illumina_fuzzy_match/illumina_fuzzy_match.nextclade_report.tsv",
+                "illumina_fuzzy_match/illumina_fuzzy_match.post-normalisation.coverage.tsv",
+                "illumina_fuzzy_match/illumina_fuzzy_match.pre-normalisation.coverage.tsv",
                 "illumina_fuzzy_match/illumina_fuzzy_match.primertrimmed.sorted.bam",
                 "illumina_fuzzy_match/illumina_fuzzy_match.sorted.bam",
                 "illumina_fuzzy_match/illumina_fuzzy_match.vcf.gz",
@@ -232,6 +237,8 @@
                 "nanopore_amplicon_test/nanopore_amplicon_test.minion.log.txt",
                 "nanopore_amplicon_test/nanopore_amplicon_test.nextclade_report.json",
                 "nanopore_amplicon_test/nanopore_amplicon_test.nextclade_report.tsv",
+                "nanopore_amplicon_test/nanopore_amplicon_test.post-normalisation.coverage.tsv",
+                "nanopore_amplicon_test/nanopore_amplicon_test.pre-normalisation.coverage.tsv",
                 "nanopore_amplicon_test/nanopore_amplicon_test.primer.bed",
                 "nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.sorted.bam",
                 "nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.sorted.bam.bai",
@@ -249,6 +256,8 @@
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.minion.log.txt",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.nextclade_report.json",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.nextclade_report.tsv",
+                "nanopore_custom_scheme_test/nanopore_custom_scheme_test.post-normalisation.coverage.tsv",
+                "nanopore_custom_scheme_test/nanopore_custom_scheme_test.pre-normalisation.coverage.tsv",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.primer.bed",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.primertrimmed.sorted.bam",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.primertrimmed.sorted.bam.bai",
@@ -268,6 +277,8 @@
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.minion.log.txt",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.nextclade_report.json",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.nextclade_report.tsv",
+                "nanopore_fuzzy_match/nanopore_fuzzy_match.post-normalisation.coverage.tsv",
+                "nanopore_fuzzy_match/nanopore_fuzzy_match.pre-normalisation.coverage.tsv",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.primer.bed",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.primertrimmed.sorted.bam",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.primertrimmed.sorted.bam.bai",
