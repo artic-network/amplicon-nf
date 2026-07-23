@@ -161,6 +161,10 @@ workflow AMPLICON_NF {
 
     SEQKIT_REPLACE_ILLUMINA(ILLUMINA_ASSEMBLY.out.consensus_fasta)
 
+    ch_multiqc_files = ch_multiqc_files.mix(ILLUMINA_ASSEMBLY.out.fastp_json.map { _meta, json -> json })
+    ch_multiqc_files = ch_multiqc_files.mix(ILLUMINA_ASSEMBLY.out.fastqc_raw_zip.map { _meta, zip -> zip })
+    ch_multiqc_files = ch_multiqc_files.mix(ILLUMINA_ASSEMBLY.out.fastqc_trim_zip.map { _meta, zip -> zip })
+
     ch_reheadered_consensus_fasta = SEQKIT_REPLACE_ILLUMINA.out.fastx.mix(
         SEQKIT_REPLACE_ONT.out.fastx
     )

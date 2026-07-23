@@ -4,4 +4,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::trimmomatic=0.39
+  # renovate: datasource=conda depName=bioconda/fastp
+  - bioconda::fastp=1.1.0
