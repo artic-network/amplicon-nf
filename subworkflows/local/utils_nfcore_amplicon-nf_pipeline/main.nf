@@ -77,6 +77,20 @@ workflow PIPELINE_INITIALISATION {
         }
         .set { ch_samplesheet }
 
+    // Validate that sample IDs are unique in the input samplesheet, I can't believe that JSON schemas don't support this....
+    ch_samplesheet
+        .map { meta, _fastq_dir, _fastq_1, _fastq_2 ->
+            meta.id
+        }
+        .collect()
+        .map { sample_id_list ->
+            def n_samples = sample_id_list.size()
+            def n_unique_samples = sample_id_list.unique().size()
+            if (n_samples != n_unique_samples) {
+                error("\nERROR: SampleSheet Validation Failed\n------------------------------------\nMultiple entries for the at least one sample ID were found in the input samplesheet. Please check the input samplesheet and ensure that each sample ID is unique.\n")
+            }
+        }
+
     emit:
     samplesheet = ch_samplesheet
     versions    = ch_versions

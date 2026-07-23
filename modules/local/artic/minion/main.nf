@@ -15,6 +15,8 @@ process ARTIC_MINION {
     tuple val(meta), path("${prefix}.sorted.bam"), path("${prefix}.sorted.bam.bai"), emit: sorted_bam
     tuple val(meta), path("${prefix}.primertrimmed.rg.sorted.bam"), path("${prefix}.primertrimmed.rg.sorted.bam.bai"), emit: primertrimmed_normalised_bam
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
+    tuple val(meta), path("${prefix}.pre-normalisation.coverage.tsv"), emit: pre_normalisation_coverage_report
+    tuple val(meta), path("${prefix}.post-normalisation.coverage.tsv"), emit: post_normalisation_coverage_report, optional: true
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
     tuple val(meta), path("${prefix}.primer.bed"), path("${prefix}.reference.fasta"), emit: primer_scheme

@@ -1,22 +1,22 @@
 {
     "-profile test": {
         "content": [
-            115,
+            126,
             {
                 "ARTIC_ALIGNTRIM": {
-                    "align_trim": "1.1.0"
+                    "align_trim": "1.2.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.10.3"
+                    "artic": "1.11.0"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": "1.23.1"
@@ -36,6 +36,15 @@
                 "BWAMEM2_MEM": {
                     "bwamem2": "2.2.1",
                     "samtools": "1.22.1"
+                },
+                "FASTP": {
+                    "fastp": "1.1.0"
+                },
+                "FASTQC_RAW": {
+                    "fastqc": "0.12.1"
+                },
+                "FASTQC_TRIM": {
+                    "fastqc": "0.12.1"
                 },
                 "FIND_CONCATENATE": {
                     "coreutils": 9.4,
@@ -70,9 +79,6 @@
                 "SAMTOOLS_COVERAGE": {
                     "samtools": "1.23.1"
                 },
-                "SAMTOOLS_DEPTH": {
-                    "samtools": "1.23.1"
-                },
                 "SAMTOOLS_FAIDX": {
                     "samtools": "1.23.1"
                 },
@@ -94,11 +100,8 @@
                 "SEQKIT_REPLACE_ONT": {
                     "seqkit": "2.9.0"
                 },
-                "TRIMMOMATIC": {
-                    "trimmomatic": 0.39
-                },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.9.0"
+                    "artic-network/amplicon-nf": "v0.10.0"
                 }
             },
             [
@@ -109,12 +112,26 @@
                 "artic-sars-cov-2_400_v3.0.0_amplicon-nf_run-report.html",
                 "artic-sars-cov-2_400_v3.0.0_qc_results.tsv",
                 "illumina_amplicon_test",
+                "illumina_amplicon_test/fastqc",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_raw_1_fastqc.html",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_raw_1_fastqc.zip",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_raw_2_fastqc.html",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_raw_2_fastqc.zip",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_trim_1_fastqc.html",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_trim_1_fastqc.zip",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_trim_2_fastqc.html",
+                "illumina_amplicon_test/fastqc/illumina_amplicon_test_trim_2_fastqc.zip",
                 "illumina_amplicon_test/illumina_amplicon_test.align_trim_report.tsv",
                 "illumina_amplicon_test/illumina_amplicon_test.amp_depth_report.tsv",
                 "illumina_amplicon_test/illumina_amplicon_test.auspice.nextclade_report.json",
                 "illumina_amplicon_test/illumina_amplicon_test.consensus.fasta",
+                "illumina_amplicon_test/illumina_amplicon_test.fastp.html",
+                "illumina_amplicon_test/illumina_amplicon_test.fastp.json",
+                "illumina_amplicon_test/illumina_amplicon_test.fastp.log",
                 "illumina_amplicon_test/illumina_amplicon_test.nextclade_report.json",
                 "illumina_amplicon_test/illumina_amplicon_test.nextclade_report.tsv",
+                "illumina_amplicon_test/illumina_amplicon_test.post-normalisation.coverage.tsv",
+                "illumina_amplicon_test/illumina_amplicon_test.pre-normalisation.coverage.tsv",
                 "illumina_amplicon_test/illumina_amplicon_test.primertrimmed.sorted.bam",
                 "illumina_amplicon_test/illumina_amplicon_test.sorted.bam",
                 "illumina_amplicon_test/illumina_amplicon_test.vcf.gz",
@@ -122,25 +139,63 @@
                 "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_qc-report.tsv",
                 "illumina_amplicon_test/illumina_amplicon_test_amplicon-nf_sample-report.html",
                 "illumina_custom_scheme_Test",
+                "illumina_custom_scheme_Test/fastqc",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_raw_1_fastqc.html",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_raw_1_fastqc.zip",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_raw_2_fastqc.html",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_raw_2_fastqc.zip",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_trim_1_fastqc.html",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_trim_1_fastqc.zip",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_trim_2_fastqc.html",
+                "illumina_custom_scheme_Test/fastqc/illumina_custom_scheme_Test_trim_2_fastqc.zip",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.align_trim_report.tsv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.amp_depth_report.tsv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.auspice.nextclade_report.json",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.consensus.fasta",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.fastp.html",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.fastp.json",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.fastp.log",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.nextclade_report.json",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.nextclade_report.tsv",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.post-normalisation.coverage.tsv",
+                "illumina_custom_scheme_Test/illumina_custom_scheme_Test.pre-normalisation.coverage.tsv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.primertrimmed.sorted.bam",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.sorted.bam",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test.vcf.gz.tbi",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test_amplicon-nf_qc-report.tsv",
                 "illumina_custom_scheme_Test/illumina_custom_scheme_Test_amplicon-nf_sample-report.html",
+                "illumina_empty_files",
+                "illumina_empty_files/fastqc",
+                "illumina_empty_files/fastqc/illumina_empty_files_raw_1_fastqc.html",
+                "illumina_empty_files/fastqc/illumina_empty_files_raw_1_fastqc.zip",
+                "illumina_empty_files/fastqc/illumina_empty_files_raw_2_fastqc.html",
+                "illumina_empty_files/fastqc/illumina_empty_files_raw_2_fastqc.zip",
+                "illumina_empty_files/illumina_empty_files.fastp.html",
+                "illumina_empty_files/illumina_empty_files.fastp.json",
+                "illumina_empty_files/illumina_empty_files.fastp.log",
+                "illumina_empty_files/illumina_empty_files.sorted.bam",
                 "illumina_fuzzy_lane_match",
+                "illumina_fuzzy_lane_match/fastqc",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_raw_1_fastqc.html",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_raw_1_fastqc.zip",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_raw_2_fastqc.html",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_raw_2_fastqc.zip",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_trim_1_fastqc.html",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_trim_1_fastqc.zip",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_trim_2_fastqc.html",
+                "illumina_fuzzy_lane_match/fastqc/illumina_fuzzy_lane_match_trim_2_fastqc.zip",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.align_trim_report.tsv",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.amp_depth_report.tsv",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.auspice.nextclade_report.json",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.consensus.fasta",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.fastp.html",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.fastp.json",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.fastp.log",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.nextclade_report.json",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.nextclade_report.tsv",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.post-normalisation.coverage.tsv",
+                "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.pre-normalisation.coverage.tsv",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.primertrimmed.sorted.bam",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.sorted.bam",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match.vcf.gz",
@@ -148,12 +203,26 @@
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match_amplicon-nf_qc-report.tsv",
                 "illumina_fuzzy_lane_match/illumina_fuzzy_lane_match_amplicon-nf_sample-report.html",
                 "illumina_fuzzy_match",
+                "illumina_fuzzy_match/fastqc",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_raw_1_fastqc.html",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_raw_1_fastqc.zip",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_raw_2_fastqc.html",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_raw_2_fastqc.zip",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_trim_1_fastqc.html",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_trim_1_fastqc.zip",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_trim_2_fastqc.html",
+                "illumina_fuzzy_match/fastqc/illumina_fuzzy_match_trim_2_fastqc.zip",
                 "illumina_fuzzy_match/illumina_fuzzy_match.align_trim_report.tsv",
                 "illumina_fuzzy_match/illumina_fuzzy_match.amp_depth_report.tsv",
                 "illumina_fuzzy_match/illumina_fuzzy_match.auspice.nextclade_report.json",
                 "illumina_fuzzy_match/illumina_fuzzy_match.consensus.fasta",
+                "illumina_fuzzy_match/illumina_fuzzy_match.fastp.html",
+                "illumina_fuzzy_match/illumina_fuzzy_match.fastp.json",
+                "illumina_fuzzy_match/illumina_fuzzy_match.fastp.log",
                 "illumina_fuzzy_match/illumina_fuzzy_match.nextclade_report.json",
                 "illumina_fuzzy_match/illumina_fuzzy_match.nextclade_report.tsv",
+                "illumina_fuzzy_match/illumina_fuzzy_match.post-normalisation.coverage.tsv",
+                "illumina_fuzzy_match/illumina_fuzzy_match.pre-normalisation.coverage.tsv",
                 "illumina_fuzzy_match/illumina_fuzzy_match.primertrimmed.sorted.bam",
                 "illumina_fuzzy_match/illumina_fuzzy_match.sorted.bam",
                 "illumina_fuzzy_match/illumina_fuzzy_match.vcf.gz",
@@ -168,6 +237,8 @@
                 "nanopore_amplicon_test/nanopore_amplicon_test.minion.log.txt",
                 "nanopore_amplicon_test/nanopore_amplicon_test.nextclade_report.json",
                 "nanopore_amplicon_test/nanopore_amplicon_test.nextclade_report.tsv",
+                "nanopore_amplicon_test/nanopore_amplicon_test.post-normalisation.coverage.tsv",
+                "nanopore_amplicon_test/nanopore_amplicon_test.pre-normalisation.coverage.tsv",
                 "nanopore_amplicon_test/nanopore_amplicon_test.primer.bed",
                 "nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.sorted.bam",
                 "nanopore_amplicon_test/nanopore_amplicon_test.primertrimmed.sorted.bam.bai",
@@ -185,6 +256,8 @@
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.minion.log.txt",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.nextclade_report.json",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.nextclade_report.tsv",
+                "nanopore_custom_scheme_test/nanopore_custom_scheme_test.post-normalisation.coverage.tsv",
+                "nanopore_custom_scheme_test/nanopore_custom_scheme_test.pre-normalisation.coverage.tsv",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.primer.bed",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.primertrimmed.sorted.bam",
                 "nanopore_custom_scheme_test/nanopore_custom_scheme_test.primertrimmed.sorted.bam.bai",
@@ -204,6 +277,8 @@
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.minion.log.txt",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.nextclade_report.json",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.nextclade_report.tsv",
+                "nanopore_fuzzy_match/nanopore_fuzzy_match.post-normalisation.coverage.tsv",
+                "nanopore_fuzzy_match/nanopore_fuzzy_match.pre-normalisation.coverage.tsv",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.primer.bed",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.primertrimmed.sorted.bam",
                 "nanopore_fuzzy_match/nanopore_fuzzy_match.primertrimmed.sorted.bam.bai",
@@ -240,7 +315,7 @@
             false,
             false
         ],
-        "timestamp": "2026-06-16T09:38:07.977816",
+        "timestamp": "2026-07-21T16:38:00.396496",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
