@@ -1,22 +1,22 @@
 {
     "-profile test": {
         "content": [
-            126,
+            119,
             {
                 "ARTIC_ALIGNTRIM": {
                     "align_trim": "1.2.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.11.0"
+                    "artic": "1.11.1"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.11.0"
+                    "artic": "1.11.1"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.11.0"
+                    "artic": "1.11.1"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.11.0"
+                    "artic": "1.11.1"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": "1.23.1"
@@ -315,7 +315,7 @@
             false,
             false
         ],
-        "timestamp": "2026-07-21T16:38:00.396496",
+        "timestamp": "2026-07-23T13:49:08.138784",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
