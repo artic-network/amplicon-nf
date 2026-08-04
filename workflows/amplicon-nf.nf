@@ -146,10 +146,17 @@ workflow AMPLICON_NF {
     //
     // Generate virus assemblies
     //    
+    ch_nanopore_input
+        .combine(channel.fromPath(ch_store_directory))
+        .multiMap { nanopore, store_dir ->
+            nanopore: nanopore
+            store_dir: store_dir
+        }
+        .set { ch_ont_inputs }
 
     ONT_ASSEMBLY(
-        ch_nanopore_input,
-        ch_store_directory,
+        ch_ont_inputs.nanopore,
+        ch_ont_inputs.store_dir,
     )
 
     SEQKIT_REPLACE_ONT(ONT_ASSEMBLY.out.consensus_fasta)
