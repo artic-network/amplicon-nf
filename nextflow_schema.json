@@ -191,6 +191,36 @@
                         "r941_prom_hac_g360+g422"
                     ]
                 },
+                "min_variant_quality": {
+                    "type": "integer",
+                    "title": "Minimum Variant Quality",
+                    "description": "Minimum QUAL score for a variant to pass filtering in artic minion.",
+                    "help_text": "Variants with a QUAL score below this threshold are discarded. If unset, artic minion's own default applies (currently 10). Lowering this admits lower-confidence variants into the consensus; raising it increases masking."
+                },
+                "min_allele_frequency": {
+                    "type": "number",
+                    "title": "Minimum Allele Frequency",
+                    "description": "Minimum allele frequency (AF) for a variant to be applied to the final consensus sequence in artic minion.",
+                    "help_text": "Variants with an allele frequency between this value and min_mask_allele_frequency are masked as N rather than applied. If unset, artic minion's own default applies (currently 0.6)."
+                },
+                "min_mask_allele_frequency": {
+                    "type": "number",
+                    "title": "Minimum Mask Allele Frequency",
+                    "description": "Allele frequency below which a variant is discarded rather than masked in artic minion.",
+                    "help_text": "Variants below this frequency are discarded (reference retained); variants between this and min_allele_frequency are masked as N; variants above min_allele_frequency are applied. If unset, artic minion's own default applies (currently 0.1)."
+                },
+                "min_frameshift_quality": {
+                    "type": "integer",
+                    "title": "Minimum Frameshift Quality",
+                    "description": "Minimum QUAL score for frameshift-inducing indels to pass filtering in artic minion.",
+                    "help_text": "Deliberately stricter than min_variant_quality by default, since frameshift indels are rare in viral genomes and are usually basecalling artefacts. If unset, artic minion's own default applies (currently 50)."
+                },
+                "min_minor_allele_count": {
+                    "type": "integer",
+                    "title": "Minimum Minor Allele Count",
+                    "description": "Minimum alt-allele read count (AD) for a variant to pass filtering in artic minion.",
+                    "help_text": "Variants supported by fewer reads than this are discarded regardless of frequency. If unset, artic minion's own default applies (currently 4)."
+                },
                 "min_ont_read_quality": {
                     "type": "integer",
                     "title": "Minimum mean read quality for ONT reads to pass quality filtering in guppyplex",
