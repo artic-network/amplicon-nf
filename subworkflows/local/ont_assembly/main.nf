@@ -9,7 +9,15 @@ workflow ONT_ASSEMBLY {
 
     main:
 
-    ARTIC_GET_MODELS(ch_store_directory)
+    ch_input
+        .count()
+        .filter { it > 0 }
+        .combine(Channel.value(ch_store_directory))
+        .map { _count, store_dir -> store_dir }
+        .first()
+        .set { ch_gated_store_directory }
+
+    ARTIC_GET_MODELS(ch_gated_store_directory)
 
     ARTIC_GUPPYPLEX(
         ch_input
