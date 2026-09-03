@@ -4,8 +4,8 @@ process ARTIC_MINION {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic:1.11.1--1a032a25a3234888'
-        : 'artic/fieldbioinformatics:1.11.1'}"
+        ? 'oras://community.wave.seqera.io/library/artic_gzip:9b6b316374421185'
+        : 'artic/fieldbioinformatics:1.11.2'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)

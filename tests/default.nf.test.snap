@@ -7,16 +7,16 @@
                     "align_trim": "1.2.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": "1.23.1"
@@ -101,7 +101,7 @@
                     "seqkit": "2.9.0"
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.10.0"
+                    "artic-network/amplicon-nf": "v0.11.0"
                 }
             },
             [
@@ -315,7 +315,7 @@
             false,
             false
         ],
-        "timestamp": "2026-07-23T13:49:08.138784",
+        "timestamp": "2026-08-26T15:08:29.064011",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"

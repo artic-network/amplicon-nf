@@ -114,7 +114,7 @@
                     "type": "integer",
                     "default": 20,
                     "description": "Minimum mapping quality for a read to be included in the consensus sequence.",
-                    "help_text": "Reads which map to the reference sequence with a mapping quality lower than this threshold will be discarded during the `align_trim` primer trimming / normalisation step. This may be changed if you have a specific reason to do so, but we recommend that you leave it at 20 for most amplicon sequencing applications, this is likely to only be relevant if you are sequencing a virus with repeat regions longer than the scheme amplicon length such as MPXV where the ITRs at the start and end of the genome are identical meaning that read mappers are unable to distinguish whether a read originated at the 3' or 5' end.",
+                    "help_text": "Reads which map to the reference sequence with a mapping quality lower than this threshold will be discarded during the `align_trim` primer trimming / normalisation step. This may be changed if you have a specific reason to do so, but we recommend that you leave it at 20 for most amplicon sequencing applications, this is likely to only be relevant if you are sequencing a virus with repeat regions longer than the scheme amplicon length such as MPXV where the ITRs at the start and end of the genome are identical meaning that read mappers are unable to distinguish whether a read originated at the 3' or 5' end. To disable the filter set to 0.",
                     "fa_icon": "fas fa-align-right"
                 },
                 "primer_match_threshold": {
@@ -190,6 +190,36 @@
                         "r941_prom_sup_g5014",
                         "r941_prom_hac_g360+g422"
                     ]
+                },
+                "min_variant_quality": {
+                    "type": "integer",
+                    "title": "Minimum Variant Quality",
+                    "description": "Minimum QUAL score for a variant to pass filtering in artic minion.",
+                    "help_text": "Variants with a QUAL score below this threshold are discarded. If unset, artic minion's own default applies (currently 10). Lowering this admits lower-confidence variants into the consensus; raising it increases masking."
+                },
+                "min_allele_frequency": {
+                    "type": "number",
+                    "title": "Minimum Allele Frequency",
+                    "description": "Minimum allele frequency (AF) for a variant to be applied to the final consensus sequence in artic minion.",
+                    "help_text": "Variants with an allele frequency between this value and min_mask_allele_frequency are masked as N rather than applied. If unset, artic minion's own default applies (currently 0.6)."
+                },
+                "min_mask_allele_frequency": {
+                    "type": "number",
+                    "title": "Minimum Mask Allele Frequency",
+                    "description": "Allele frequency below which a variant is discarded rather than masked in artic minion.",
+                    "help_text": "Variants below this frequency are discarded (reference retained); variants between this and min_allele_frequency are masked as N; variants above min_allele_frequency are applied. If unset, artic minion's own default applies (currently 0.1)."
+                },
+                "min_frameshift_quality": {
+                    "type": "integer",
+                    "title": "Minimum Frameshift Quality",
+                    "description": "Minimum QUAL score for frameshift-inducing indels to pass filtering in artic minion.",
+                    "help_text": "Deliberately stricter than min_variant_quality by default, since frameshift indels are rare in viral genomes and are usually basecalling artefacts. If unset, artic minion's own default applies (currently 50)."
+                },
+                "min_minor_allele_count": {
+                    "type": "integer",
+                    "title": "Minimum Minor Allele Count",
+                    "description": "Minimum alt-allele read count (AD) for a variant to pass filtering in artic minion.",
+                    "help_text": "Variants supported by fewer reads than this are discarded regardless of frequency. If unset, artic minion's own default applies (currently 4)."
                 },
                 "min_ont_read_quality": {
                     "type": "integer",

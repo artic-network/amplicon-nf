@@ -146,7 +146,6 @@ workflow AMPLICON_NF {
     //
     // Generate virus assemblies
     //    
-
     ONT_ASSEMBLY(
         ch_nanopore_input,
         ch_store_directory,
@@ -178,12 +177,13 @@ workflow AMPLICON_NF {
         ch_versions = ch_versions.mix(RUN_NEXTCLADE.out.versions)
 
         ch_nextclade_tsv = RUN_NEXTCLADE.out.tsv
-            .map {meta, tsv ->
-            [
+            .map { meta, tsv ->
+                [
                     meta.subMap("scheme", "custom_scheme", "custom_scheme_name"),
                     tsv,
-            ]
-        }.groupTuple()
+                ]
+            }
+            .groupTuple()
     }
 
     //
@@ -336,17 +336,15 @@ workflow AMPLICON_NF {
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
     // massage optional inputs
-    ch_msas_opt       = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
-    ch_nextclade_opt  = params.nextclade ? ch_nextclade_tsv :  channel.empty()
-    
+    ch_msas_opt = params.primer_mismatch_plot ? ch_msas_by_scheme : channel.empty()
+    ch_nextclade_opt = params.nextclade ? ch_nextclade_tsv : channel.empty()
+
     ch_post_norm_opt = params.normalise_depth ? ch_post_norm_tsvs_by_scheme : channel.empty()
 
     ch_run_report_input = ch_bed_by_scheme
-        // required
         .join(ch_pre_norm_tsvs_by_scheme)
         .join(ch_amp_depth_tsvs_by_scheme)
         .join(ch_coverage_tsvs_by_scheme)
-        // optional
         .join(ch_post_norm_opt, remainder: true)
         .join(ch_msas_opt, remainder: true)
         .join(ch_nextclade_opt, remainder: true)
@@ -360,7 +358,7 @@ workflow AMPLICON_NF {
                 cov,
                 msas ?: [],
                 nc ?: [],
-                samplesheet_csv
+                samplesheet_csv,
             ]
         }
 
