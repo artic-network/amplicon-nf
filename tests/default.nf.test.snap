@@ -7,16 +7,16 @@
                     "align_trim": "1.2.0"
                 },
                 "ARTIC_GET_MODELS": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "ARTIC_GET_SCHEME": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "ARTIC_GUPPYPLEX": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "ARTIC_MINION": {
-                    "artic": "1.11.1"
+                    "artic": "1.11.2"
                 },
                 "BCFTOOLS_CONSENSUS_AMBIGUOUS": {
                     "bcftools": "1.23.1"
