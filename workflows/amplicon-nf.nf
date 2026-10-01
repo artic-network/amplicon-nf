@@ -78,23 +78,23 @@ workflow AMPLICON_NF {
             }
 
         // 
-        // ONT file fuzzy matching from read_directory
+        // ONT file fuzzy matching from read_directory, explicit fastq_directory / fastq_1 paths always take precedence over barcode matching
         //
         ch_nanopore_fuzzy_match = ch_input.nanopore
-            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                !fastq_dir && meta.barcode
+            .filter { meta, fastq_dir, fastq_1, _fastq_2 ->
+                !fastq_dir && !fastq_1 && meta.barcode
             }
             .map { meta, _fastq_dir, _fastq_1, _fastq_2 ->
                 [meta, file("${read_directory}/${meta.barcode}/", checkIfExists: true)]
             }
 
-        // Mix in the fuzzy matched Nanopore files with the well behaved samplesheet entries.
+        // Mix in the fuzzy matched Nanopore files with the well behaved samplesheet entries (a directory of FASTQs or a single FASTQ file).
         ch_nanopore_input = ch_input.nanopore
-            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                fastq_dir && !meta.barcode
+            .filter { _meta, fastq_dir, fastq_1, _fastq_2 ->
+                fastq_dir || fastq_1
             }
-            .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                [meta, fastq_dir]
+            .map { meta, fastq_dir, fastq_1, _fastq_2 ->
+                [meta, fastq_dir ?: fastq_1]
             }
             .mix(ch_nanopore_fuzzy_match)
 
@@ -110,11 +110,11 @@ workflow AMPLICON_NF {
     }
     else {
         ch_nanopore_input = ch_input.nanopore
-            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                fastq_dir && !meta.barcode
+            .filter { _meta, fastq_dir, fastq_1, _fastq_2 ->
+                fastq_dir || fastq_1
             }
-            .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                [meta, fastq_dir]
+            .map { meta, fastq_dir, fastq_1, _fastq_2 ->
+                [meta, fastq_dir ?: fastq_1]
             }
 
         ch_illumina_input = ch_input.illumina

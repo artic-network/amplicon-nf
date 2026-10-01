@@ -18,8 +18,8 @@ def intervals_extract(iterable):
         yield [group[0][1], group[-1][1]]
 
 
-# write the depth mask used with bcftools to turn consensus positions into Ns
-def write_depth_mask(out_filename, contig_depths, min_coverage):
+# write the depth/ambiguity mask used with bcftools to turn consensus positions into Ns
+def write_depth_mask(out_filename, contig_depths, min_coverage, extra_mask_positions):
     maskfh = open(out_filename, "w")
     for contig_name, depths in contig_depths.items():
         # from artic-mask, create list of positions that fail the depth check
@@ -27,6 +27,9 @@ def write_depth_mask(out_filename, contig_depths, min_coverage):
         for pos, depth in enumerate(depths):
             if depth < min_coverage:
                 mask_vector.append(pos)
+
+        # additional 0-based positions to mask, e.g. ambiguous sites when IUPAC codes are disabled
+        mask_vector.extend(extra_mask_positions.get(contig_name, ()))
 
         # get the intervals from the mask_vector
         intervals = list(intervals_extract(mask_vector))
@@ -145,8 +148,9 @@ def main():
         variants_output="variants.vcf",
         consensus_sites_output="consensus.vcf",
         min_depth=int("${params.min_coverage_depth}"),
-        lower_ambiguity_frequency=float("${params.lower_ambiguity_frequency}"),
-        upper_ambiguity_frequency=float("${params.upper_ambiguity_frequency}"),
+        min_mask_allele_frequency=float("${params.min_mask_allele_frequency}"),
+        min_allele_frequency=float("${params.min_allele_frequency}"),
+        allow_iupac_codes=str("${params.allow_iupac_codes}").lower() == "true",
     )
 
     vcf = pysam.VariantFile(open("${gvcf}", "r"))
@@ -179,6 +183,9 @@ def main():
     consensus_sites_out = pysam.VariantFile(
         args.consensus_sites_output, "w", header=out_header
     )
+
+    # 0-based positions of ambiguous sites to be masked with Ns when IUPAC codes are disabled
+    ambiguous_positions = defaultdict(set)
 
     current_ref = None
     for record in vcf:
@@ -252,7 +259,7 @@ def main():
             is_indel = len(out_r.ref) != len(out_r.alts[0])
 
             # discard low frequency variants
-            if vaf < args.lower_ambiguity_frequency:
+            if vaf < args.min_mask_allele_frequency:
                 continue
 
             # Write a tag describing what to do with the variant
@@ -260,12 +267,15 @@ def main():
 
             # high-frequency subs and indels are always applied without ambiguity
             # we don't have to do an indel VAF check here as it is dealt with in handle_indel
-            if vaf > args.upper_ambiguity_frequency or is_indel:
+            if vaf >= args.min_allele_frequency or is_indel:
                 # always apply these to the consensus
                 consensus_tag = "fixed"
             else:
-                # record ambiguous SNPs in the consensus sequence with IUPAC codes
+                # record ambiguous SNPs in the consensus sequence with IUPAC codes,
+                # or mask them with Ns unless IUPAC codes are allowed
                 consensus_tag = "ambiguous"
+                if not args.allow_iupac_codes:
+                    ambiguous_positions[out_r.chrom].add(out_r.pos - 1)
             out_r.info["ConsensusTag"] = consensus_tag
             consensus_sites_out.write(out_r)
             accept_variant = True
@@ -274,7 +284,9 @@ def main():
             record.info["VAF"] = calculate_vafs(record)
             variants_out.write(record)
 
-    write_depth_mask(args.mask_output, contig_depth, args.min_depth)
+    write_depth_mask(
+        args.mask_output, contig_depth, args.min_depth, ambiguous_positions
+    )
 
     with open("versions.yml", "wt") as versions_fh:
         versions_fh.write("${task.process}:\\n  pysam: " + str(version("pysam")))

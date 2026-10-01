@@ -117,6 +117,27 @@
                     "help_text": "Reads which map to the reference sequence with a mapping quality lower than this threshold will be discarded during the `align_trim` primer trimming / normalisation step. This may be changed if you have a specific reason to do so, but we recommend that you leave it at 20 for most amplicon sequencing applications, this is likely to only be relevant if you are sequencing a virus with repeat regions longer than the scheme amplicon length such as MPXV where the ITRs at the start and end of the genome are identical meaning that read mappers are unable to distinguish whether a read originated at the 3' or 5' end. To disable the filter set to 0.",
                     "fa_icon": "fas fa-align-right"
                 },
+                "min_allele_frequency": {
+                    "type": "number",
+                    "title": "Minimum Allele Frequency",
+                    "default": 0.8,
+                    "description": "Minimum allele frequency for a variant to be applied to the consensus sequence.",
+                    "help_text": "Variants with an allele frequency at or above this value are applied to the consensus sequence. Variants with an allele frequency between min_mask_allele_frequency and this value are treated as mixed sites and masked as N (or written as IUPAC ambiguity codes in the Illumina workflow if allow_iupac_codes is set). Applies to both the Nanopore (artic minion --min-allele-frequency) and Illumina workflows. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
+                },
+                "min_mask_allele_frequency": {
+                    "type": "number",
+                    "title": "Minimum Mask Allele Frequency",
+                    "default": 0.2,
+                    "description": "Allele frequency below which a variant is discarded (reference retained) rather than masked.",
+                    "help_text": "Variants below this frequency are discarded (reference retained); variants between this and min_allele_frequency are masked as N (or written as IUPAC ambiguity codes in the Illumina workflow if allow_iupac_codes is set); variants at or above min_allele_frequency are applied. Applies to both the Nanopore (artic minion --min-mask-allele-frequency) and Illumina workflows, in the Illumina workflow this also sets the Freebayes --min-alternate-fraction."
+                },
+                "min_minor_allele_count": {
+                    "type": "integer",
+                    "title": "Minimum Minor Allele Count",
+                    "default": 4,
+                    "description": "Minimum number of reads supporting an alternate allele for a variant to be considered.",
+                    "help_text": "Variants supported by fewer reads than this are discarded regardless of frequency. Applies to both the Nanopore (artic minion --min-minor-allele-count) and Illumina workflows, in the Illumina workflow this sets the Freebayes --min-alternate-count."
+                },
                 "primer_match_threshold": {
                     "type": "integer",
                     "default": 35,
@@ -197,29 +218,11 @@
                     "description": "Minimum QUAL score for a variant to pass filtering in artic minion.",
                     "help_text": "Variants with a QUAL score below this threshold are discarded. If unset, artic minion's own default applies (currently 10). Lowering this admits lower-confidence variants into the consensus; raising it increases masking."
                 },
-                "min_allele_frequency": {
-                    "type": "number",
-                    "title": "Minimum Allele Frequency",
-                    "description": "Minimum allele frequency (AF) for a variant to be applied to the final consensus sequence in artic minion.",
-                    "help_text": "Variants with an allele frequency between this value and min_mask_allele_frequency are masked as N rather than applied. If unset, artic minion's own default applies (currently 0.6)."
-                },
-                "min_mask_allele_frequency": {
-                    "type": "number",
-                    "title": "Minimum Mask Allele Frequency",
-                    "description": "Allele frequency below which a variant is discarded rather than masked in artic minion.",
-                    "help_text": "Variants below this frequency are discarded (reference retained); variants between this and min_allele_frequency are masked as N; variants above min_allele_frequency are applied. If unset, artic minion's own default applies (currently 0.1)."
-                },
                 "min_frameshift_quality": {
                     "type": "integer",
                     "title": "Minimum Frameshift Quality",
                     "description": "Minimum QUAL score for frameshift-inducing indels to pass filtering in artic minion.",
                     "help_text": "Deliberately stricter than min_variant_quality by default, since frameshift indels are rare in viral genomes and are usually basecalling artefacts. If unset, artic minion's own default applies (currently 50)."
-                },
-                "min_minor_allele_count": {
-                    "type": "integer",
-                    "title": "Minimum Minor Allele Count",
-                    "description": "Minimum alt-allele read count (AD) for a variant to pass filtering in artic minion.",
-                    "help_text": "Variants supported by fewer reads than this are discarded regardless of frequency. If unset, artic minion's own default applies (currently 4)."
                 },
                 "min_ont_read_quality": {
                     "type": "integer",
@@ -255,32 +258,13 @@
             "description": "Settings which change the behaviour of the pipeline specifically for the Illumina workflow.",
             "default": "",
             "properties": {
-                "lower_ambiguity_frequency": {
-                    "type": "number",
-                    "title": "Lower Ambiguity Frequency",
-                    "default": 0.2,
-                    "description": "Minimum frequency of a minor allele variant to call an ambiguous variant in Freebayes.",
-                    "help_text": "Increasing this value will result in fewer ambiguity codes being added to the consensus sequence whereas reducing it will increase them. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
-                },
-                "upper_ambiguity_frequency": {
-                    "type": "number",
-                    "default": 0.8,
-                    "description": "Maximum frequency of a major allele variant to call an ambiguous variant in Freebayes.",
-                    "help_text": "Increasing this value will result in fewer ambiguity codes being added to the consensus sequence whereas reducing it will increase them. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
-                },
-                "min_ambiguity_count": {
-                    "type": "integer",
-                    "title": "Minimum Ambiguous Allele Count",
-                    "default": 10,
-                    "description": "Minimum absolute number of reads supporting a minor allele variant to call an ambiguous variant in Freebayes.",
-                    "help_text": "Increasing this value will result in fewer ambiguity codes being added to the consensus sequence whereas reducing it will increase them. Ambiguity codes may make phylogenetic analysis more difficult so this should be modified with care."
+                "allow_iupac_codes": {
+                    "type": "boolean",
+                    "title": "Allow IUPAC Ambiguity Codes",
+                    "description": "Represent mixed sites in the Illumina consensus sequence with IUPAC ambiguity codes instead of N.",
+                    "help_text": "By default, mixed sites (variants with an allele frequency between min_mask_allele_frequency and min_allele_frequency) are masked as N in the consensus sequence, consistent with the Nanopore workflow. Set this to emit IUPAC ambiguity codes (e.g. Y for C/T) instead. This has no effect on Nanopore samples, and is unrelated to the replacement of IUPAC codes within the reference sequence with N, which always happens in the Illumina workflow."
                 }
-            },
-            "required": [
-                "lower_ambiguity_frequency",
-                "upper_ambiguity_frequency",
-                "min_ambiguity_count"
-            ]
+            }
         },
         "institutional_config_options": {
             "title": "Institutional config options",

@@ -14,12 +14,20 @@ You will need to create a samplesheet with information about the samples you wou
 
 ## Nanopore (ONT) only runs
 
-There are two ways to run the pipeline for ONT data; 
+There are three ways to run the pipeline for ONT data; 
 1) with explicit FASTQ directories within the samplesheet in the `fastq_directory` column, this is recommended since all FASTQ directories are explicitly linked with their sample name within the samplesheet making mistakes where data is associated with incorrect metadata less likely.
-2) with implicit (fuzzy) matching of FASTQ directories based on the provided `barcode` column, this option will match up subdirectories of the directory provided with the `--read_directory` parameter so you will not have to provide filepaths within the samplesheet.
+2) with explicit FASTQ files within the samplesheet in the `fastq_1` column, this is useful if your reads for each sample have already been combined into a single FASTQ file.
+3) with implicit (fuzzy) matching of FASTQ directories based on the provided `barcode` column, this option will match up subdirectories of the directory provided with the `--read_directory` parameter so you will not have to provide filepaths within the samplesheet.
 
 > [!NOTE]
->Whichever option you use, it is important to remember that for ONT data the pipeline expects a directory of FASTQ files to be provided, not fastq files directly even if a directory only contains a single FASTQ file.
+> Each ONT sample must provide **either** a `fastq_directory` **or** a `fastq_1` file, not both, providing both will cause samplesheet validation to fail. Nanopore reads are single-end so `fastq_2` should be left empty for ONT samples (it is ignored with a warning if provided).
+>
+> If a sample has multiple FASTQ files (as is normally the case for MinKNOW / Dorado output) then provide the directory containing them in the `fastq_directory` column, only a single file per sample can be provided via `fastq_1`.
+>
+> Whichever option you use the reads are combined and length / quality filtered with `artic guppyplex` before analysis, so a directory or a single FASTQ file containing the same reads will produce the same results.
+
+> [!IMPORTANT]
+> Explicit paths always take precedence over fuzzy matching. If an ONT sample has a `fastq_directory` or `fastq_1` value **and** a `barcode` value, the explicit path will be used and the `barcode` will be ignored for read matching, even if `--read_directory` is provided.
 
 If you are only running ONT sequenced samples through the pipeline then you only need to fill in a subset of the samplesheet which will be different based on which of the above two options you are using, the following examples would be valid for a fastq_pass directory which looks like this:
 
@@ -50,7 +58,22 @@ sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/fastq_pass/barcode0
 > [!NOTE]
 > An [example explicit Nanopore samplesheet](../assets/samplesheet.nanopore_explicit.csv) has been provided with the pipeline for reference.
 
-### 2: Implicit (fuzzy) FASTQ Directory Input
+### 2: Explicit FASTQ File Input
+
+If your reads have already been combined into a single FASTQ file per sample then a valid samplesheet could look like this:
+```csv title="samplesheet.nanopore_explicit_file.csv"
+sample,platform,scheme_name,fastq_1
+sample1,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/barcode01.fastq.gz
+sample2,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/barcode02.fastq.gz
+sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,/some/directory/barcode03.fastq
+```
+
+FASTQ files may be gzipped (`.fastq.gz` / `.fq.gz`) or uncompressed (`.fastq` / `.fq`).
+
+> [!NOTE]
+> An [example explicit Nanopore FASTQ file samplesheet](../assets/samplesheet.nanopore_explicit_file.csv) has been provided with the pipeline for reference.
+
+### 3: Implicit (fuzzy) FASTQ Directory Input
 
 If you wish to utilise fuzzy directory matching then a valid samplesheet could look like this (remember, the `fastq_pass` directory **MUST** be provided with `--read_directory` for this samplesheet to be valid):
 
@@ -63,13 +86,16 @@ sample3,nanopore,artic-inrb-mpox/2500/v1.0.0,barcode03
 
 Please Note that the full barcode name must be provided and must match the directory exactly, as in, `01` or `1` would be invalid since they would not match the directory exactly.
 > [!NOTE]
-> An [example explicit Nanopore samplesheet](../assets/samplesheet.nanopore_implicit.csv) has been provided with the pipeline for reference.
+> An [example implicit Nanopore samplesheet](../assets/samplesheet.nanopore_implicit.csv) has been provided with the pipeline for reference.
 
 ## Illumina only runs
 
 As with ONT data, there are two ways to run the pipeline for Illumina datasets; 
-1) with explicit FASTQ directories within the samplesheet in the `fastq_1` and `fastq_2` columns, this is recommended since all FASTQ files are explicitly linked with their sample name within the samplesheet making mistakes where data is associated with incorrect metadata less likely.
+1) with explicit FASTQ files within the samplesheet in the `fastq_1` and `fastq_2` columns, this is recommended since all FASTQ files are explicitly linked with their sample name within the samplesheet making mistakes where data is associated with incorrect metadata less likely.
 2) with implicit (fuzzy) matching of FASTQ file pairs based on the provided `sample` column, this option will match up file pairs within the directory provided with the `--read_directory` parameter so you will not have to provide filepaths within the samplesheet.
+
+> [!NOTE]
+> The Illumina workflow does not support directories of FASTQ files, if an Illumina sample has a `fastq_directory` value it will be ignored and a warning will be raised. Explicit Illumina FASTQ files may be gzipped (`.fastq.gz` / `.fq.gz`) or uncompressed (`.fastq` / `.fq`), fuzzy matching with `--read_directory` only matches gzipped `*_R1*.fastq.gz` / `*_R2*.fastq.gz` file pairs.
 
 If you are only running Illumina sequenced samples through the pipeline then you only need to fill in a subset of the samplesheet which will be different based on which of the above two options you are using, the following examples would be valid for a directory which looks like this:
 
@@ -117,9 +143,10 @@ If you wish to run a mix of platforms or even a mix of primer schemes in the sam
 A final samplesheet file consisting of both Nanopore and Illumina data and a mix of primer schemes may look something like the one below. 
 
 ```csv title="samplesheet.csv"
-sample,platform,scheme_name,custom_scheme_path,custom_scheme_name,fastq_directory,fastq_1,fastq_2
-nanopore_amplicon_data,nanopore,artic-inrb-mpox/2500/v1.0.0,,,/path/to/fastq/files/Barcode01/,,,
-illumina_amplicon_data,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
+sample,barcode,platform,scheme_name,custom_scheme_path,custom_scheme_name,fastq_directory,fastq_1,fastq_2
+nanopore_amplicon_data,,nanopore,artic-inrb-mpox/2500/v1.0.0,,,/path/to/fastq/files/Barcode01/,,
+nanopore_single_fastq_data,,nanopore,artic-inrb-mpox/2500/v1.0.0,,,,/path/to/fastq/files/barcode02.fastq.gz,
+illumina_amplicon_data,,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
 ```
 
 | Column               | Description                                                                                                                                                                                         |
@@ -130,9 +157,9 @@ illumina_amplicon_data,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path
 | `scheme_name`        | The [primalscheme labs](https://labs.primalscheme.com/) identifier for the scheme used to amplify your sequencing data, this must be in the format `<SCHEME_NAME>/<SCHEME_LENGTH>/<SCHEME_VERSION>` |
 | `custom_scheme_path` | A path which points to a directory containing two files `primer.bed` and `reference.fasta` which describe your custom scheme.                                                                       |
 | `custom_scheme_name` | The name of your custom scheme, this is used to refer to the scheme in the per-run QC reports.                                                                                                      |
-| `fastq_directory`    | A directory containing your Nanopore read FASTQS for this sample.                                                                                                                                   |
-| `fastq_1`            | Full path to FastQ file for Illumina short reads 1 for this sample.                                                                                                                                 |
-| `fastq_2`            | Full path to FastQ file for Illumina short reads 2 for this sample.                                                                                                                                 |
+| `fastq_directory`    | Nanopore only. A directory containing your Nanopore read FASTQs for this sample. Cannot be combined with `fastq_1`, ignored (with a warning) for Illumina samples.                                  |
+| `fastq_1`            | Full path to FastQ file for Illumina short reads 1 for this sample, or for Nanopore samples a single FASTQ file containing all reads for this sample (an alternative to `fastq_directory`).         |
+| `fastq_2`            | Illumina only. Full path to FastQ file for Illumina short reads 2 for this sample.                                                                                                                  |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
