@@ -101,7 +101,7 @@
                     "seqkit": "2.9.0"
                 },
                 "Workflow": {
-                    "artic-network/amplicon-nf": "v0.11.0"
+                    "artic-network/amplicon-nf": "v0.12.0"
                 }
             },
             [
@@ -355,7 +355,7 @@
             false,
             false
         ],
-        "timestamp": "2026-10-01T13:59:57.276661",
+        "timestamp": "2026-10-01T14:46:16.302246",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.0"
