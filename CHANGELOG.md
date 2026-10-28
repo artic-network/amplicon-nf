@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nanopore samples with an explicit FASTQ path and a `barcode` were silently dropped, explicit paths now always take precedence over `barcode` fuzzy matching.
 - Fixed mismatched header / column order in the example `assets/samplesheet.csv`.
+- `--min_mapping_quality` is now passed to freebayes in the Illumina workflow. Previously freebayes applied its own default (`1`), discarding MAPQ 0 reads kept by `align_trim`, which caused well-covered repetitive regions (e.g. mpox inverted terminal repeats) to be depth masked when `--min_mapping_quality 0` was set.
 
 ### `Dependencies`
 
