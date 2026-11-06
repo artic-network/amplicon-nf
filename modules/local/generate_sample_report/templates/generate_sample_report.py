@@ -8,6 +8,7 @@ import plotly.io as pio
 import pandas as pd
 
 import csv
+import math
 from importlib.metadata import version
 
 from primalbedtools.scheme import Scheme
@@ -198,9 +199,17 @@ def read_depth_plot(
             row=1,
             col=1,
         )
+        # Pin the log axis to start at depth 1, otherwise fractional binned means
+        # (e.g. 0.001) drag the autorange down several decades
+        max_depth = max(
+            [depth_plot_df["depth"].max() if not depth_plot_df.empty else 0]
+            + ([post_norm_plot_df["depth"].max()] if post_norm_plot_df is not None else [])
+        )
+        y_max = math.log10(max(max_depth, min_depth, 10)) + 0.1
         fig.update_yaxes(
             type="log",
             dtick=1,
+            range=[0, y_max],
             ticks="outside",
             tickcolor="black",
             showticklabels=True,

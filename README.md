@@ -43,13 +43,14 @@ First, prepare a samplesheet with your input data that looks as follows:
 
 ```csv
 sample,barcode,platform,scheme_name,custom_scheme_path,custom_scheme_name,fastq_directory,fastq_1,fastq_2
-nanopore_amplicon_data,,nanopore,artic-inrb-mpox/2500/v1.0.0,,,/path/to/fastq/files/Barcode01/,,,
+nanopore_amplicon_data,,nanopore,artic-inrb-mpox/2500/v1.0.0,,,/path/to/fastq/files/Barcode01/,,
+nanopore_single_fastq_data,,nanopore,artic-inrb-mpox/2500/v1.0.0,,,,/path/to/fastq/files/barcode02.fastq.gz,
 illumina_amplicon_data,,illumina,,/path/to/custom_scheme/,some_scheme_name,,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
 ```
 
 The `scheme_name` field refers to a scheme as a [primalscheme labs](https://labs.primalscheme.com/) identifier e.g. `artic-inrb-mpox/2500/v1.0.0` or `artic-sars-cov-2/400/v5.4.2`.
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires only `fastq_directory` which is intended to be a directory as created by Dorado / minKNOW during basecalling, whereas Illumina requires a pair of read files.
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), the pipeline will run the Illumina and ONT workflows in parallel, it is important to note that the ONT and Illumina workflows have different input requirements. ONT requires either `fastq_directory`, a directory of FASTQ files as created by Dorado / MinKNOW during basecalling, or `fastq_1`, a single FASTQ file, whereas Illumina requires a pair of read files in `fastq_1` and `fastq_2`. FASTQ files may be gzipped (`.fastq.gz` / `.fq.gz`) or uncompressed (`.fastq` / `.fq`).
 
 > [!NOTE]
 > There are more detailed pipeline / Nextflow usage instructions (including samplesheet construction and custom primer schemes), there are available in: [docs/usage.md](docs/usage.md).

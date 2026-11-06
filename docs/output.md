@@ -109,7 +109,7 @@ The alignment FASTA(s) contain(s) an alignment of all consensus FASTAs to the sc
 
 </details>
 
-[VCF files](https://en.wikipedia.org/wiki/Variant_Call_Format) are a text based format which describes how the consensus sequence is different from the reference sequence. The VCF file created will be slightly different for the Illumina / Nanopore workflows due to differences in how they are generated, most importantly the Illumina workflow calls mixed positions using [IUPAC ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation#IUPAC_notation) but since IUPAC codes are not valid VCF format a `ConsensusTag` `INFO` tag field indicates whether the position is `ambiguous` or `fixed`. For example:
+[VCF files](https://en.wikipedia.org/wiki/Variant_Call_Format) are a text based format which describes how the consensus sequence is different from the reference sequence. The VCF file created will be slightly different for the Illumina / Nanopore workflows due to differences in how they are generated, most importantly the Illumina workflow records mixed positions (variants with an allele frequency between `--min_mask_allele_frequency` and `--min_allele_frequency`) in the VCF. In both workflows these positions are masked as `N` in the consensus sequence by default, but the Illumina workflow can instead represent them using [IUPAC ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation#IUPAC_notation) if `--allow_iupac_codes` is set. Since IUPAC codes are not valid VCF format a `ConsensusTag` `INFO` tag field indicates whether the position is `ambiguous` or `fixed`. For example:
 
 ```
 MN908947.3      1875    .       C       T       .       .       DP=38;VAF=0.210526;ConsensusTag=ambiguous       .       .
