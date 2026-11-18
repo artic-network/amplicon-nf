@@ -153,8 +153,9 @@ workflow AMPLICON_NF {
         }
         else {
             DEACON_FETCH(ch_store_directory, params.dehosting_index)
-            ch_deacon_index = DEACON_FETCH.out.store_directory.map { store_dir ->
-                file("${store_dir}/amplicon-nf/deacon-indexes/${params.dehosting_index}.idx")
+            // Wait on the fetch, but point at the real store_dir path (not the fetch task's staged symlink)
+            ch_deacon_index = DEACON_FETCH.out.store_directory.map { _store_dir ->
+                file("${params.store_dir}/amplicon-nf/deacon/${params.dehosting_index}.idx", checkIfExists: true)
             }
         }
 

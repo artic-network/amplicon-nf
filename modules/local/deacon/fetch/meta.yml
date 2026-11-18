@@ -19,7 +19,7 @@ tools:
 input:
   - store_directory:
       type: directory
-      description: Pipeline store directory (--store_dir); the index is written to `amplicon-nf/deacon-indexes/<index_name>.idx` within it
+      description: Pipeline store directory (--store_dir); the index is written to `amplicon-nf/deacon/<index_name>.idx` within it
   - index_name:
       type: string
       description: Name of a prebuilt Deacon index to fetch (e.g. panhuman-1)
@@ -28,7 +28,7 @@ output:
   store_directory:
     - store_directory:
         type: directory
-        description: The store directory, now containing `amplicon-nf/deacon-indexes/<index_name>.idx`
+        description: The store directory, now containing `amplicon-nf/deacon/<index_name>.idx`
   versions_deacon:
     - - ${task.process}:
           type: string

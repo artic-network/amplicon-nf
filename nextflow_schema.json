@@ -171,7 +171,7 @@
                     "type": "string",
                     "default": "panhuman-1",
                     "description": "Name of a prebuilt Deacon index (e.g. panhuman-1) or path to a local Deacon index file.",
-                    "help_text": "Prebuilt indexes are downloaded once into `<store_dir>/amplicon-nf/deacon-indexes/` and reused by later runs (panhuman-1 is ~3.3 GB and needs ~5 GB of RAM per sample to load). If a path to an existing index file is given it is used directly.",
+                    "help_text": "Prebuilt indexes are downloaded once into `<store_dir>/amplicon-nf/deacon/` and reused by later runs (panhuman-1 is ~3.3 GB and needs ~5 GB of RAM per sample to load). If a path to an existing index file is given it is used directly.",
                     "fa_icon": "fas fa-user-slash"
                 }
             },
