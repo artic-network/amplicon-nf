@@ -23,6 +23,8 @@ include { FIND_CONCATENATE                          } from '../modules/nf-core/f
 
 include { GENERATE_SAMPLE_REPORT                    } from '../modules/local/generate_sample_report/main'
 include { GENERATE_RUN_REPORT                       } from '../modules/local/generate_run_report/main'
+include { DEACON_FETCH                              } from '../modules/local/deacon/fetch/main'
+include { DEACON_FILTER                             } from '../modules/local/deacon/filter/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,6 +144,33 @@ workflow AMPLICON_NF {
         }
         .filter { it != null }
 
+    //
+    // Host read removal with Deacon (before guppyplex / fastp) - on by default
+    //
+    if (!params.skip_dehosting) {
+        if (file(params.dehosting_index).exists()) {
+            ch_deacon_index = file(params.dehosting_index)
+        }
+        else {
+            DEACON_FETCH(ch_store_directory, params.dehosting_index)
+            ch_deacon_index = DEACON_FETCH.out.store_directory.map { store_dir ->
+                file("${store_dir}/amplicon-nf/deacon-indexes/${params.dehosting_index}.idx")
+            }
+        }
+
+        DEACON_FILTER(
+            ch_nanopore_input.mix(
+                ch_illumina_input.map { meta, fastq_1, fastq_2 -> [meta, [fastq_1, fastq_2]] }
+            ),
+            ch_deacon_index,
+        )
+
+        // ONT: single dehosted FASTQ -> guppyplex | Illumina: glob output is sorted, so [_R1, _R2]
+        ch_nanopore_input = DEACON_FILTER.out.fastq.filter { meta, _fastq -> meta.platform == "nanopore" }
+        ch_illumina_input = DEACON_FILTER.out.fastq
+            .filter { meta, _fastq -> meta.platform == "illumina" }
+            .map { meta, fastq -> [meta, fastq[0], fastq[1]] }
+    }
 
     //
     // Generate virus assemblies

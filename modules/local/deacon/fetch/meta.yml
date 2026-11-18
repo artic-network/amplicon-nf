@@ -1,0 +1,58 @@
+name: "deacon_fetch"
+description: Download a prebuilt Deacon minimizer index into the pipeline store directory, skipping the download if it is already present
+keywords:
+  - dehosting
+  - decontamination
+  - host depletion
+  - index
+  - download
+tools:
+  - "deacon":
+      description: "Fast alignment-free sequence filter"
+      homepage: "https://github.com/bede/deacon"
+      documentation: "https://github.com/bede/deacon"
+      tool_dev_url: "https://github.com/bede/deacon"
+      doi: "10.1101/2025.06.09.658732"
+      licence: ["MIT"]
+      identifier: ""
+
+input:
+  - store_directory:
+      type: directory
+      description: Pipeline store directory (--store_dir); the index is written to `amplicon-nf/deacon-indexes/<index_name>.idx` within it
+  - index_name:
+      type: string
+      description: Name of a prebuilt Deacon index to fetch (e.g. panhuman-1)
+
+output:
+  store_directory:
+    - store_directory:
+        type: directory
+        description: The store directory, now containing `amplicon-nf/deacon-indexes/<index_name>.idx`
+  versions_deacon:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - deacon:
+          type: string
+          description: The name of the tool
+      - deacon --version | head -n1 | sed "s/deacon //":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - deacon:
+          type: string
+          description: The name of the tool
+      - deacon --version | head -n1 | sed "s/deacon //":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+authors:
+  - "@Biowilko"
+maintainers:
+  - "@Biowilko"

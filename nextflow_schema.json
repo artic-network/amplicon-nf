@@ -160,6 +160,19 @@
                     "default": 90,
                     "description": "Coverage of reference above `minimum_coverage_depth` to be considered a high QC pass.",
                     "help_text": "This number is only used to mark samples as passing QC within the run / sample reports, the default values are what we consider to be reasonable QC thresholds for amplicon sequencing but these should be changed to reflect your own requirements and QC processes."
+                },
+                "skip_dehosting": {
+                    "type": "boolean",
+                    "description": "Skip host read removal with Deacon.",
+                    "help_text": "By default reads are depleted of host sequences with Deacon before read QC (artic guppyplex for Nanopore, fastp for Illumina) and the dehosted reads are written to each sample's output directory. Set this to skip dehosting entirely.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "dehosting_index": {
+                    "type": "string",
+                    "default": "panhuman-1",
+                    "description": "Name of a prebuilt Deacon index (e.g. panhuman-1) or path to a local Deacon index file.",
+                    "help_text": "Prebuilt indexes are downloaded once into `<store_dir>/amplicon-nf/deacon-indexes/` and reused by later runs (panhuman-1 is ~3.3 GB and needs ~5 GB of RAM per sample to load). If a path to an existing index file is given it is used directly.",
+                    "fa_icon": "fas fa-user-slash"
                 }
             },
             "required": [
