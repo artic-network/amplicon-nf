@@ -8,6 +8,7 @@ import plotly.io as pio
 import pandas as pd
 
 import csv
+import math
 from importlib.metadata import version
 
 from primalbedtools.scheme import Scheme
@@ -198,9 +199,17 @@ def read_depth_plot(
             row=1,
             col=1,
         )
+        # Pin the log axis to start at depth 1, otherwise fractional binned means
+        # (e.g. 0.001) drag the autorange down several decades
+        max_depth = max(
+            [depth_plot_df["depth"].max() if not depth_plot_df.empty else 0]
+            + ([post_norm_plot_df["depth"].max()] if post_norm_plot_df is not None else [])
+        )
+        y_max = math.log10(max(max_depth, min_depth, 10)) + 0.1
         fig.update_yaxes(
             type="log",
             dtick=1,
+            range=[0, y_max],
             ticks="outside",
             tickcolor="black",
             showticklabels=True,
@@ -557,6 +566,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
             "post_norm_mean_depth",
             "total_reads",
             "total_amp_dropouts",
+            "amplicon_dropouts",
             "qc_result",
         ],
         delimiter="\t",
@@ -575,6 +585,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
                 "post_norm_mean_depth": contig["post_norm_mean_depth"] if contig["post_norm_mean_depth"] is not None else "",
                 "total_reads": contig["total_reads"],
                 "total_amp_dropouts": contig["total_amplicon_dropouts"],
+                "amplicon_dropouts": ",".join(contig["amplicon_dropouts"]),
                 "qc_result": contig["qc_status"],
             }
         )

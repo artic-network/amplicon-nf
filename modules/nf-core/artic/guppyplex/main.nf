@@ -8,7 +8,7 @@ process ARTIC_GUPPYPLEX {
         : 'artic/fieldbioinformatics:1.11.2'}"
 
     input:
-    tuple val(meta), path(fastq_dir)
+    tuple val(meta), path(fastq_dir, stageAs: 'guppyplex_input/*')
 
     output:
     tuple val(meta), path("*.fastq.gz"), emit: fastq
@@ -20,12 +20,28 @@ process ARTIC_GUPPYPLEX {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
+    // Input may be a directory of FASTQs or FASTQ file(s) supplied directly. Inputs are staged into a
+    // subdirectory so a file named '<prefix>.fastq(.gz)' can never collide with (and be overwritten by) the output.
     """
+    if [ -d "${fastq_dir}" ]; then
+        input_dir="${fastq_dir}"
+    else
+        input_dir="guppyplex_input"
+        # guppyplex only collects '*.fastq*' files, so rename '.fq' / '.fq.gz' symlinks
+        for f in guppyplex_input/*.fq guppyplex_input/*.fq.gz; do
+            [ -e "\$f" ] || continue
+            case "\$f" in
+                *.fq.gz) mv "\$f" "\${f%.fq.gz}.fastq.gz" ;;
+                *.fq)    mv "\$f" "\${f%.fq}.fastq" ;;
+            esac
+        done
+    fi
+
     artic \\
         guppyplex \\
         ${args} \\
         --threads ${task.cpus} \\
-        --directory ${fastq_dir} \\
+        --directory \${input_dir} \\
         --output ${prefix}.fastq.gz
     """
 

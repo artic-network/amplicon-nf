@@ -12,3 +12,4 @@ pipeline_info/*.{html,json,txt,yml}
 *.amplicon_depths.tsv
 *.minion.log.txt
 *.vcf.gz*
+pathoplexus/*/*.xlsx

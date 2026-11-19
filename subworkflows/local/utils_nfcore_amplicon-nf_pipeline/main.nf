@@ -69,9 +69,25 @@ workflow PIPELINE_INITIALISATION {
     Channel.fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map { meta, fastq_dir, fastq_1, fastq_2 ->
             if (meta.platform == "illumina") {
+                if (fastq_dir) {
+                    log.warn(
+                        "\nWARNING: Sample '${meta.id}' is an Illumina sample but has a 'fastq_directory' value, which will be IGNORED.\n" +
+                        "    The Illumina workflow does not support directories of FASTQ files, please provide paired reads in the 'fastq_1' and 'fastq_2' columns\n" +
+                        "    (or leave them empty and use --read_directory for fuzzy matching).\n"
+                    )
+                }
                 return [meta + [single_end: false], fastq_dir, fastq_1, fastq_2]
             }
             else {
+                if (fastq_dir && fastq_1) {
+                    error("\nERROR: SampleSheet Validation Failed\n------------------------------------\nNanopore sample '${meta.id}' provides both 'fastq_directory' and 'fastq_1'. Please provide EITHER a directory of FASTQ files in 'fastq_directory' OR a single FASTQ file in 'fastq_1', not both.\n")
+                }
+                if (fastq_2) {
+                    log.warn(
+                        "\nWARNING: Sample '${meta.id}' is a Nanopore sample but has a 'fastq_2' value, which will be IGNORED.\n" +
+                        "    Nanopore reads are single-end, please provide them as a directory in 'fastq_directory' or as a single file in 'fastq_1'.\n"
+                    )
+                }
                 return [meta + [single_end: true], fastq_dir, fastq_1, fastq_2]
             }
         }

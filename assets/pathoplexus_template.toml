@@ -1,0 +1,675 @@
+# amplicon-nf Pathoplexus metadata template definition
+#
+# Hand-maintained local copy of the Pathoplexus submission spec, used by the
+# PATHOPLEXUS_TEMPLATE module (on unless --skip_pathoplexus_template). Nothing is fetched at runtime.
+# Copied from pathoplexus loculus_values/values.yaml at the commit in [provenance].
+#
+# Contents: only the fields amplicon-nf can fill from run information, plus a small set of
+# high-impact fields users are asked to fill in themselves. Users can add any other
+# Pathoplexus field as an extra column (exact machine name) before uploading.
+#
+# File order = column order. `fastaIds` and `files.rawReads` are only written when needed
+# (multi-record samples / dehosted reads available). Whether a field is auto-filled is decided
+# by the AUTO table in modules/local/pathoplexus/sample/templates/pathoplexus_sample.py, not by
+# this file: every field listed here that is not in AUTO is highlighted for the user to fill in.
+#
+# Keys per field:
+#   name          exact Pathoplexus machine name (column header)
+#   display_name  Pathoplexus display name
+#   tier          "required" | "desired" | "optional" (Pathoplexus base requirement level)
+#   definition, guidance, example   copied verbatim from Pathoplexus values.yaml (optional)
+#   options       controlled vocabulary, copied verbatim (optional; becomes an XLSX dropdown)
+#
+# Updating when Pathoplexus changes its spec:
+#   1. Find the production pathoplexus commit: deploy/production/config.json (head_sha) in
+#      https://github.com/pathoplexus/loculus_deployments
+#   2. In loculus_values/values.yaml at that commit, re-copy display name, definition, guidance,
+#      example, options and required/desired flags for each field below from
+#      defaultOrganismConfig.schema.metadata / extraInputFields.
+#   3. Re-check organism-specific overrides (organisms.*.schema.extraInputFields / metadataAdd),
+#      e.g. `host` is required for dengue, yellow fever, zika and chikungunya.
+#   4. Spot-check against https://pathoplexus.org/<organism>/submission/template?fileType=xlsx
+#   5. Update [provenance].
+
+[provenance]
+pathoplexus_sha = "71791ce4bf329364ec70362aa1a502cf171030c9"
+loculus_version = "e39435956308cea69ca6f11b67352e1ae2f78d07"
+checked_on = "2026-11-18"
+
+# ---- linking ----
+[[fields]]
+name = "id"
+display_name = "Sample ID"
+tier = "required"
+definition = "Your sequence identifier; should match the sequence's id in the FASTA file - this is used to link the metadata to the FASTA sequence. Depending on its format, this ID may be parsed and incorporated in the display name of this sequence on the website if `specimenCollectorSampleId` is not set."
+example = "SAMPLE-001"
+
+[[fields]]
+name = "fastaIds"
+display_name = "FASTA IDs"
+tier = "desired"
+definition = "Space-separated list of the FASTA IDs of every sequence (e.g. genome segment) that belongs to this metadata entry. Only written by amplicon-nf when at least one sample has more than one consensus sequence."
+
+# ---- user-fill: highlighted in the XLSX ----
+[[fields]]
+name = "sampleCollectionDate"
+display_name = "Collection date"
+tier = "required"
+definition = "The date (or date range) on which the sample was collected."
+guidance = "Please format the date as `YYYY-MM-DD`. If day is unknown, use `YYYY-MM` (e.g., `2020-03`). If both day and month are unknown, use `YYYY` (e.g., `2020`). If only a range is known please supply the range in ISO format `date_lower/date_upper` where `date_lower` and `date_upper` are in the format `YYYY-MM-DD`, `YYYY-MM` or `YYYY`. Please provide at least a year."
+example = "2020-03-15"
+
+[[fields]]
+name = "geoLocCountry"
+display_name = "Country"
+tier = "required"
+definition = "The country from which the sample was collected."
+guidance = "Please choose a country or ocean/sea from the list of options defined by INSDC standards."
+example = "Canada"
+options = [
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "American Samoa",
+    "Andorra",
+    "Angola",
+    "Anguilla",
+    "Antarctica",
+    "Antigua and Barbuda",
+    "Arctic Ocean",
+    "Argentina",
+    "Armenia",
+    "Aruba",
+    "Ashmore and Cartier Islands",
+    "Atlantic Ocean",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas",
+    "Bahrain",
+    "Baltic Sea",
+    "Baker Island",
+    "Bangladesh",
+    "Barbados",
+    "Bassas da India",
+    "Belarus",
+    "Belgium",
+    "Belize",
+    "Benin",
+    "Bermuda",
+    "Bhutan",
+    "Bolivia",
+    "Borneo",
+    "Bosnia and Herzegovina",
+    "Botswana",
+    "Bouvet Island",
+    "Brazil",
+    "British Virgin Islands",
+    "Brunei",
+    "Bulgaria",
+    "Burkina Faso",
+    "Burundi",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "Cape Verde",
+    "Cayman Islands",
+    "Central African Republic",
+    "Chad",
+    "Chile",
+    "China",
+    "Christmas Island",
+    "Clipperton Island",
+    "Cocos Islands",
+    "Colombia",
+    "Comoros",
+    "Cook Islands",
+    "Coral Sea Islands",
+    "Costa Rica",
+    "Cote d'Ivoire",
+    "Croatia",
+    "Cuba",
+    "Curacao",
+    "Cyprus",
+    "Czechia",
+    "Democratic Republic of the Congo",
+    "Denmark",
+    "Djibouti",
+    "Dominica",
+    "Dominican Republic",
+    "Ecuador",
+    "Egypt",
+    "El Salvador",
+    "Equatorial Guinea",
+    "Eritrea",
+    "Estonia",
+    "Eswatini",
+    "Ethiopia",
+    "Europa Island",
+    "Falkland Islands (Islas Malvinas)",
+    "Faroe Islands",
+    "Fiji",
+    "Finland",
+    "France",
+    "French Guiana",
+    "French Polynesia",
+    "French Southern and Antarctic Lands",
+    "Gabon",
+    "Gambia",
+    "Gaza Strip",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Gibraltar",
+    "Glorioso Islands",
+    "Greece",
+    "Greenland",
+    "Grenada",
+    "Guadeloupe",
+    "Guam",
+    "Guatemala",
+    "Guernsey",
+    "Guinea",
+    "Guinea-Bissau",
+    "Guyana",
+    "Haiti",
+    "Heard Island and McDonald Islands",
+    "Honduras",
+    "Hong Kong",
+    "Howland Island",
+    "Hungary",
+    "Iceland",
+    "India",
+    "Indian Ocean",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "Ireland",
+    "Isle of Man",
+    "Israel",
+    "Italy",
+    "Jamaica",
+    "Jan Mayen",
+    "Japan",
+    "Jarvis Island",
+    "Jersey",
+    "Johnston Atoll",
+    "Jordan",
+    "Juan de Nova Island",
+    "Kazakhstan",
+    "Kenya",
+    "Kerguelen Archipelago",
+    "Kingman Reef",
+    "Kiribati",
+    "Kosovo",
+    "Kuwait",
+    "Kyrgyzstan",
+    "Laos",
+    "Latvia",
+    "Lebanon",
+    "Lesotho",
+    "Liberia",
+    "Libya",
+    "Liechtenstein",
+    "Line Islands",
+    "Lithuania",
+    "Luxembourg",
+    "Macau",
+    "Madagascar",
+    "Malawi",
+    "Malaysia",
+    "Maldives",
+    "Mali",
+    "Malta",
+    "Marshall Islands",
+    "Martinique",
+    "Mauritania",
+    "Mauritius",
+    "Mayotte",
+    "Mediterranean Sea",
+    "Mexico",
+    "Micronesia, Federated States of",
+    "Midway Islands",
+    "Moldova",
+    "Monaco",
+    "Mongolia",
+    "Montenegro",
+    "Montserrat",
+    "Morocco",
+    "Mozambique",
+    "Myanmar",
+    "Namibia",
+    "Nauru",
+    "Navassa Island",
+    "Nepal",
+    "Netherlands",
+    "New Caledonia",
+    "New Zealand",
+    "Nicaragua",
+    "Niger",
+    "Nigeria",
+    "Niue",
+    "Norfolk Island",
+    "North Korea",
+    "North Macedonia",
+    "North Sea",
+    "Northern Mariana Islands",
+    "Norway",
+    "Oman",
+    "Pacific Ocean",
+    "Pakistan",
+    "Palau",
+    "Palmyra Atoll",
+    "Panama",
+    "Papua New Guinea",
+    "Paracel Islands",
+    "Paraguay",
+    "Peru",
+    "Philippines",
+    "Pitcairn Islands",
+    "Poland",
+    "Portugal",
+    "Puerto Rico",
+    "Qatar",
+    "Republic of the Congo",
+    "Reunion",
+    "Romania",
+    "Ross Sea",
+    "Russia",
+    "Rwanda",
+    "Saint Barthelemy",
+    "Saint Helena",
+    "Saint Kitts and Nevis",
+    "Saint Lucia",
+    "Saint Martin",
+    "Saint Pierre and Miquelon",
+    "Saint Vincent and the Grenadines",
+    "Samoa",
+    "San Marino",
+    "Sao Tome and Principe",
+    "Saudi Arabia",
+    "Senegal",
+    "Serbia",
+    "Seychelles",
+    "Sierra Leone",
+    "Singapore",
+    "Sint Maarten",
+    "Slovakia",
+    "Slovenia",
+    "Solomon Islands",
+    "Somalia",
+    "South Africa",
+    "South Georgia and the South Sandwich Islands",
+    "South Korea",
+    "South Sudan",
+    "Southern Ocean",
+    "Spain",
+    "Spratly Islands",
+    "Sri Lanka",
+    "State of Palestine",
+    "Sudan",
+    "Suriname",
+    "Svalbard",
+    "Sweden",
+    "Switzerland",
+    "Syria",
+    "Taiwan",
+    "Tajikistan",
+    "Tanzania",
+    "Tasman Sea",
+    "Thailand",
+    "Timor-Leste",
+    "Togo",
+    "Tokelau",
+    "Tonga",
+    "Trinidad and Tobago",
+    "Tromelin Island",
+    "Tunisia",
+    "Turkey",
+    "Turkmenistan",
+    "Turks and Caicos Islands",
+    "Tuvalu",
+    "Uganda",
+    "Ukraine",
+    "United Arab Emirates",
+    "United Kingdom",
+    "Uruguay",
+    "USA",
+    "Uzbekistan",
+    "Vanuatu",
+    "Venezuela",
+    "Viet Nam",
+    "Virgin Islands",
+    "Wake Island",
+    "Wallis and Futuna",
+    "West Bank",
+    "Western Sahara",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe",
+    "Belgian Congo",
+    "British Guiana",
+    "Burma",
+    "Czechoslovakia",
+    "Czech Republic",
+    "East Timor",
+    "Korea",
+    "Macedonia",
+    "Micronesia",
+    "Netherlands Antilles",
+    "Serbia and Montenegro",
+    "Siam",
+    "Swaziland",
+    "The former Yugoslav Republic of Macedonia",
+    "USSR",
+    "Yugoslavia",
+    "Zaire",
+]
+
+[[fields]]
+name = "geoLocAdmin1"
+display_name = "Admin level 1"
+tier = "desired"
+definition = "A local administrative region from which the sample was collected (ex: Province, State, Canton)."
+example = "Ontario"
+
+[[fields]]
+name = "geoLocAdmin2"
+display_name = "Admin level 2"
+tier = "desired"
+definition = "A local administrative region from which the sample was collected (ex: county or municipality)."
+example = "City of Toronto"
+
+[[fields]]
+name = "host"
+display_name = "Host"
+tier = "desired"
+definition = "NCBI taxon ID or scientific name that uniquely identifies the host from which the sample was collected."
+guidance = "You can provide either the scientific name of the organism (e.g., `Aedes aegypti`) or its NCBI taxon ID (e.g., `7159`) in this field. We will validate your input and use it to populate the `hostNameCommon` and `hostNameScientific` fields. If the host is not known, please enter `unidentified`. When uploading data from a pooled sample, we recommend using a higher-level taxon that includes all host organisms in the sample pool. For example, you can use `Culicidae` when uploading data for a pooled mosquito sample (in addition to setting the `specimenProcessing` field to `pooling specimens`, see [OBI:0600016]). (amplicon-nf note: host is REQUIRED by Pathoplexus for dengue, yellow fever, zika and chikungunya submissions; leaving it empty causes a processing error for those organisms.)"
+example = "Aedes aegypti"
+
+[[fields]]
+name = "authors"
+display_name = "Authors"
+tier = "required"
+definition = "List of authors who should be listed on the sample."
+guidance = "Authors should be separated by semi-colons. Each author's name should be in the format `last name, first name;`. Last name(s) is mandatory, only ASCII alphabetical characters A-Z are allowed."
+example = "Smith, Anna; Perez, Tom J.; Xu,;"
+
+# ---- auto-filled by amplicon-nf ----
+[[fields]]
+name = "sequencingInstrument"
+display_name = "Sequencing instrument"
+tier = "desired"
+definition = "The model of the sequencing instrument used. This field is required when raw reads are supplied."
+guidance = "Select the sequencing instrument from the pick list."
+example = "MinION"
+options = [
+    "454 GS",
+    "454 GS 20",
+    "454 GS FLX",
+    "454 GS FLX Titanium",
+    "454 GS FLX+",
+    "454 GS Junior",
+    "AB 310 Genetic Analyzer",
+    "AB 3130 Genetic Analyzer",
+    "AB 3130xL Genetic Analyzer",
+    "AB 3500 Genetic Analyzer",
+    "AB 3500xL Genetic Analyzer",
+    "AB 3730 Genetic Analyzer",
+    "AB 3730xL Genetic Analyzer",
+    "AVITI 24",
+    "BGISEQ-50",
+    "BGISEQ-500",
+    "DNBSEQ-G400",
+    "DNBSEQ-G400 FAST",
+    "DNBSEQ-G50",
+    "DNBSEQ-T7",
+    "DNBSEQ-T10x4RS",
+    "Element AVITI",
+    "FASTASeq 300",
+    "GENIUS",
+    "GS111",
+    "Genapsys Sequencer",
+    "GenoCare 1600",
+    "GenoLab M",
+    "GridION",
+    "HiSeq X Five",
+    "HiSeq X Ten",
+    "Illumina Genome Analyzer",
+    "Illumina Genome Analyzer II",
+    "Illumina Genome Analyzer IIx",
+    "Illumina HiScanSQ",
+    "Illumina HiSeq 1000",
+    "Illumina HiSeq 1500",
+    "Illumina HiSeq 2000",
+    "Illumina HiSeq 2500",
+    "Illumina HiSeq 3000",
+    "Illumina HiSeq 4000",
+    "Illumina HiSeq X",
+    "Illumina MiSeq",
+    "Illumina MiniSeq",
+    "Illumina NovaSeq 6000",
+    "Illumina NovaSeq X",
+    "Illumina NovaSeq X Plus",
+    "Illumina iSeq 100",
+    "Ion GeneStudio S5",
+    "Ion GeneStudio S5 Plus",
+    "Ion GeneStudio S5 Prime",
+    "Ion Torrent Genexus",
+    "Ion Torrent PGM",
+    "Ion Torrent Proton",
+    "Ion Torrent S5",
+    "Ion Torrent S5 XL",
+    "MGISEQ-2000RS",
+    "MinION",
+    "NextSeq 1000",
+    "NextSeq 2000",
+    "NextSeq 500",
+    "NextSeq 550",
+    "Onso",
+    "PacBio RS",
+    "PacBio RS II",
+    "PromethION",
+    "Revio",
+    "Sentosa SQ301",
+    "Sequel",
+    "Sequel II",
+    "Sequel IIe",
+    "UG 100",
+    "ILLUMINA",
+    "PACBIO_SMRT",
+    "OXFORD_NANOPORE",
+    "BGISEQ",
+    "LS454",
+    "ION_TORRENT",
+    "CAPILLARY",
+    "DNBSEQ",
+    "ELEMENT",
+    "ULTIMA",
+    "VELA_DIAGNOSTICS",
+    "GENAPSYS",
+    "GENEMIND",
+    "TAPESTRI",
+    "AVITI",
+]
+
+[[fields]]
+name = "sequencingAssayType"
+display_name = "Sequencing assay type"
+tier = "desired"
+definition = "The overarching sequencing technique that was used to determine the sequence of a biomaterial, also called library strategy in the INSDC."
+guidance = "Select the sequencing technology from the pick list."
+example = "WGS"
+options = [
+    "WGS",
+    "WGA",
+    "WXS",
+    "RNA-Seq",
+    "ssRNA-seq",
+    "snRNA-seq",
+    "miRNA-Seq",
+    "ncRNA-Seq",
+    "FL-cDNA",
+    "EST",
+    "Hi-C",
+    "ATAC-seq",
+    "WCS",
+    "RAD-Seq",
+    "CLONE",
+    "POOLCLONE",
+    "AMPLICON",
+    "CLONEEND",
+    "FINISHING",
+    "ChIP-Seq",
+    "MNase-Seq",
+    "DNase-Hypersensitivity",
+    "Bisulfite-Seq",
+    "CTS",
+    "MRE-Seq",
+    "MeDIP-Seq",
+    "MBD-Seq",
+    "Tn-Seq",
+    "VALIDATION",
+    "FAIRE-seq",
+    "SELEX",
+    "RIP-Seq",
+    "ChIA-PET",
+    "Synthetic-Long-Read",
+    "Targeted-Capture",
+    "Tethered Chromatin Conformation Capture",
+    "NOMe-seq",
+    "ChM-Seq",
+    "GBS",
+    "Ribo-seq",
+    "OTHER",
+]
+
+[[fields]]
+name = "sequencingDate"
+display_name = "Sequencing date"
+tier = "optional"
+definition = "The date the sample was sequenced."
+guidance = "Please format the date as `YYYY-MM-DD`. If day is unknown, use `YYYY-MM` (e.g., `2020-03`). If both day and month are unknown, use `YYYY` (e.g., `2020`). Please provide at least a year."
+example = "2021-04-26"
+
+[[fields]]
+name = "sequencingProtocol"
+display_name = "Sequencing protocol"
+tier = "desired"
+definition = "The protocol used to generate the sequence."
+guidance = "Provide methods and materials used to generate the sequence (e.g. amplicon strategy, primer scheme, sequencing instrument, library kit)."
+example = "Genomes were generated through amplicon sequencing of 1200 bp amplicons with Freed schema primers. Libraries were created using Illumina DNA Prep kits, and sequence data was produced using Miseq Micro v2 (500 cycles) sequencing kits."
+
+[[fields]]
+name = "ampliconPcrPrimerScheme"
+display_name = "Amplicon PCR primer scheme"
+tier = "optional"
+definition = "The specifications of the primers (primer sequences, binding positions, fragment size generated etc) used to generate the amplicons to be sequenced."
+example = "https://github.com/joshquick/artic-ncov2019/blob/master/primer_schemes/nCoV-2019/V3/nCoV-2019.tsv"
+
+[[fields]]
+name = "ampliconSize"
+display_name = "Amplicon size"
+tier = "optional"
+definition = "The length of the amplicon generated by PCR amplification including units."
+example = "300bp"
+
+[[fields]]
+name = "assemblyReferenceGenomeAccession"
+display_name = "Reference genome accession"
+tier = "optional"
+definition = "A persistent, unique identifier of a genome database entry."
+guidance = "Provide the INSDC accession number of the reference genome used for mapping/assembly."
+example = "NC_045512.2"
+
+[[fields]]
+name = "rawSequenceDataProcessingMethod"
+display_name = "Raw sequence data processing method"
+tier = "optional"
+definition = "The method used for raw data processing such as removing barcodes, adapter trimming, filtering etc."
+guidance = "Provide the name and version numbers of the software used to process the raw data."
+example = "Porechop 0.2.3"
+
+[[fields]]
+name = "dehostingMethod"
+display_name = "Dehosting method"
+tier = "optional"
+definition = "The method used to remove host reads from the pathogen sequence."
+guidance = "Provide the name and version number of the software used to remove host reads."
+example = "Nanostripper 1.2.3"
+
+[[fields]]
+name = "consensusSequenceSoftwareName"
+display_name = "Consensus sequence software name"
+tier = "optional"
+definition = "The name of software used to generate the consensus sequence."
+guidance = "Provide the name of the software used to generate the consensus sequence."
+example = "Ivar"
+
+[[fields]]
+name = "consensusSequenceSoftwareVersion"
+display_name = "Consensus sequence software version"
+tier = "optional"
+definition = "The version of the software used to generate the consensus sequence."
+guidance = "Provide the version of the software used to generate the consensus sequence."
+example = "1.3"
+
+[[fields]]
+name = "depthOfCoverage"
+display_name = "Depth of coverage"
+tier = "desired"
+definition = "The average number of reads representing a given nucleotide in the reconstructed sequence."
+guidance = "Provide value as a fold of coverage (as a number)."
+example = "400"
+
+[[fields]]
+name = "breadthOfCoverage"
+display_name = "Breadth of coverage"
+tier = "optional"
+definition = "The percentage of the reference genome covered by the sequenced data, at a prescribed depth (`depthOfCoverage`)."
+guidance = "Provide the percentage as a number."
+example = "95"
+
+[[fields]]
+name = "qualityControlMethodName"
+display_name = "Quality control method name"
+tier = "optional"
+definition = "The name of the method used to assess whether a sequence passed a predetermined quality control threshold."
+guidance = "Method names can be provided as the name of a pipeline or a link to a GitHub repository. Multiple methods should be listed and separated by a semi-colon."
+example = "ncov-tools"
+
+[[fields]]
+name = "qualityControlMethodVersion"
+display_name = "Quality control method version"
+tier = "optional"
+definition = "The version number of the method used to assess whether a sequence passed a predetermined quality control threshold."
+guidance = "If multiple methods were used, record the version numbers in the same order as the method names. Separate the version numbers using a semi-colon."
+example = "1.2.3"
+
+[[fields]]
+name = "qualityControlDetermination"
+display_name = "Quality control determination"
+tier = "optional"
+definition = "The determination (result) of a quality control assessment."
+example = "sequence failed quality control"
+
+[[fields]]
+name = "qualityControlIssues"
+display_name = "Quality control issues"
+tier = "optional"
+definition = "The reason contributing to, or causing, a low quality determination in a quality control assessment."
+example = "low average genome coverage"
+
+[[fields]]
+name = "qualityControlDetails"
+display_name = "Quality control details"
+tier = "optional"
+definition = "The details surrounding a low quality determination in a quality control assessment."
+example = "CT value of 39. Low viral load. Low DNA concentration after amplification."
+
+[[fields]]
+name = "files.rawReads"
+display_name = "Raw reads"
+tier = "optional"
+definition = "Space-separated list of the raw read file names belonging to this entry, as uploaded alongside the metadata (website: select the raw_reads folder with 'Upload folder'). Only written by amplicon-nf when dehosted reads are available."
