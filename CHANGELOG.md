@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A warning is now raised when an Illumina sample has a `fastq_directory` value (which is ignored) or a Nanopore sample has a `fastq_2` value (which is ignored).
 - A Nanopore sample which provides both `fastq_directory` and `fastq_1` now fails samplesheet validation with an informative error.
 - New `--allow_iupac_codes` parameter (default `false`) to represent mixed sites in the Illumina consensus sequence with IUPAC ambiguity codes instead of `N`.
+- A Pathoplexus submission folder is now prepared per primer scheme by default (turn off with the new `--skip_pathoplexus_template` parameter).
+  - Each folder contains a virus-agnostic metadata template (XLSX and TSV), a FASTA with matching IDs, and the dehosted reads with FASTQ headers stripped to the read ID.
+  - Everything that can be derived from the run is filled in automatically, including sequencing date and flow cell type from Nanopore read headers, QC results and dropout amplicons.
+  - Not designed for primer panels or multi-pathogen schemes, where the reference contains several sequences that are not segments of one genome (segmented genomes and reference-selecting schemes are supported).
+- The per-sample QC TSV (`<SAMPLE>_amplicon-nf_qc-report.tsv`) has a new `amplicon_dropouts` column listing the amplicons below `--min_coverage_depth`.
 
 ### `Changed`
 
@@ -24,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nanopore samples with an explicit FASTQ path and a `barcode` were silently dropped, explicit paths now always take precedence over `barcode` fuzzy matching.
 - Fixed mismatched header / column order in the example `assets/samplesheet.csv`.
+- Illumina samples now use their own reference when a primer scheme picks a reference variant per sample (refselect schemes such as `artic-pan-ebola`). Previously the reference, BWA index and FASTA index were deduplicated per scheme, so every Illumina sample of the scheme was aligned, variant called and given a consensus against the first sample's variant. These are now deduplicated per distinct reference.
 - `--min_mapping_quality` is now passed to freebayes in the Illumina workflow. Previously freebayes applied its own default (`1`), discarding MAPQ 0 reads kept by `align_trim`, which caused well-covered repetitive regions (e.g. mpox inverted terminal repeats) to be depth masked when `--min_mapping_quality 0` was set.
 
 ### `Dependencies`

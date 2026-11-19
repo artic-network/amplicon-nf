@@ -4,8 +4,8 @@ process DEACON_FETCH {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/deacon:0.19.1--h3edb6b3_0'
-        : 'quay.io/biocontainers/deacon:0.19.1--h3edb6b3_0'}"
+        ? 'https://depot.galaxyproject.org/singularity/deacon:0.20.0--h3edb6b3_0'
+        : 'quay.io/biocontainers/deacon:0.20.0--h3edb6b3_0'}"
 
     input:
     path store_directory
@@ -28,14 +28,13 @@ process DEACON_FETCH {
 
     mkdir -p ${index_dir}
 
-    # deacon downloads to <output>.tmp and renames on completion, so a present index is a complete one
-    if [ ! -s ${index_dir}/${index_name}.idx ]; then
-        deacon \\
-            index fetch \\
-            ${args} \\
-            ${index_name} \\
-            --output ${index_dir}/${index_name}.idx
-    fi
+    # deacon (>= 0.20) skips the download if the index already exists (add --force via ext.args to
+    # replace it) and never leaves a truncated download in place of a complete index
+    deacon \\
+        index fetch \\
+        ${args} \\
+        ${index_name} \\
+        --output ${index_dir}/${index_name}.idx
     """
 
     stub:

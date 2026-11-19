@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::deacon=0.19.1
+  - bioconda::deacon=0.20.0

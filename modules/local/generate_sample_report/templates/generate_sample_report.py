@@ -566,6 +566,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
             "post_norm_mean_depth",
             "total_reads",
             "total_amp_dropouts",
+            "amplicon_dropouts",
             "qc_result",
         ],
         delimiter="\t",
@@ -584,6 +585,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
                 "post_norm_mean_depth": contig["post_norm_mean_depth"] if contig["post_norm_mean_depth"] is not None else "",
                 "total_reads": contig["total_reads"],
                 "total_amp_dropouts": contig["total_amplicon_dropouts"],
+                "amplicon_dropouts": ",".join(contig["amplicon_dropouts"]),
                 "qc_result": contig["qc_status"],
             }
         )

@@ -4,8 +4,8 @@ process DEACON_FILTER {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/deacon:0.19.1--h3edb6b3_0'
-        : 'quay.io/biocontainers/deacon:0.19.1--h3edb6b3_0'}"
+        ? 'https://depot.galaxyproject.org/singularity/deacon:0.20.0--h3edb6b3_0'
+        : 'quay.io/biocontainers/deacon:0.20.0--h3edb6b3_0'}"
 
     input:
     // nanopore: fastq directory or single fastq file | illumina: [fastq_1, fastq_2]
@@ -28,14 +28,28 @@ process DEACON_FILTER {
         """
         if [ -d ${reads} ]; then
             # Mirror guppyplex's input rules (top-level *.fastq*, skip *.temp) and stream everything through one deacon run
-            # awful, will fix when deacon accepts gzipped input directly over stdin or directory input
+            files=()
+            n_gz=0
             for f in ${reads}/*.fastq*; do
                 case "\$f" in
-                    *.temp) continue ;;
-                    *.gz) gzip -dc "\$f" ;;
-                    *) cat "\$f" ;;
+                    *.temp) ;;
+                    *.gz) files+=("\$f"); n_gz=\$((n_gz + 1)) ;;
+                    *) files+=("\$f") ;;
                 esac
-            done | deacon \\
+            done
+            # deacon (>= 0.20) detects gzip on stdin and reads concatenated .gz files as one stream, so the
+            # files are passed through compressed. One stream can't switch between gzip and plain text, so a
+            # directory mixing the two is decompressed file by file instead.
+            if [ \$n_gz -eq 0 ] || [ \$n_gz -eq \${#files[@]} ]; then
+                cat "\${files[@]}"
+            else
+                for f in "\${files[@]}"; do
+                    case "\$f" in
+                        *.gz) gzip -dc "\$f" ;;
+                        *) cat "\$f" ;;
+                    esac
+                done
+            fi | deacon \\
                 filter \\
                 --deplete \\
                 --threads ${task.cpus} \\

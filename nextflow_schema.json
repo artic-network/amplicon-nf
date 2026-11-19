@@ -173,6 +173,12 @@
                     "description": "Name of a prebuilt Deacon index (e.g. panhuman-1) or path to a local Deacon index file.",
                     "help_text": "Prebuilt indexes are downloaded once into `<store_dir>/amplicon-nf/deacon/` and reused by later runs (panhuman-1 is ~3.3 GB and needs ~5 GB of RAM per sample to load). If a path to an existing index file is given it is used directly.",
                     "fa_icon": "fas fa-user-slash"
+                },
+                "skip_pathoplexus_template": {
+                    "type": "boolean",
+                    "description": "Skip preparing the Pathoplexus submission folder per primer scheme (metadata XLSX/TSV template, consensus FASTA and dehosted reads).",
+                    "help_text": "By default the pipeline writes `pathoplexus/<SCHEME>/` containing a metadata template (XLSX and TSV) with every field amplicon-nf can fill in from the run, a FASTA whose IDs match the metadata, and (unless --skip_dehosting is set) the dehosted reads in `raw_reads/`. Sample collection date, location, host and authors must be filled in by you before uploading. IMPORTANT: this is designed for single-target tiled amplicon schemes (one organism per primer scheme; segmented genomes and reference-selecting schemes such as artic-pan-ebola are supported). It is NOT designed for primer panels or multi-pathogen schemes, where the reference contains several sequences that are not segments of one genome: a sample with several consensus records is always treated as one segmented genome. Set this to skip it.",
+                    "fa_icon": "fas fa-forward"
                 }
             },
             "required": [

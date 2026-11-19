@@ -25,6 +25,8 @@ include { GENERATE_SAMPLE_REPORT                    } from '../modules/local/gen
 include { GENERATE_RUN_REPORT                       } from '../modules/local/generate_run_report/main'
 include { DEACON_FETCH                              } from '../modules/local/deacon/fetch/main'
 include { DEACON_FILTER                             } from '../modules/local/deacon/filter/main'
+include { PATHOPLEXUS_SAMPLE                        } from '../modules/local/pathoplexus/sample/main'
+include { PATHOPLEXUS_TEMPLATE                      } from '../modules/local/pathoplexus/template/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -401,6 +403,48 @@ workflow AMPLICON_NF {
         plotly_js,
     )
     ch_versions = ch_versions.mix(GENERATE_RUN_REPORT.out.versions.first())
+
+    //
+    // Pathoplexus submission template (metadata XLSX/TSV, FASTA, dehosted reads) per primer scheme - on by default
+    //
+    if (!params.skip_pathoplexus_template) {
+        if (params.skip_dehosting) {
+            log.warn("Pathoplexus template: --skip_dehosting is set, so no raw reads are prepared for Pathoplexus (raw_reads/ and files.rawReads are left out). Set --skip_pathoplexus_template to turn the Pathoplexus template off.")
+        }
+
+        // Reads as used for assembly (dehosted unless --skip_dehosting), their headers carry run information
+        ch_pp_reads = ch_nanopore_input
+            .map { meta, reads -> [meta.id, reads] }
+            .mix(ch_illumina_input.map { meta, fastq_1, fastq_2 -> [meta.id, [fastq_1, fastq_2]] })
+
+        ch_pp_qc_tsvs = GENERATE_SAMPLE_REPORT.out.sample_qc_tsv
+            .map { tsv -> [tsv.name.replace('_amplicon-nf_qc-report.tsv', ''), tsv] }
+
+        // Inner joins only: samples without a consensus (failed assembly) drop out here
+        ch_pp_sample_input = ch_reheadered_consensus_fasta
+            .map { meta, fasta -> [meta.id, meta, fasta] }
+            .join(ch_primer_scheme.map { meta, bed, _ref -> [meta.id, bed] })
+            .join(ch_pp_qc_tsvs)
+            .join(ch_pp_reads)
+            .map { _id, meta, fasta, bed, qc_tsv, reads -> [meta, fasta, bed, qc_tsv, reads] }
+
+        PATHOPLEXUS_SAMPLE(ch_pp_sample_input)
+
+        PATHOPLEXUS_SAMPLE.out.sample
+            .filter { _meta, json, _fasta -> json.text.contains('"excluded": true') }
+            .subscribe { meta, _json, _fasta ->
+                log.warn("Pathoplexus template: sample ${meta.id} has no called consensus bases and was left out of the Pathoplexus template.")
+            }
+
+        ch_pp_template_input = PATHOPLEXUS_SAMPLE.out.sample
+            .map { meta, json, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), json, fasta] }
+            .groupTuple()
+
+        PATHOPLEXUS_TEMPLATE(
+            ch_pp_template_input,
+            file("${projectDir}/assets/pathoplexus_template.toml", checkIfExists: true),
+        )
+    }
 
     //
     // Collate and save software versions

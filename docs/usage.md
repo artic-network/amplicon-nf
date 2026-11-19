@@ -239,6 +239,28 @@ When specifying the dataset name (`--nextclade 'sars-cov-2'`) the dataset will b
 > [!TIP]
 > To see the available supported viruses, dataset names and tag information go to https://clades.nextstrain.org
 
+### Preparing a Pathoplexus submission
+
+> [!CAUTION]
+> **This is designed for single-target tiled amplicon schemes only: one organism per primer scheme** (segmented genomes and reference-selecting schemes such as `artic-pan-ebola` are supported). It is **NOT** designed for primer panels or multi-pathogen schemes, where the reference contains several sequences that are not segments of one genome.
+
+By default amplicon-nf prepares one upload folder per primer scheme for [Pathoplexus](https://pathoplexus.org) (`<outdir>/pathoplexus/<SCHEME>/`). Each folder contains:
+
+- a metadata template (XLSX and TSV), with every field the pipeline can work out already filled in
+- a FASTA file whose IDs match the metadata
+- the dehosted reads
+
+You fill in `sampleCollectionDate`, `geoLocCountry`, `authors`, `host`, `geoLocAdmin1` and `geoLocAdmin2` before uploading.
+
+See [Pathoplexus submissions](pathoplexus.md) for the full details: every pre-filled field and how it is derived, which samples are included, and how to upload.
+
+To turn it off:
+
+```bash
+nextflow run artic-network/amplicon-nf \
+...
+   --skip_pathoplexus_template
+```
 
 ### Updating the pipeline
 

@@ -6,5 +6,7 @@ The artic-network/amplicon-nf documentation is split into the following pages:
   - An overview of how the pipeline works, how to run it and a description of all of the different command-line flags.
 - [Output](output.md)
   - An overview of the different results produced by the pipeline and how to interpret them.
+- [Pathoplexus submissions](pathoplexus.md)
+  - How the per-scheme Pathoplexus upload folders are prepared, every pre-filled metadata field and its logic, and how to upload.
 - [Parameters](parameters.md)
   - An overview of the different configurable parameters that can be provided to the pipeline and their defaults.
