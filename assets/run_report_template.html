@@ -154,6 +154,21 @@
       color: var(--color-cream);
     }
 
+    #aligntrim code {
+      white-space: nowrap;
+    }
+
+    .basis-tag {
+      display: inline-block;
+      padding: 0 0.35rem;
+      margin-left: 0.15rem;
+      border: 1px solid #adb5bd;
+      border-radius: 0.6rem;
+      color: #495057;
+      font-size: 0.75em;
+      white-space: nowrap;
+    }
+
     .fate-swatch {
       display: inline-block;
       flex: 0 0 auto;
@@ -448,7 +463,7 @@
         {% for item in items %}
         <div class="col-md-6 d-flex align-items-start mb-1">
           {% if item.colour %}<span class="fate-swatch" style="background-color: {{ item.colour }}"></span>{% endif %}
-          <span><code>{{ item.name }}</code>: {{ item.definition }}</span>
+          <span><code>{{ item.name }}</code>{% if item.basis %} <span class="basis-tag">{{ item.basis }}</span>{% endif %}: {{ item.definition | safe }}</span>
         </div>
         {% endfor %}
       </div>
@@ -457,6 +472,11 @@
         <p class="small text-muted mt-2 mb-2">
           Summaries of the per-sample <code>align_trim</code> QC reports (<code>&lt;SAMPLE&gt;.summary.tsv</code>, <code>.amplicons.tsv</code>, <code>.primer_pairs.tsv</code>, <code>.split_reads.tsv</code>, <code>.overlaps.tsv</code>).
           A fragment is a single read for Nanopore and a read pair for Illumina.
+        </p>
+        <p class="small text-muted mb-2">
+          <strong>How primers are identified.</strong> Primers are assigned to a fragment by <em>position</em>, not sequence: each aligned end (leftmost aligned start, rightmost aligned end, soft-clipped bases excluded) is given the nearest primer pointing inwards from an amplicon whose span, extended by {{ aligntrim.primer_threshold | safe }}, covers it.
+          Checks of whether an end is &ldquo;at&rdquo; a primer compare its aligned coordinate with the primer's 5&prime; end, within {{ aligntrim.primer_threshold | safe }}.
+          The only sequence-based check is the <em>Also observed</em> primer pair columns, which search the read ends for primer sequence. Each definition in the keys is tagged with what it is judged on.
         </p>
         {% if aligntrim.no_report %}
         <p class="small mb-2"><strong>No align_trim report:</strong> {{ aligntrim.no_report | join(", ") }}</p>
@@ -483,6 +503,7 @@
         <div class="tab-content">
           <!-- Read fates -->
           <div class="tab-pane fade show active" id="aligntrim-fates" role="tabpanel">
+            <p class="small text-muted mb-1">What happened to every fragment. Checks run in the order listed in the key, and each removed fragment is counted once, under the first check it fails; percentages are of all fragments.</p>
             {% if aligntrim.read_fates.plot %}
             <div class="aligntrim-plot" style="--plot-height: {{ aligntrim.read_fates.plot.height }}px">{{ aligntrim.read_fates.plot.html | safe }}</div>
             {% endif %}
@@ -493,11 +514,11 @@
                     <th rowspan="2">Sample</th>
                     <th rowspan="2">Platform</th>
                     <th rowspan="2">Fragments</th>
-                    <th rowspan="2" title="{{ aligntrim.read_fates.key[0].definition }}">{{ aligntrim.read_fates.key[0].name }}</th>
+                    <th rowspan="2" title="{{ aligntrim.read_fates.key[0].definition | striptags }}">{{ aligntrim.read_fates.key[0].name }}</th>
                     <th colspan="{{ aligntrim.read_fates.columns | length - 1 }}" class="text-center">Removed</th>
                   </tr>
                   <tr>
-                    {% for fate in aligntrim.read_fates.key[1:] %}<th title="{{ fate.definition }}">{{ fate.name | replace("_", " ") }}</th>{% endfor %}
+                    {% for fate in aligntrim.read_fates.key[1:] %}<th title="{{ fate.definition | striptags }}">{{ fate.name | replace("_", " ") }}</th>{% endfor %}
                   </tr>
                 </thead>
                 <tbody>
@@ -520,7 +541,7 @@
 
           <!-- Per-amplicon fates -->
           <div class="tab-pane fade" id="aligntrim-amplicons" role="tabpanel">
-            <p class="small text-muted mb-1">Fragments assigned to each amplicon, and those removed at the amplicon level. Use the dropdown to switch between all fragments and each removal reason. Fragments removed before an amplicon is assigned (e.g. unmapped, low MAPQ, ambiguous amplicon) only appear in Read Fates; the full per-amplicon breakdown is in <code>&lt;SAMPLE&gt;.amplicons.tsv</code>.</p>
+            <p class="small text-muted mb-1">Fragments removed after primers were assigned (by position), per amplicon they were counted against. Use the dropdown to switch between removal reasons. Fragments removed before an amplicon is assigned (e.g. unmapped, low MAPQ, ambiguous amplicon) only appear in Read Fates; the full per-amplicon breakdown is in <code>&lt;SAMPLE&gt;.amplicons.tsv</code>.</p>
             {% for plot in aligntrim.amplicon_plots %}
             <div class="aligntrim-plot" style="--plot-height: {{ plot.height }}px">{{ plot.html | safe }}</div>
             {% else %}
@@ -532,7 +553,7 @@
 
           <!-- Primer pairs -->
           <div class="tab-pane fade" id="aligntrim-pairs" role="tabpanel">
-            <p class="small text-muted mb-1">Fragments with a primer matched at both ends, by the type of primer combination; percentages are of pairs classified. The last two columns are counted in addition to each fragment's own type.</p>
+            <p class="small text-muted mb-1">Fragments with a primer assigned (by position) to both aligned ends, by how the two assigned primers relate; percentages are of pairs classified. The last two columns are a separate, sequence-based check counted in addition to each fragment's own type.</p>
             <div class="table-responsive">
               <table class="table table-sm small mt-2">
                 <thead>
@@ -543,7 +564,7 @@
                     <th colspan="{{ aligntrim.primer_pairs.extra_columns | length }}" class="text-center">Also observed</th>
                   </tr>
                   <tr>
-                    {% for item in aligntrim.primer_pairs.key %}<th title="{{ item.definition }}">{{ item.name | replace("_", " ") }}</th>{% endfor %}
+                    {% for item in aligntrim.primer_pairs.key %}<th title="{{ item.definition | striptags }}">{{ item.name | replace("_", " ") }}</th>{% endfor %}
                   </tr>
                 </thead>
                 <tbody>
@@ -560,7 +581,7 @@
                 </tbody>
               </table>
             </div>
-            <p class="small text-muted mb-0">Pairs classified is the number of fragments with a primer matched at each end (the sum of the pair type columns). In the key, LEFT n and RIGHT n are the left and right primers of amplicon n.</p>
+            <p class="small text-muted mb-0">Pairs classified is the number of fragments with a primer assigned to each end (the sum of the pair type columns); fragments removed earlier (Read Fates checks above <code>no_primer_match</code>) are not classified. In the key, LEFT n and RIGHT n are the left and right primers of amplicon n.</p>
             {{ render_key(aligntrim.primer_pairs.key) }}
           </div>
 
@@ -572,7 +593,7 @@
                 <thead>
                   <tr>
                     <th>Sample</th>
-                    {% for item in aligntrim.split_reads.key %}<th title="{{ item.definition }}">{{ item.name | replace("_", " ") }}</th>{% endfor %}
+                    {% for item in aligntrim.split_reads.key %}<th title="{{ item.definition | striptags }}">{{ item.name | replace("_", " ") }}</th>{% endfor %}
                   </tr>
                 </thead>
                 <tbody>
@@ -587,19 +608,19 @@
                 </tbody>
               </table>
             </div>
-            <p class="small text-muted mb-0">A join is where a read's alignment stops and continues at another position, strand or reference (a split or supplementary alignment). Joins are grouped by their two breakpoints (in 10 bp windows) and orientation; a join seen in both mates of a pair counts once. The first number is fragment-joins (fragments showing that kind of join, summed over joins), the number in brackets is how many distinct joins were seen. Per-join detail, including breakpoint positions and orientation, is in <code>&lt;SAMPLE&gt;.split_reads.tsv</code>.</p>
+            <p class="small text-muted mb-0">A join is where a read's alignment stops and continues at another position, strand or reference, taken from the aligner's supplementary alignments (SA tag). Every fragment that passes the alignment checks (Read Fates <code>unmapped</code> to <code>no_alignment</code>) is checked, whatever its later fate; breakpoints are judged by position against primer 5&prime; ends, not by sequence. Joins are grouped by their two breakpoints (in 10 bp windows) and orientation; a join seen in both mates of a pair counts once. The first number is fragment-joins (fragments showing that kind of join, summed over joins), the number in brackets is how many distinct joins were seen. Per-join detail, including breakpoint positions and orientation, is in <code>&lt;SAMPLE&gt;.split_reads.tsv</code>.</p>
             {{ render_key(aligntrim.split_reads.key) }}
           </div>
 
           <!-- Overlaps -->
           <div class="tab-pane fade" id="aligntrim-overlaps" role="tabpanel">
-            <p class="small text-muted mb-1">Overlaps between neighbouring amplicons (n/n+1): fragments removed as ambiguous, and the largest base frequency difference between the two amplicons. Blank cells were not compared.</p>
+            <p class="small text-muted mb-1">Overlaps between neighbouring amplicons (n/n+1): the largest difference in base frequency between the two amplicons' kept, correctly paired fragments, where their inserts overlap. Blank cells were not compared. Fragments removed as ambiguous inside overlaps are counted in Read Fates (<code>ambiguous_amplicon</code>).</p>
             {% for plot in aligntrim.overlap_plots %}
             <div class="aligntrim-plot" style="--plot-height: {{ plot.height }}px">{{ plot.html | safe }}</div>
             {% else %}
             <p class="small">No amplicon overlaps in this scheme.</p>
             {% endfor %}
-            <p class="small text-muted mb-0">Each row is a sample and each column the overlap between amplicon n and n+1. Use the dropdown to switch metric: <code>ambiguous_fragments</code> is coloured on a log scale (lighter = more fragments), <code>max_freq_difference</code> on a fixed 0&ndash;1 scale. Hover over a cell for the exact value; per-overlap detail (median depths, positions) is in <code>&lt;SAMPLE&gt;.overlaps.tsv</code>.</p>
+            <p class="small text-muted mb-0">Each row is a sample and each column the overlap between amplicon n and n+1. Colour is on a fixed 0&ndash;1 scale (lighter = larger difference). Hover over a cell for the exact value; per-overlap detail (ambiguous fragments, median depths, positions) is in <code>&lt;SAMPLE&gt;.overlaps.tsv</code>.</p>
             {{ render_key(aligntrim.overlap_key) }}
           </div>
         </div>

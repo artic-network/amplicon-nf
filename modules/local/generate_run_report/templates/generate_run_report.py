@@ -740,91 +740,187 @@ PRIMER_PAIR_TYPES = [
 # Recorded in addition to a fragment's own pair type, so never summed with the above
 PRIMER_PAIR_EXTRA_TYPES = ["left_primer_at_both_ends", "right_primer_at_both_ends"]
 SPLIT_READ_TYPES = ["amplicon_chimera", "joined_inside_amplicon", "low_mapq_part"]
+def param_text(name: str, value: str, unit: str = "") -> str:
+    """Parameter name as HTML code, with this run's value when it is a positive integer.
+    Definitions are trusted constants rendered unescaped in the report keys."""
+    code = f"<code>{name}</code>"
+    return f"{code} ({value}{unit} in this run)" if value.isdigit() and int(value) > 0 else code
+
+
+PRIMER_THRESHOLD = param_text("--primer_match_threshold", "${params.primer_match_threshold}", " bp")
+MIN_MAPQ = param_text("--min_mapping_quality", "${params.min_mapping_quality}")
+NORMALISE_DEPTH = param_text("--normalise_depth", "${params.normalise_depth}")
+
+# What each definition is judged on, shown as a tag in the report keys
+BASIS_LABELS = {
+    "aligner": "aligner flags / MAPQ",
+    "position": "primer position",
+    "sequence": "primer sequence",
+    "depth": "depth",
+    "bases": "base frequencies",
+}
+
 # Read fates in align_trim pipeline order: fixed colour (stable across runs and schemes,
-# not encoding good / bad) and the definition shown in the report key
+# not encoding good / bad), what the fate is judged on, and the definition shown in the report key
 READ_FATES = {
     "kept": (
         "#345c67",
-        "Passed every check and was written to the primer-trimmed BAM used for variant calling.",
+        None,
+        "Passed every check below: assigned to an amplicon, primer-trimmed and written to the BAM used for variant calling.",
     ),
     "unmapped": (
         "#999999",
-        "The read (or either mate of a pair) did not map to the reference.",
+        "aligner",
+        "The read (or either mate of a pair) has no alignment to the reference.",
     ),
     "not_proper_pair": (
         "#bab0ac",
-        "Illumina only: both mates mapped but the aligner did not flag them as a proper pair.",
+        "aligner",
+        "Illumina only: both mates aligned, but the aligner did not set the proper-pair flag.",
     ),
     "missing_mate": (
         "#d4a6c8",
-        "Illumina only: only one mate of the pair was present in the alignment.",
+        "aligner",
+        "Illumina only: only one mate of the pair is present in the alignment.",
     ),
     "low_mapq": (
         "#9d7660",
-        "Mapping quality (of either mate) below --min_mapping_quality.",
+        "aligner",
+        f"Mapping quality of the alignment (of either mate) is below {MIN_MAPQ}.",
     ),
     "no_alignment": (
         "#79706e",
-        "Mapped, but with no aligned reference span.",
+        "aligner",
+        "Flagged as mapped, but with no aligned reference span.",
     ),
     "no_primer_match": (
         "#e69f00",
-        "One or both ends of the fragment were not at a primer site (within the primer match threshold).",
+        "position",
+        f"An aligned end of the fragment lies outside every amplicon (more than {PRIMER_THRESHOLD} beyond the outer primers), "
+        "so no primer could be assigned to it. The read sequence is not checked.",
     ),
     "ambiguous_amplicon": (
         "#56b4e9",
-        "Lies inside the overlap of two neighbouring amplicons, so its ends cannot show which amplicon it came from.",
+        "position",
+        "The aligned ends were assigned LEFT n+1 and RIGHT n: the fragment lies entirely within the overlap of two neighbouring "
+        "amplicons, so it cannot be placed in either.",
     ),
     "mismatched_primers": (
         "#cc79a7",
-        "The primers at the two ends belong to different amplicons.",
+        "position",
+        "The primers assigned to the two aligned ends belong to different amplicons (other than the overlap case above).",
     ),
     "trim_failed": (
         "#0072b2",
-        "Soft-masking the primer sequence from the alignment failed.",
+        "position",
+        "Soft-masking the assigned primers' reference coordinates from the alignment failed.",
     ),
     "primer_only": (
         "#f0e442",
-        "Nothing aligned to the reference remained once primer sequence was masked.",
+        "position",
+        "No aligned bases remained once the assigned primers' reference coordinates were soft-masked: the alignment lies "
+        "entirely within primer sites.",
     ),
     "not_full_length": (
         "#009e73",
-        "Did not span the full amplicon (only applied when full-length fragments are required).",
+        "position",
+        "The alignment does not reach both primer sites of its amplicon (only applied when full-length fragments are required).",
     ),
     "by_normalise": (
         "#d3b88c",
-        "Removed by depth normalisation, as its amplicon had already reached --normalise_depth.",
+        "depth",
+        f"Passed every other check, but not kept because its amplicon had already reached the fragment depth target, {NORMALISE_DEPTH}.",
     ),
 }
 # Fates added by a newer align_trim get these, assigned in sorted name order
 UNKNOWN_FATE_COLOURS = ["#4d4d4d", "#737373", "#a6a6a6", "#cccccc"]
 UNKNOWN_DEFINITION = "Reported by align_trim; no description available in this pipeline version."
 
-# Definitions for the keys under the other Primer Trimming QC plots / tables
+# Definitions for the keys under the other Primer Trimming QC plots / tables, as (basis, text)
+# Amplicons key: the Read Fates definition plus which amplicon the fragment is counted against
 AMPLICON_METRIC_DEFINITIONS = {
-    "fragments": "Fragments attributed to the amplicon by its primers: kept plus the amplicon-level removals below. "
-    "Mismatched pairs are attributed to the left primer's amplicon, and fragments with a primer at only one end to that primer's amplicon.",
+    "mismatched_primers": (
+        "position",
+        READ_FATES["mismatched_primers"][2]
+        + " Counted against the amplicon of the primer assigned to the left end.",
+    ),
+    "no_primer_match": (
+        "position",
+        READ_FATES["no_primer_match"][2]
+        + " Counted against the amplicon of the primer assigned to the other end; fragments with neither end assigned "
+        "are only counted in Read Fates.",
+    ),
 }
+# Metric shown first (the default) in the Amplicons heatmap dropdown
+AMPLICON_HEATMAP_DEFAULT = "removed_mismatched_primers"
 PRIMER_PAIR_DEFINITIONS = {
-    "same_amplicon": "Left and right primers from the same amplicon: the intended product.",
-    "at_overlap_primers": "LEFT n+1 with RIGHT n, with the fragment ends at those primers: a short product of the overlap between neighbouring amplicons.",
-    "inside_overlap": "LEFT n+1 with RIGHT n, but the fragment ends are not at those primers: part of a normal amplicon that lies within the overlap.",
-    "spans_amplicons_same_pool": "LEFT n with RIGHT n+1 or further, primers from the same pool: the product skips the amplicon(s) in between.",
-    "spans_amplicons_other_pool": "LEFT n with RIGHT n+1 or further, primers from different pools: the product skips the amplicon(s) in between.",
-    "different_references": "The two primers are on different reference sequences.",
-    "other_combination": "Any other combination, e.g. LEFT n with RIGHT n-2 or further back.",
-    "left_primer_at_both_ends": "A left primer sequence was found at both ends of the fragment. Recorded in addition to the fragment's own type; it does not change what happens to the fragment.",
-    "right_primer_at_both_ends": "A right primer sequence was found at both ends of the fragment. Recorded in addition to the fragment's own type; it does not change what happens to the fragment.",
+    "same_amplicon": (
+        "position",
+        "Both aligned ends were assigned primers of the same amplicon: the intended product.",
+    ),
+    "at_overlap_primers": (
+        "position",
+        f"Ends assigned LEFT n+1 and RIGHT n, and both aligned ends are within {PRIMER_THRESHOLD} of those primers' 5' ends: "
+        "a short product spanning just the overlap between neighbouring amplicons.",
+    ),
+    "inside_overlap": (
+        "position",
+        f"Ends assigned LEFT n+1 and RIGHT n, but the aligned ends are not within {PRIMER_THRESHOLD} of those primers' 5' ends: "
+        "part of a normal amplicon that lies within the overlap.",
+    ),
+    "spans_amplicons_same_pool": (
+        "position",
+        "Ends assigned LEFT n and RIGHT n+1 or further, both from the same pool: the fragment spans the amplicon(s) in between.",
+    ),
+    "spans_amplicons_other_pool": (
+        "position",
+        "Ends assigned LEFT n and RIGHT n+1 or further, from different pools: the fragment spans the amplicon(s) in between.",
+    ),
+    "different_references": (
+        "position",
+        "The two ends were assigned primers on different reference sequences.",
+    ),
+    "other_combination": (
+        "position",
+        "Any other combination of assigned primers, e.g. LEFT n with RIGHT n-2 or further back.",
+    ),
+    "left_primer_at_both_ends": (
+        "sequence",
+        "The right end of the read carries a left primer's sequence, and the left end is at a left primer (by position, or by the "
+        "same sequence search). Found by searching both read ends, including soft-clipped bases, for the last 12 bases of every "
+        "primer. Recorded in addition to the fragment's own type; it does not change what happens to the fragment.",
+    ),
+    "right_primer_at_both_ends": (
+        "sequence",
+        "The left end of the read carries a right primer's sequence, and the right end is at a right primer (by position, or by "
+        "the same sequence search). Found by searching both read ends, including soft-clipped bases, for the last 12 bases of "
+        "every primer. Recorded in addition to the fragment's own type; it does not change what happens to the fragment.",
+    ),
 }
 SPLIT_READ_DEFINITIONS = {
-    "amplicon_chimera": "Both sides of the join are at amplicon ends (within the primer match threshold): two amplicon products joined end to end.",
-    "joined_inside_amplicon": "At least one side of the join is away from an amplicon end.",
-    "low_mapq_part": "One of the joined parts has mapping quality below --min_mapping_quality, so its position is uncertain.",
+    "amplicon_chimera": (
+        "position",
+        f"Both breakpoints of the join are within {PRIMER_THRESHOLD} of a primer 5' end (an amplicon end): "
+        "two amplicon products joined end to end.",
+    ),
+    "joined_inside_amplicon": (
+        "position",
+        f"At least one breakpoint of the join is more than {PRIMER_THRESHOLD} from every primer 5' end.",
+    ),
+    "low_mapq_part": (
+        "aligner",
+        f"One of the joined alignment parts has mapping quality below {MIN_MAPQ}; its breakpoint positions are not classified.",
+    ),
 }
 OVERLAP_METRIC_DEFINITIONS = {
-    "ambiguous_fragments": "Fragments lying inside this overlap that were removed as ambiguous_amplicon (see Read Fates), since their ends cannot show which of the two amplicons they came from.",
-    "max_freq_difference": "Largest difference in base frequency (A, C, G, T, deletion or insertion) between the two amplicons at any overlap position where both have depth of at least 10. "
-    "0 means identical base frequencies, 1 completely different. Blank (NA) where no position reached that depth in both amplicons.",
+    "max_freq_difference": (
+        "bases",
+        "Base frequencies (A, C, G, T, deletion and insertion) are counted separately for each amplicon from its kept, "
+        "correctly paired fragments, after primer trimming and normalisation. At every position in the overlap (where both "
+        "amplicon inserts cover the reference, primers excluded) with a depth of at least 10 fragments in both amplicons, "
+        "the largest difference in any base's frequency is taken; this is the maximum over those positions. 0 means "
+        "identical base frequencies, 1 completely different. Blank (NA) where no position reached that depth in both amplicons.",
+    ),
 }
 
 
@@ -837,11 +933,14 @@ AMPLICON_HEATMAP_EXCLUDED = {
 
 
 def key_items(names: list, definitions: dict) -> list:
-    """Key entries (name, definition) in display order, for the report template."""
-    return [
-        {"name": name, "definition": definitions.get(name, UNKNOWN_DEFINITION)}
-        for name in names
-    ]
+    """Key entries (name, basis label, definition) in display order, for the report template."""
+    items = []
+    for name in names:
+        basis, definition = definitions.get(name, (None, UNKNOWN_DEFINITION))
+        items.append(
+            {"name": name, "basis": BASIS_LABELS.get(basis), "definition": definition}
+        )
+    return items
 LOG_TICKS = [0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000]
 PLOTLY_MODEBAR_REMOVE = ["select2d", "lasso2d", "select"]
 
@@ -1004,6 +1103,7 @@ def metric_heatmap(metrics: list, title: str, x_title: str) -> tuple[str, int]:
         font=dict(family="Roboto, monospace", size=14),
         hoverlabel=dict(font_family="Roboto, monospace"),
         title_text=title,
+        # metric dropdown only when there is more than one metric to switch between
         updatemenus=[
             dict(
                 buttons=buttons,
@@ -1014,7 +1114,9 @@ def metric_heatmap(metrics: list, title: str, x_title: str) -> tuple[str, int]:
                 y=1.02,
                 yanchor="bottom",
             )
-        ],
+        ]
+        if len(metrics) > 1
+        else [],
         modebar_remove=PLOTLY_MODEBAR_REMOVE,
     )
     fig.update_xaxes(type="category", title=x_title)
@@ -1395,6 +1497,7 @@ sample_platforms = (
     else {}
 )
 payload["aligntrim"] = {
+    "primer_threshold": PRIMER_THRESHOLD,
     "samples": aligntrim_samples,
     "no_report": sorted(
         set(scheme_samplesheet_df["sample"].astype(str)) - set(aligntrim_samples)
@@ -1436,9 +1539,8 @@ payload["aligntrim"]["read_fates"] = {
         {
             "name": label,
             "colour": fate_colours[label],
-            "definition": READ_FATES[label][1]
-            if label in READ_FATES
-            else UNKNOWN_DEFINITION,
+            "basis": BASIS_LABELS.get(READ_FATES[label][1]) if label in READ_FATES else None,
+            "definition": READ_FATES[label][2] if label in READ_FATES else UNKNOWN_DEFINITION,
         }
         for label in fate_labels
     ],
@@ -1460,15 +1562,17 @@ payload["aligntrim"]["amplicon_plots"] = []
 payload["aligntrim"]["amplicon_key"] = []
 if amplicon_frames:
     amplicons_df = pd.concat(amplicon_frames, ignore_index=True)
-    amplicon_metrics = ["fragments"] + [
+    amplicon_metrics = [
         c
         for c in amplicons_df.columns
         if c.startswith("removed_") and c not in AMPLICON_HEATMAP_EXCLUDED
     ]
+    # default metric first, the rest in align_trim column order
+    amplicon_metrics.sort(key=lambda c: c != AMPLICON_HEATMAP_DEFAULT)
     payload["aligntrim"]["amplicon_key"] = key_items(
         [m.replace("removed_", "") for m in amplicon_metrics],
         {
-            **{fate: definition for fate, (_, definition) in READ_FATES.items()},
+            **{fate: (basis, text) for fate, (_, basis, text) in READ_FATES.items()},
             **AMPLICON_METRIC_DEFINITIONS,
         },
     )
@@ -1483,7 +1587,7 @@ if amplicon_frames:
             metrics.append((metric.replace("removed_", ""), matrix, "log"))
         html, height = metric_heatmap(
             metrics,
-            title=f"Fragments per Amplicon: {chrom_display_name(chrom)}",
+            title=f"Removed Fragments per Amplicon: {chrom_display_name(chrom)}",
             x_title="Amplicon",
         )
         payload["aligntrim"]["amplicon_plots"].append({"html": html, "height": height})
@@ -1551,7 +1655,6 @@ overlap_frames = [
     if len(df) > 0
 ]
 overlap_metrics = [
-    ("ambiguous_fragments", "sum", "log"),
     ("max_freq_difference", "max", (0, 1)),
 ]
 payload["aligntrim"]["overlap_plots"] = []
