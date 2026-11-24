@@ -4,8 +4,8 @@ process ARTIC_MINION {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'oras://community.wave.seqera.io/library/artic_gzip:9b6b316374421185'
-        : 'artic/fieldbioinformatics:1.11.2'}"
+        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/0f/0ff516afa828b5ba2c95c5c88c870938d146ae2961f6c6b26ab8d00b21567c94/data'
+        : 'artic/fieldbioinformatics:1.12.0'}"
 
     input:
     tuple val(meta), path(fastq), path(custom_scheme_directory)
@@ -17,6 +17,11 @@ process ARTIC_MINION {
     tuple val(meta), path("${prefix}.amplicon_depths.tsv"), emit: amplicon_depths
     tuple val(meta), path("${prefix}.pre-normalisation.coverage.tsv"), emit: pre_normalisation_coverage_report
     tuple val(meta), path("${prefix}.post-normalisation.coverage.tsv"), emit: post_normalisation_coverage_report, optional: true
+    tuple val(meta), path("${prefix}.summary.tsv"), emit: qc_summary
+    tuple val(meta), path("${prefix}.amplicons.tsv"), emit: qc_amplicons
+    tuple val(meta), path("${prefix}.primer_pairs.tsv"), emit: qc_primer_pairs
+    tuple val(meta), path("${prefix}.split_reads.tsv"), emit: qc_split_reads
+    tuple val(meta), path("${prefix}.overlaps.tsv"), emit: qc_overlaps
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
     tuple val(meta), path("${prefix}.primer.bed"), path("${prefix}.reference.fasta"), emit: primer_scheme
@@ -60,6 +65,15 @@ process ARTIC_MINION {
 
     touch ${prefix}.alignreport.csv
     touch ${prefix}.amplicon_depths.tsv
+    touch ${prefix}.pre-normalisation.coverage.tsv
+    touch ${prefix}.post-normalisation.coverage.tsv
+    touch ${prefix}.summary.tsv
+    touch ${prefix}.amplicons.tsv
+    touch ${prefix}.primer_pairs.tsv
+    touch ${prefix}.split_reads.tsv
+    touch ${prefix}.overlaps.tsv
+    touch ${prefix}.primer.bed
+    touch ${prefix}.reference.fasta
 
     touch ${prefix}.consensus.fasta
     touch ${prefix}.coverage_mask.txt

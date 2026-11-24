@@ -453,7 +453,7 @@ def amplicon_depth_heatmap(
     # columns = [int(x) for x in amplicon_depths.amplicon.to_list()]
 
     amplicon_depths = amplicon_depths.pivot(index="sample", columns="amplicon")[
-        "mean_depth"
+        "mean_fragment_depth"
     ].fillna(0) # type: ignore
 
     # amplicon_depths.reindex(columns=columns)
@@ -463,7 +463,7 @@ def amplicon_depth_heatmap(
         x=amplicon_depths.columns,
         y=amplicon_depths.index,
         color_continuous_scale=plotly_colour_scale,
-        labels=dict(x="Amplicon", y="Sample", color="Mean Depth"),
+        labels=dict(x="Amplicon", y="Sample", color="Mean Fragment Depth"),
         aspect="auto",
     )
 
@@ -720,6 +720,320 @@ def primer_mismatch_heatmap(
     )
 
 
+# align_trim (>= 2.0) per-sample QC reports, written with --qc-prefix
+ALIGNTRIM_REPORT_KINDS = (
+    "summary",
+    "amplicons",
+    "primer_pairs",
+    "split_reads",
+    "overlaps",
+)
+PRIMER_PAIR_TYPES = [
+    "same_amplicon",
+    "at_overlap_primers",
+    "inside_overlap",
+    "spans_amplicons_same_pool",
+    "spans_amplicons_other_pool",
+    "different_references",
+    "other_combination",
+]
+# Recorded in addition to a fragment's own pair type, so never summed with the above
+PRIMER_PAIR_EXTRA_TYPES = ["left_primer_at_both_ends", "right_primer_at_both_ends"]
+SPLIT_READ_TYPES = ["amplicon_chimera", "joined_inside_amplicon", "low_mapq_part"]
+# Read fates in align_trim pipeline order: fixed colour (stable across runs and schemes,
+# not encoding good / bad) and the definition shown in the report key
+READ_FATES = {
+    "kept": (
+        "#345c67",
+        "Passed every check and was written to the primer-trimmed BAM used for variant calling.",
+    ),
+    "unmapped": (
+        "#999999",
+        "The read (or either mate of a pair) did not map to the reference.",
+    ),
+    "not_proper_pair": (
+        "#bab0ac",
+        "Illumina only: both mates mapped but the aligner did not flag them as a proper pair.",
+    ),
+    "missing_mate": (
+        "#d4a6c8",
+        "Illumina only: only one mate of the pair was present in the alignment.",
+    ),
+    "low_mapq": (
+        "#9d7660",
+        "Mapping quality (of either mate) below --min_mapping_quality.",
+    ),
+    "no_alignment": (
+        "#79706e",
+        "Mapped, but with no aligned reference span.",
+    ),
+    "no_primer_match": (
+        "#e69f00",
+        "One or both ends of the fragment were not at a primer site (within the primer match threshold).",
+    ),
+    "ambiguous_amplicon": (
+        "#56b4e9",
+        "Lies inside the overlap of two neighbouring amplicons, so its ends cannot show which amplicon it came from.",
+    ),
+    "mismatched_primers": (
+        "#cc79a7",
+        "The primers at the two ends belong to different amplicons.",
+    ),
+    "trim_failed": (
+        "#0072b2",
+        "Soft-masking the primer sequence from the alignment failed.",
+    ),
+    "primer_only": (
+        "#f0e442",
+        "Nothing aligned to the reference remained once primer sequence was masked.",
+    ),
+    "not_full_length": (
+        "#009e73",
+        "Did not span the full amplicon (only applied when full-length fragments are required).",
+    ),
+    "by_normalise": (
+        "#d3b88c",
+        "Removed by depth normalisation, as its amplicon had already reached --normalise_depth.",
+    ),
+}
+# Fates added by a newer align_trim get these, assigned in sorted name order
+UNKNOWN_FATE_COLOURS = ["#4d4d4d", "#737373", "#a6a6a6", "#cccccc"]
+UNKNOWN_DEFINITION = "Reported by align_trim; no description available in this pipeline version."
+
+# Definitions for the keys under the other Primer Trimming QC plots / tables
+AMPLICON_METRIC_DEFINITIONS = {
+    "fragments": "Fragments attributed to the amplicon by its primers: kept plus the amplicon-level removals below. "
+    "Mismatched pairs are attributed to the left primer's amplicon, and fragments with a primer at only one end to that primer's amplicon.",
+}
+PRIMER_PAIR_DEFINITIONS = {
+    "same_amplicon": "Left and right primers from the same amplicon: the intended product.",
+    "at_overlap_primers": "LEFT n+1 with RIGHT n, with the fragment ends at those primers: a short product of the overlap between neighbouring amplicons.",
+    "inside_overlap": "LEFT n+1 with RIGHT n, but the fragment ends are not at those primers: part of a normal amplicon that lies within the overlap.",
+    "spans_amplicons_same_pool": "LEFT n with RIGHT n+1 or further, primers from the same pool: the product skips the amplicon(s) in between.",
+    "spans_amplicons_other_pool": "LEFT n with RIGHT n+1 or further, primers from different pools: the product skips the amplicon(s) in between.",
+    "different_references": "The two primers are on different reference sequences.",
+    "other_combination": "Any other combination, e.g. LEFT n with RIGHT n-2 or further back.",
+    "left_primer_at_both_ends": "A left primer sequence was found at both ends of the fragment. Recorded in addition to the fragment's own type; it does not change what happens to the fragment.",
+    "right_primer_at_both_ends": "A right primer sequence was found at both ends of the fragment. Recorded in addition to the fragment's own type; it does not change what happens to the fragment.",
+}
+SPLIT_READ_DEFINITIONS = {
+    "amplicon_chimera": "Both sides of the join are at amplicon ends (within the primer match threshold): two amplicon products joined end to end.",
+    "joined_inside_amplicon": "At least one side of the join is away from an amplicon end.",
+    "low_mapq_part": "One of the joined parts has mapping quality below --min_mapping_quality, so its position is uncertain.",
+}
+OVERLAP_METRIC_DEFINITIONS = {
+    "ambiguous_fragments": "Fragments lying inside this overlap that were removed as ambiguous_amplicon (see Read Fates), since their ends cannot show which of the two amplicons they came from.",
+    "max_freq_difference": "Largest difference in base frequency (A, C, G, T, deletion or insertion) between the two amplicons at any overlap position where both have depth of at least 10. "
+    "0 means identical base frequencies, 1 completely different. Blank (NA) where no position reached that depth in both amplicons.",
+}
+
+
+# amplicons.tsv columns not offered in the Amplicons heatmap dropdown (still in the TSV)
+AMPLICON_HEATMAP_EXCLUDED = {
+    "removed_trim_failed",
+    "removed_not_full_length",
+    "removed_by_normalise",
+}
+
+
+def key_items(names: list, definitions: dict) -> list:
+    """Key entries (name, definition) in display order, for the report template."""
+    return [
+        {"name": name, "definition": definitions.get(name, UNKNOWN_DEFINITION)}
+        for name in names
+    ]
+LOG_TICKS = [0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000]
+PLOTLY_MODEBAR_REMOVE = ["select2d", "lasso2d", "select"]
+
+
+def read_aligntrim_reports(directory: str = "aligntrim_qc") -> dict:
+    """
+    Read the align_trim QC TSVs staged in directory into {kind: {sample: DataFrame}}.
+    Zero-byte files (stub runs) are skipped, header-only files give an empty DataFrame.
+    """
+    reports = {kind: {} for kind in ALIGNTRIM_REPORT_KINDS}
+    for path in sorted(Path(directory).glob("*.tsv")):
+        for kind in ALIGNTRIM_REPORT_KINDS:
+            suffix = f".{kind}.tsv"
+            if not path.name.endswith(suffix):
+                continue
+            if path.stat().st_size > 0:
+                reports[kind][path.name[: -len(suffix)]] = pd.read_csv(
+                    path, sep="\\t", keep_default_na=False, na_values=["NA"]
+                )
+            break
+    return reports
+
+
+def ordered_types(known: list, observed) -> list:
+    """Known types in their canonical order, then any types a newer align_trim adds."""
+    return list(known) + sorted(set(observed) - set(known))
+
+
+def read_fate_colours(columns: list) -> dict:
+    """Fixed colour per read fate, so the same fate is always the same colour."""
+    unknown = sorted(c for c in columns if c not in READ_FATES)
+    colours = {c: READ_FATES[c][0] for c in columns if c in READ_FATES}
+    for i, c in enumerate(unknown):
+        colours[c] = UNKNOWN_FATE_COLOURS[i % len(UNKNOWN_FATE_COLOURS)]
+    return colours
+
+
+def aligntrim_fates_bar(rows: list, columns: list) -> tuple[str, int]:
+    """Horizontal stacked bar of the % of fragments in each fate, one bar per sample."""
+    colours = read_fate_colours(columns)
+    samples = [row["sample"] for row in rows]
+    fig = go.Figure()
+    for i, column in enumerate(columns):
+        counts = [row["cells"][i]["n"] for row in rows]
+        pcts = [row["cells"][i]["pct"] or 0.0 for row in rows]
+        fig.add_trace(
+            go.Bar(
+                y=samples,
+                x=pcts,
+                name=column,
+                orientation="h",
+                marker_color=colours[column],
+                customdata=counts,
+                hovertemplate="%{y}<br>"
+                + column
+                + ": %{customdata:,} (%{x:.1f}%)<extra></extra>",
+            )
+        )
+    # tall enough for the full legend to the right of the plot without scrolling
+    height = max(160 + 28 * len(samples), 180 + 24 * len(columns))
+    fig.update_layout(
+        barmode="stack",
+        height=height,
+        margin=dict(t=60, b=60),
+        font=dict(family="Roboto, monospace", size=14),
+        hoverlabel=dict(font_family="Roboto, monospace"),
+        title_text="Read Fates",
+        legend=dict(
+            orientation="v",
+            x=1.01,
+            xanchor="left",
+            y=1,
+            yanchor="top",
+            traceorder="normal",
+            font=dict(size=12),
+        ),
+        xaxis=dict(title="% of fragments", range=[0, 100]),
+        yaxis=dict(type="category", autorange="reversed"),
+        modebar_remove=PLOTLY_MODEBAR_REMOVE,
+    )
+    html = pio.to_html(
+        fig,
+        include_plotlyjs=False,
+        full_html=False,
+        default_height=f"{height}px",
+        default_width="100%",
+    )
+    return html, height
+
+
+def metric_heatmap(metrics: list, title: str, x_title: str) -> tuple[str, int]:
+    """
+    Heatmap (rows = samples) with a dropdown to switch between metrics.
+    metrics: list of (label, DataFrame indexed by sample, scale) where scale is
+    "log" (colour by log10(1 + n), ticks labelled with raw counts) or a (zmin, zmax) tuple.
+    NaN cells are left blank.
+    """
+    fig = go.Figure()
+    for i, (label, matrix, scale) in enumerate(metrics):
+        raw = matrix.to_numpy(dtype=float)
+        if scale == "log":
+            z = np.log10(1 + raw)
+            finite = z[np.isfinite(z)]
+            zmax = max(float(finite.max()) if finite.size else 1.0, 1.0)
+            ticks = [t for t in LOG_TICKS if np.log10(1 + t) <= zmax]
+            zmin = 0.0
+            colorbar = dict(
+                title=label,
+                tickvals=[float(np.log10(1 + t)) for t in ticks],
+                ticktext=[f"{t:,}" for t in ticks],
+            )
+        else:
+            z = raw
+            zmin, zmax = scale
+            colorbar = dict(title=label)
+        # Pre-formatted hover values: 2D numpy customdata is not resolved by
+        # heatmap hovertemplates in the bundled plotly.js, plain string text is
+        hover_text = [
+            [
+                "NA"
+                if not np.isfinite(v)
+                else (f"{int(v):,}" if scale == "log" else f"{v:.4g}")
+                for v in row
+            ]
+            for row in raw
+        ]
+        fig.add_trace(
+            go.Heatmap(
+                z=z,
+                x=[str(c) for c in matrix.columns],
+                y=[str(s) for s in matrix.index],
+                text=hover_text,
+                zmin=zmin,
+                zmax=zmax,
+                colorscale=plotly_colour_scale,
+                colorbar=colorbar,
+                xgap=1,
+                ygap=1,
+                hoverongaps=False,
+                visible=(i == 0),
+                hovertemplate="Sample: %{y}<br>"
+                + x_title
+                + ": %{x}<br>"
+                + label
+                + ": %{text}<extra></extra>",
+            )
+        )
+    buttons = [
+        dict(
+            label=label,
+            method="update",
+            args=[{"visible": [j == i for j in range(len(metrics))]}],
+        )
+        for i, (label, _, _) in enumerate(metrics)
+    ]
+    n_rows = len(metrics[0][1].index) if metrics else 0
+    height = max(350, 180 + 22 * n_rows)
+    fig.update_layout(
+        height=height,
+        font=dict(family="Roboto, monospace", size=14),
+        hoverlabel=dict(font_family="Roboto, monospace"),
+        title_text=title,
+        updatemenus=[
+            dict(
+                buttons=buttons,
+                direction="down",
+                showactive=True,
+                x=1,
+                xanchor="right",
+                y=1.02,
+                yanchor="bottom",
+            )
+        ],
+        modebar_remove=PLOTLY_MODEBAR_REMOVE,
+    )
+    fig.update_xaxes(type="category", title=x_title)
+    fig.update_yaxes(type="category", autorange="reversed")
+    html = pio.to_html(
+        fig,
+        include_plotlyjs=False,
+        full_html=False,
+        default_height=f"{height}px",
+        default_width="100%",
+    )
+    return html, height
+
+
+def chrom_display_name(chrom: str) -> str:
+    header = primer_scheme.header_dict.get(chrom)
+    return f"{header} ({chrom})" if header else chrom
+
+
 if "${meta.scheme}" != "[]":
     scheme_version_str = "${meta.scheme}"
 elif "${meta.custom_scheme_name}" != "[]":
@@ -742,7 +1056,44 @@ payload = {
     "single_plots": [],
     "nested_plots": [],
     "nextclade_table": {},
+    "run_warnings": [],
 }
+
+COVERAGE_DISAGREEMENT_TOLERANCE = 1.0  # percentage points
+
+
+def amplicon_region_coverage(df, amplicons, min_depth) -> float:
+    """
+    Percentage of positions inside amplicon inserts (union of primer-trimmed regions,
+    [coverage_start, coverage_end) 0-based half-open) with depth >= min_depth.
+    df is a per-base coverage table with 1-based pos (chrom, pos, depth).
+    """
+    regions = {}
+    for amp in amplicons:
+        if amp.coverage_end > amp.coverage_start:
+            regions.setdefault(str(amp.chrom), []).append(
+                (amp.coverage_start, amp.coverage_end)
+            )
+
+    covered = 0
+    total = 0
+    for chrom, spans in regions.items():
+        length = max(end for _, end in spans)
+        mask = np.zeros(length, dtype=bool)
+        for start, end in spans:
+            mask[start:end] = True
+
+        depth = np.zeros(length, dtype=int)
+        chrom_df = df[df["chrom"].astype(str) == chrom]
+        idx = chrom_df["pos"].to_numpy(dtype=int) - 1
+        vals = chrom_df["depth"].to_numpy(dtype=int)
+        in_range = (idx >= 0) & (idx < length)
+        depth[idx[in_range]] = vals[in_range]
+
+        covered += int(np.sum(depth[mask] >= min_depth))
+        total += int(mask.sum())
+
+    return round(covered / total * 100, 2) if total > 0 else 0.0
 
 samples = set()
 
@@ -779,7 +1130,12 @@ for tsv_path in pre_norm_tsvs:
         if len(df) > 0
         else 0.0
     )
-    coverage_for_qc = payload["qc_table_info"][sample_name]["pre_norm_coverage"]
+    payload["qc_table_info"][sample_name]["pre_norm_amplicon_coverage"] = (
+        amplicon_region_coverage(
+            df, primer_pairs, int("${params.min_coverage_depth}")
+        )
+    )
+    coverage_for_qc =payload["qc_table_info"][sample_name]["pre_norm_coverage"]
     if coverage_for_qc >= int("${params.qc_pass_high_coverage}"):
         payload["qc_table_info"][sample_name]["qc_result"] = "pass"
     elif coverage_for_qc >= int("${params.qc_pass_min_coverage}"):
@@ -802,6 +1158,11 @@ for tsv_path in post_norm_tsvs:
         )
         if len(df) > 0
         else 0.0
+    )
+    payload["qc_table_info"][sample_name]["post_norm_amplicon_coverage"] = (
+        amplicon_region_coverage(
+            df, primer_pairs, int("${params.min_coverage_depth}")
+        )
     )
 
 has_post_norm = len(post_norm_tsvs) > 0
@@ -826,8 +1187,15 @@ for tsv_path in amp_depth_tsvs:
         reader = csv.DictReader(f, delimiter="\t")
         rows = []
         for row in reader:
-            row_dict = {"sample": sample_name, **row}
-            row_dict["amplicon"] = int(row_dict["amplicon"])
+            # align_trim >= 2.0 reports mean_fragment_depth (a read pair counts once)
+            row_dict = {
+                "sample": sample_name,
+                "chrom": row["chrom"],
+                "amplicon": int(row["amplicon"]),
+                "mean_fragment_depth": float(
+                    row.get("mean_fragment_depth", row.get("mean_depth"))
+                ),
+            }
             # row_dict["amplicon"] = f"Amplicon {row_dict['amplicon']}"
             rows.append(row_dict)
 
@@ -841,7 +1209,7 @@ for tsv_path in amp_depth_tsvs:
                         "sample": sample_name,
                         "chrom": str(x.chrom),
                         "amplicon": x.amplicon_number,
-                        "mean_depth": 0.0,
+                        "mean_fragment_depth": 0.0,
                     }
                 )
 
@@ -850,7 +1218,7 @@ for tsv_path in amp_depth_tsvs:
             [
                 x
                 for x in rows
-                if float(x["mean_depth"]) < int("${params.min_coverage_depth}")
+                if float(x["mean_fragment_depth"]) < int("${params.min_coverage_depth}")
             ]
         )
         if len(rows) > 0
@@ -899,9 +1267,11 @@ for row in scheme_samplesheet_df.itertuples():
         payload["qc_table_info"][row.sample]["primer_scheme"] = scheme_version_str
         payload["qc_table_info"][row.sample]["pre_norm_coverage"] = 0.0
         payload["qc_table_info"][row.sample]["pre_norm_mean_depth"] = 0.0
+        payload["qc_table_info"][row.sample]["pre_norm_amplicon_coverage"] = 0.0
         if has_post_norm:
             payload["qc_table_info"][row.sample]["post_norm_coverage"] = 0.0
             payload["qc_table_info"][row.sample]["post_norm_mean_depth"] = 0.0
+            payload["qc_table_info"][row.sample]["post_norm_amplicon_coverage"] = 0.0
         payload["qc_table_info"][row.sample]["total_reads"] = 0
         payload["qc_table_info"][row.sample]["total_amp_dropouts"] = len(primer_pairs)
         payload["qc_table_info"][row.sample]["qc_result"] = "fail"
@@ -913,7 +1283,7 @@ for row in scheme_samplesheet_df.itertuples():
                     "sample": row.sample,
                     "chrom": str(x.chrom),
                     "amplicon": x.amplicon_number,
-                    "mean_depth": 0.0,
+                    "mean_fragment_depth": 0.0,
                 }
             )
 
@@ -930,6 +1300,42 @@ payload["qc_table_info"] = dict(
     )
 )
 
+# Unified HTML coverage metric: amplicon-region coverage from the BAM used for
+# consensus (post-normalisation when normalising, otherwise pre-normalisation).
+# Pre and post values stay separate in the TSV.
+coverage_disagreements = []
+for sample, info in payload["qc_table_info"].items():
+    pre_amp_cov = info.get("pre_norm_amplicon_coverage", 0.0)
+    post_amp_cov = info.get("post_norm_amplicon_coverage")
+    info["amplicon_coverage"] = (
+        post_amp_cov if has_post_norm and post_amp_cov is not None else pre_amp_cov
+    )
+    if (
+        post_amp_cov is not None
+        and abs(pre_amp_cov - post_amp_cov) > COVERAGE_DISAGREEMENT_TOLERANCE
+    ):
+        coverage_disagreements.append(
+            f"{sample} (pre {pre_amp_cov}% / post {post_amp_cov}%)"
+        )
+
+if coverage_disagreements:
+    warning = (
+        f"Pre- and post-normalisation amplicon coverage (>= ${params.min_coverage_depth}x) "
+        f"differ by more than {COVERAGE_DISAGREEMENT_TOLERANCE}% for "
+        f"{len(coverage_disagreements)} sample(s): {', '.join(coverage_disagreements)}."
+    )
+    try:
+        normalise_depth = int("${params.normalise_depth}")
+    except ValueError:
+        normalise_depth = None
+    if normalise_depth and normalise_depth < int("${params.min_coverage_depth}"):
+        warning += (
+            f" --normalise_depth ({normalise_depth}) is lower than --min_coverage_depth "
+            "(${params.min_coverage_depth}), so normalisation is removing coverage needed "
+            "to call consensus at these positions."
+        )
+    payload["run_warnings"].append(warning)
+
 qc_fieldnames = [
     "sample",
     "primer_scheme",
@@ -939,6 +1345,10 @@ qc_fieldnames = [
 if has_post_norm:
     qc_fieldnames += ["post_norm_coverage", "post_norm_mean_depth"]
 qc_fieldnames += ["total_reads", "total_amp_dropouts", "qc_result"]
+# New columns are appended so existing column positions are unchanged
+qc_fieldnames += ["pre_norm_amplicon_coverage"]
+if has_post_norm:
+    qc_fieldnames += ["post_norm_amplicon_coverage"]
 
 with open(f"{scheme_version_str.replace('/', '_')}_qc_results.tsv", "w") as f:
     writer = csv.DictWriter(
@@ -975,6 +1385,211 @@ for chrom in chroms:
         }
     )
 payload["nested_plots"].append(amp_depth_heatmaps)
+
+# Primer Trimming QC tab: summaries of the align_trim QC reports, values only
+aligntrim_reports = read_aligntrim_reports()
+aligntrim_samples = sorted(aligntrim_reports["summary"])
+sample_platforms = (
+    dict(zip(scheme_samplesheet_df["sample"], scheme_samplesheet_df["platform"]))
+    if "platform" in scheme_samplesheet_df.columns
+    else {}
+)
+payload["aligntrim"] = {
+    "samples": aligntrim_samples,
+    "no_report": sorted(
+        set(scheme_samplesheet_df["sample"].astype(str)) - set(aligntrim_samples)
+    ),
+}
+
+# Read fates (summary.tsv): kept and each removal reason as n and % of fragments
+fate_columns = []
+for df in aligntrim_reports["summary"].values():
+    for column in df.columns:
+        if (column == "kept" or column.startswith("removed_")) and column not in fate_columns:
+            fate_columns.append(column)
+fate_rows = []
+for sample in aligntrim_samples:
+    df = aligntrim_reports["summary"][sample]
+    if len(df) == 0:
+        continue
+    record = df.iloc[0]
+    fragments = int(record["fragments"])
+    cells = []
+    for column in fate_columns:
+        n = int(record[column]) if column in df.columns else 0
+        cells.append({"n": n, "pct": n / fragments * 100 if fragments else None})
+    fate_rows.append(
+        {
+            "sample": sample,
+            "platform": sample_platforms.get(sample, ""),
+            "fragments": fragments,
+            "cells": cells,
+        }
+    )
+fate_labels = [column.replace("removed_", "") for column in fate_columns]
+fate_colours = read_fate_colours(fate_labels)
+payload["aligntrim"]["read_fates"] = {
+    "columns": fate_labels,
+    "rows": fate_rows,
+    "plot": None,
+    "key": [
+        {
+            "name": label,
+            "colour": fate_colours[label],
+            "definition": READ_FATES[label][1]
+            if label in READ_FATES
+            else UNKNOWN_DEFINITION,
+        }
+        for label in fate_labels
+    ],
+}
+if fate_rows:
+    fates_html, fates_height = aligntrim_fates_bar(fate_rows, fate_labels)
+    payload["aligntrim"]["read_fates"]["plot"] = {
+        "html": fates_html,
+        "height": fates_height,
+    }
+
+# Amplicons (amplicons.tsv): per-amplicon fragment fates, one heatmap per chrom
+amplicon_frames = [
+    df.assign(sample=sample)
+    for sample, df in aligntrim_reports["amplicons"].items()
+    if len(df) > 0
+]
+payload["aligntrim"]["amplicon_plots"] = []
+payload["aligntrim"]["amplicon_key"] = []
+if amplicon_frames:
+    amplicons_df = pd.concat(amplicon_frames, ignore_index=True)
+    amplicon_metrics = ["fragments"] + [
+        c
+        for c in amplicons_df.columns
+        if c.startswith("removed_") and c not in AMPLICON_HEATMAP_EXCLUDED
+    ]
+    payload["aligntrim"]["amplicon_key"] = key_items(
+        [m.replace("removed_", "") for m in amplicon_metrics],
+        {
+            **{fate: definition for fate, (_, definition) in READ_FATES.items()},
+            **AMPLICON_METRIC_DEFINITIONS,
+        },
+    )
+    for chrom in sorted(amplicons_df["chrom"].astype(str).unique()):
+        chrom_df = amplicons_df[amplicons_df["chrom"].astype(str) == chrom]
+        metrics = []
+        for metric in amplicon_metrics:
+            matrix = chrom_df.pivot_table(
+                index="sample", columns="amplicon", values=metric, aggfunc="sum"
+            ).sort_index()
+            matrix = matrix[sorted(matrix.columns, key=int)]
+            metrics.append((metric.replace("removed_", ""), matrix, "log"))
+        html, height = metric_heatmap(
+            metrics,
+            title=f"Fragments per Amplicon: {chrom_display_name(chrom)}",
+            x_title="Amplicon",
+        )
+        payload["aligntrim"]["amplicon_plots"].append({"html": html, "height": height})
+
+# Primer pairs (primer_pairs.tsv): fragments per pair type
+pair_frames = [df for df in aligntrim_reports["primer_pairs"].values() if len(df) > 0]
+observed_pair_types = (
+    set(pd.concat(pair_frames)["type"]) if pair_frames else set()
+) - set(PRIMER_PAIR_EXTRA_TYPES)
+pair_columns = ordered_types(PRIMER_PAIR_TYPES, observed_pair_types)
+pair_rows = []
+for sample in sorted(aligntrim_reports["primer_pairs"]):
+    df = aligntrim_reports["primer_pairs"][sample]
+    by_type = df.groupby("type")["fragments"].sum() if len(df) > 0 else pd.Series(dtype=int)
+    total = int(sum(by_type.get(t, 0) for t in pair_columns))
+    pair_rows.append(
+        {
+            "sample": sample,
+            "total": total,
+            "cells": [
+                {
+                    "n": int(by_type.get(t, 0)),
+                    "pct": by_type.get(t, 0) / total * 100 if total else None,
+                }
+                for t in pair_columns
+            ],
+            "extra": [int(by_type.get(t, 0)) for t in PRIMER_PAIR_EXTRA_TYPES],
+        }
+    )
+payload["aligntrim"]["primer_pairs"] = {
+    "columns": pair_columns,
+    "extra_columns": PRIMER_PAIR_EXTRA_TYPES,
+    "rows": pair_rows,
+    "key": key_items(pair_columns + PRIMER_PAIR_EXTRA_TYPES, PRIMER_PAIR_DEFINITIONS),
+}
+
+# Split reads (split_reads.tsv): fragment-joins and distinct joins per type
+split_frames = [df for df in aligntrim_reports["split_reads"].values() if len(df) > 0]
+split_columns = ordered_types(
+    SPLIT_READ_TYPES, set(pd.concat(split_frames)["type"]) if split_frames else set()
+)
+split_rows = []
+for sample in sorted(aligntrim_reports["split_reads"]):
+    df = aligntrim_reports["split_reads"][sample]
+    cells = []
+    for split_type in split_columns:
+        type_df = df[df["type"] == split_type] if len(df) > 0 else df
+        cells.append(
+            {
+                "fragments": int(type_df["fragments"].sum()) if len(type_df) > 0 else 0,
+                "joins": len(type_df),
+            }
+        )
+    split_rows.append({"sample": sample, "cells": cells})
+payload["aligntrim"]["split_reads"] = {
+    "columns": split_columns,
+    "rows": split_rows,
+    "key": key_items(split_columns, SPLIT_READ_DEFINITIONS),
+}
+
+# Overlaps (overlaps.tsv): one heatmap per chrom, columns are amplicon n/n+1 overlaps
+overlap_frames = [
+    df.assign(sample=sample)
+    for sample, df in aligntrim_reports["overlaps"].items()
+    if len(df) > 0
+]
+overlap_metrics = [
+    ("ambiguous_fragments", "sum", "log"),
+    ("max_freq_difference", "max", (0, 1)),
+]
+payload["aligntrim"]["overlap_plots"] = []
+payload["aligntrim"]["overlap_key"] = key_items(
+    [metric for metric, _, _ in overlap_metrics], OVERLAP_METRIC_DEFINITIONS
+)
+if overlap_frames:
+    overlaps_df = pd.concat(overlap_frames, ignore_index=True)
+    overlaps_df["overlap"] = (
+        overlaps_df["amplicon"].astype(str) + "/" + overlaps_df["next_amplicon"].astype(str)
+    )
+    for chrom in sorted(overlaps_df["chrom"].astype(str).unique()):
+        chrom_df = overlaps_df[overlaps_df["chrom"].astype(str) == chrom]
+        overlap_order = [
+            label
+            for _, label in sorted(
+                {
+                    (int(a), int(n)): f"{a}/{n}"
+                    for a, n in zip(chrom_df["amplicon"], chrom_df["next_amplicon"])
+                }.items()
+            )
+        ]
+        metrics = []
+        for metric, aggfunc, scale in overlap_metrics:
+            matrix = chrom_df.pivot_table(
+                index="sample",
+                columns="overlap",
+                values=metric,
+                aggfunc=aggfunc,
+                dropna=False,
+            ).sort_index()
+            metrics.append((metric, matrix.reindex(columns=overlap_order), scale))
+        html, height = metric_heatmap(
+            metrics,
+            title=f"Amplicon Overlaps: {chrom_display_name(chrom)}",
+            x_title="Overlap",
+        )
+        payload["aligntrim"]["overlap_plots"].append({"html": html, "height": height})
 
 msa_list = glob("msas/*.fa*")
 if len(msa_list) > 0:

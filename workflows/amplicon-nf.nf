@@ -365,6 +365,11 @@ workflow AMPLICON_NF {
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
         .groupTuple()
 
+    ch_aligntrim_qc_tsvs_by_scheme = ONT_ASSEMBLY.out.aligntrim_qc_tsvs
+        .mix(ILLUMINA_ASSEMBLY.out.aligntrim_qc_tsvs)
+        .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
+        .groupTuple()
+
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
     // massage optional inputs
@@ -377,10 +382,11 @@ workflow AMPLICON_NF {
         .join(ch_pre_norm_tsvs_by_scheme)
         .join(ch_amp_depth_tsvs_by_scheme)
         .join(ch_coverage_tsvs_by_scheme)
+        .join(ch_aligntrim_qc_tsvs_by_scheme)
         .join(ch_post_norm_opt, remainder: true)
         .join(ch_msas_opt, remainder: true)
         .join(ch_nextclade_opt, remainder: true)
-        .map { meta, bed, pre_norm, amp, cov, post_norm, msas, nc ->
+        .map { meta, bed, pre_norm, amp, cov, aligntrim_qc, post_norm, msas, nc ->
             [
                 meta,
                 bed,
@@ -388,6 +394,7 @@ workflow AMPLICON_NF {
                 post_norm ?: [],
                 amp,
                 cov,
+                aligntrim_qc,
                 msas ?: [],
                 nc ?: [],
                 samplesheet_csv,

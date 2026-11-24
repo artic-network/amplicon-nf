@@ -10,6 +10,11 @@ pipeline_info/*.{html,json,txt,yml}
 *.primertrimmed.sorted.bam*
 *.trimmed.rg.sorted.bam*
 *.amplicon_depths.tsv
+*.summary.tsv
+*.amplicons.tsv
+*.primer_pairs.tsv
+*.split_reads.tsv
+*.overlaps.tsv
 *.minion.log.txt
 *.vcf.gz*
 pathoplexus/*/*.xlsx

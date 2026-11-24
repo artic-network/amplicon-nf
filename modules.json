@@ -7,7 +7,7 @@
                 "nf-core": {
                     "artic/aligntrim": {
                         "branch": "master",
-                        "git_sha": "1c2df6eda26829e3025cb5a98a344a18ac55a706",
+                        "git_sha": "18dd4cf17ca626a307d1d55b34cb36ba834a8152",
                         "installed_by": ["modules"]
                     },
                     "artic/guppyplex": {

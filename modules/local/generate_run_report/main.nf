@@ -14,6 +14,7 @@ process GENERATE_RUN_REPORT {
         path(post_norm_tsvs, stageAs: "post_norm_tsvs/*"),
         path(amp_depth_tsvs, stageAs: "amplicon_depth_tsvs/*"),
         path(coverage_tsvs, stageAs: "coverage_tsvs/*"),
+        path(aligntrim_qc_tsvs, stageAs: "aligntrim_qc/*"),
         path(msas, stageAs: "msas/*"),
         path(nextclade, stageAs: "nextclade_tsv/*"),
         path(samplesheet_csv)

@@ -389,7 +389,8 @@ with open("${amp_depth_tsv}", "rt") as f:
         {
             "chrom": row["chrom"],
             "amplicon": row["amplicon"],
-            "mean_depth": float(row["mean_depth"]),
+            # align_trim >= 2.0 reports mean_fragment_depth (a read pair counts once)
+            "mean_depth": float(row.get("mean_fragment_depth", row.get("mean_depth"))),
         }
         for row in reader
     ]

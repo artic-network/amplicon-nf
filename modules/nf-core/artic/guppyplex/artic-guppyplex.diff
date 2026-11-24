@@ -7,7 +7,7 @@ Changes in 'artic/guppyplex/environment.yml':
    - bioconda
  dependencies:
 -  - bioconda::artic=1.6.2
-+  - bioconda::artic=1.11.2
++  - bioconda::artic=1.12.0
 +  - conda-forge::gzip=1.14
 
 'modules/nf-core/artic/guppyplex/meta.yml' is unchanged
@@ -26,8 +26,8 @@ Changes in 'artic/guppyplex/main.nf':
 -        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/5a/5a747cc579edfc0cb2176b749afc02550ab5de678ae6a40d2cfadeba6c0de25d/data' :
 -        'community.wave.seqera.io/library/artic:1.6.2--d4956cdc155b8612' }"
 +    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-+        ? 'oras://community.wave.seqera.io/library/artic_gzip:9b6b316374421185'
-+        : 'artic/fieldbioinformatics:1.11.2'}"
++        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/0f/0ff516afa828b5ba2c95c5c88c870938d146ae2961f6c6b26ab8d00b21567c94/data'
++        : 'artic/fieldbioinformatics:1.12.0'}"
  
      input:
 -    tuple val(meta), path(fastq_dir)

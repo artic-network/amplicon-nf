@@ -86,6 +86,11 @@
       font-weight: bold;
     }
 
+    .metric-primary {
+      background-color: rgba(52, 92, 103, 0.08);
+      font-weight: bold;
+    }
+
     .table-sm td,
     .table-sm th {
       padding: 0.3rem;
@@ -134,6 +139,28 @@
     .tab-content {
       width: 100%;
       overflow: hidden;
+    }
+
+    .aligntrim-plot .plotly-graph-div {
+      height: var(--plot-height) !important;
+    }
+
+    .aligntrim-pills .nav-link {
+      color: var(--color-teal-dark);
+    }
+
+    .aligntrim-pills .nav-link.active {
+      background-color: var(--color-teal-dark);
+      color: var(--color-cream);
+    }
+
+    .fate-swatch {
+      display: inline-block;
+      flex: 0 0 auto;
+      width: 0.9rem;
+      height: 0.9rem;
+      margin: 0.15rem 0.5rem 0 0;
+      border-radius: 2px;
     }
 
     .tab-pane {
@@ -196,6 +223,17 @@
       </table>
     </div>
 
+    {% if run_warnings %}
+    <div class="alert alert-danger mb-4" role="alert">
+      <strong>Run warnings</strong>
+      <ul class="mb-0">
+        {% for warning in run_warnings %}
+        <li>{{ warning }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
     <ul class="nav nav-tabs" id="plotTabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="qc-table-tab" data-bs-toggle="tab" data-bs-target="#qc-table" type="button" role="tab">QC Summary Table</button>
@@ -210,6 +248,11 @@
         <button class="nav-link" id="nested-plot-{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#nested-plot-{{ loop.index }}" type="button" role="tab">{{ plot_type.name }}</button>
       </li>
       {% endfor %}
+      {% if aligntrim and aligntrim.samples %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="aligntrim-tab" data-bs-toggle="tab" data-bs-target="#aligntrim" type="button" role="tab">Primer Trimming QC</button>
+      </li>
+      {% endif %}
       {% if nextclade_table %}
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="nextclade-table-tab" data-bs-toggle="tab" data-bs-target="#nextclade-table" type="button" role="tab">Nextclade</button>
@@ -224,15 +267,14 @@
           <thead>
             <tr>
               <th><strong>Sample</strong></th>
-              <th><strong>Primer Scheme</strong></th>
               <th><strong>Total Reads</strong></th>
-              <th><strong>Pre-norm Coverage &ge; {{minimum_coverage_depth}}x</strong></th>
+              <th title="% of the reference with depth &ge; {{minimum_coverage_depth}}x before normalisation (basis for QC Result)"><strong>Raw Coverage &ge; {{minimum_coverage_depth}}x</strong></th>
+              <th class="metric-primary" title="% of positions inside amplicon inserts (primers excluded) with depth &ge; {{minimum_coverage_depth}}x{% if has_post_norm %}, after normalisation{% endif %}"><strong>Amplicon Coverage &ge; {{minimum_coverage_depth}}x</strong></th>
               <th><strong>Pre-norm Mean Depth</strong></th>
               {% if has_post_norm %}
-              <th><strong>Post-norm Coverage &ge; {{minimum_coverage_depth}}x</strong></th>
               <th><strong>Post-norm Mean Depth</strong></th>
               {% endif %}
-              <th><strong>Total Amplicon Dropouts</strong></th>
+              <th title="Amplicons with mean fragment depth &lt; {{minimum_coverage_depth}}x"><strong>Total Amplicon Dropouts</strong></th>
               <th><strong>QC Result</strong></th>
             </tr>
           </thead>
@@ -240,12 +282,11 @@
             {% for sample, results in qc_table_info.items() %}
             <tr>
               <td>{{ sample }}</td>
-              <td>{{ results.primer_scheme }}</td>
               <td>{{ results.total_reads }}</td>
-              <td>{{ results.pre_norm_coverage }}</td>
+              <td>{{ results.pre_norm_coverage }}%</td>
+              <td class="metric-primary">{{ results.amplicon_coverage }}%</td>
               <td>{{ results.pre_norm_mean_depth }}</td>
               {% if has_post_norm %}
-              <td>{{ results.post_norm_coverage }}</td>
               <td>{{ results.post_norm_mean_depth }}</td>
               {% endif %}
               <td>{{ results.total_amp_dropouts }}</td>
@@ -262,8 +303,9 @@
             {% endfor %}
           </tbody>
         </table>
+        <p class="small text-muted mb-0">Raw Coverage is pre-normalisation across the whole reference and determines the QC Result; Amplicon Coverage is restricted to amplicon inserts. The full pre/post-normalisation breakdown is in the <code>{{ primer_scheme_version | replace('/', '_') }}_qc_results.tsv</code> file.</p>
       </div>
-      
+
       <!-- Nextclade output -->
       <!-- {% if nextclade_table %} -->
       <div class="tab-pane fade" id="nextclade-table" role="tabpanel">
@@ -397,6 +439,172 @@
         {% endfor %}
       </div>
       {% endfor %}
+
+      <!-- Primer Trimming QC (align_trim QC reports) -->
+      {% if aligntrim and aligntrim.samples %}
+      {% macro render_key(items) %}
+      <h6 class="mt-3 mb-2">Key</h6>
+      <div class="row small fate-key">
+        {% for item in items %}
+        <div class="col-md-6 d-flex align-items-start mb-1">
+          {% if item.colour %}<span class="fate-swatch" style="background-color: {{ item.colour }}"></span>{% endif %}
+          <span><code>{{ item.name }}</code>: {{ item.definition }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endmacro %}
+      <div class="tab-pane fade" id="aligntrim" role="tabpanel">
+        <p class="small text-muted mt-2 mb-2">
+          Summaries of the per-sample <code>align_trim</code> QC reports (<code>&lt;SAMPLE&gt;.summary.tsv</code>, <code>.amplicons.tsv</code>, <code>.primer_pairs.tsv</code>, <code>.split_reads.tsv</code>, <code>.overlaps.tsv</code>).
+          A fragment is a single read for Nanopore and a read pair for Illumina.
+        </p>
+        {% if aligntrim.no_report %}
+        <p class="small mb-2"><strong>No align_trim report:</strong> {{ aligntrim.no_report | join(", ") }}</p>
+        {% endif %}
+
+        <ul class="nav nav-pills aligntrim-pills mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="aligntrim-fates-tab" data-bs-toggle="tab" data-bs-target="#aligntrim-fates" type="button" role="tab">Read Fates</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aligntrim-amplicons-tab" data-bs-toggle="tab" data-bs-target="#aligntrim-amplicons" type="button" role="tab">Amplicons</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aligntrim-pairs-tab" data-bs-toggle="tab" data-bs-target="#aligntrim-pairs" type="button" role="tab">Primer Pairs</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aligntrim-splits-tab" data-bs-toggle="tab" data-bs-target="#aligntrim-splits" type="button" role="tab">Split Reads</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aligntrim-overlaps-tab" data-bs-toggle="tab" data-bs-target="#aligntrim-overlaps" type="button" role="tab">Overlaps</button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Read fates -->
+          <div class="tab-pane fade show active" id="aligntrim-fates" role="tabpanel">
+            {% if aligntrim.read_fates.plot %}
+            <div class="aligntrim-plot" style="--plot-height: {{ aligntrim.read_fates.plot.height }}px">{{ aligntrim.read_fates.plot.html | safe }}</div>
+            {% endif %}
+            <div class="table-responsive">
+              <table class="table table-sm small mt-2">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Sample</th>
+                    <th rowspan="2">Platform</th>
+                    <th rowspan="2">Fragments</th>
+                    <th rowspan="2" title="{{ aligntrim.read_fates.key[0].definition }}">{{ aligntrim.read_fates.key[0].name }}</th>
+                    <th colspan="{{ aligntrim.read_fates.columns | length - 1 }}" class="text-center">Removed</th>
+                  </tr>
+                  <tr>
+                    {% for fate in aligntrim.read_fates.key[1:] %}<th title="{{ fate.definition }}">{{ fate.name | replace("_", " ") }}</th>{% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in aligntrim.read_fates.rows %}
+                  <tr>
+                    <td class="text-nowrap">{{ row.sample }}</td>
+                    <td>{{ row.platform }}</td>
+                    <td>{{ "{:,}".format(row.fragments) }}</td>
+                    {% for cell in row.cells %}
+                    <td class="text-nowrap">{{ "{:,}".format(cell.n) }}{% if cell.pct is not none %} ({{ "%.1f" | format(cell.pct) }}%){% endif %}</td>
+                    {% endfor %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            {{ render_key(aligntrim.read_fates.key) }}
+          </div>
+
+          <!-- Per-amplicon fates -->
+          <div class="tab-pane fade" id="aligntrim-amplicons" role="tabpanel">
+            <p class="small text-muted mb-1">Fragments assigned to each amplicon, and those removed at the amplicon level. Use the dropdown to switch between all fragments and each removal reason. Fragments removed before an amplicon is assigned (e.g. unmapped, low MAPQ, ambiguous amplicon) only appear in Read Fates; the full per-amplicon breakdown is in <code>&lt;SAMPLE&gt;.amplicons.tsv</code>.</p>
+            {% for plot in aligntrim.amplicon_plots %}
+            <div class="aligntrim-plot" style="--plot-height: {{ plot.height }}px">{{ plot.html | safe }}</div>
+            {% else %}
+            <p class="small">No amplicon reports.</p>
+            {% endfor %}
+            <p class="small text-muted mb-0">Each row is a sample and each column an amplicon, numbered as in the primer scheme. Colour is on a log scale (lighter = more fragments), with the colour bar labelled in raw counts; hover over a cell for the exact value.</p>
+            {{ render_key(aligntrim.amplicon_key) }}
+          </div>
+
+          <!-- Primer pairs -->
+          <div class="tab-pane fade" id="aligntrim-pairs" role="tabpanel">
+            <p class="small text-muted mb-1">Fragments with a primer matched at both ends, by the type of primer combination; percentages are of pairs classified. The last two columns are counted in addition to each fragment's own type.</p>
+            <div class="table-responsive">
+              <table class="table table-sm small mt-2">
+                <thead>
+                  <tr>
+                    <th rowspan="2">Sample</th>
+                    <th rowspan="2">Pairs classified</th>
+                    <th colspan="{{ aligntrim.primer_pairs.columns | length }}" class="text-center">Pair type</th>
+                    <th colspan="{{ aligntrim.primer_pairs.extra_columns | length }}" class="text-center">Also observed</th>
+                  </tr>
+                  <tr>
+                    {% for item in aligntrim.primer_pairs.key %}<th title="{{ item.definition }}">{{ item.name | replace("_", " ") }}</th>{% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in aligntrim.primer_pairs.rows %}
+                  <tr>
+                    <td class="text-nowrap">{{ row.sample }}</td>
+                    <td>{{ "{:,}".format(row.total) }}</td>
+                    {% for cell in row.cells %}
+                    <td class="text-nowrap">{{ "{:,}".format(cell.n) }}{% if cell.pct is not none %} ({{ "%.1f" | format(cell.pct) }}%){% endif %}</td>
+                    {% endfor %}
+                    {% for n in row.extra %}<td>{{ "{:,}".format(n) }}</td>{% endfor %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <p class="small text-muted mb-0">Pairs classified is the number of fragments with a primer matched at each end (the sum of the pair type columns). In the key, LEFT n and RIGHT n are the left and right primers of amplicon n.</p>
+            {{ render_key(aligntrim.primer_pairs.key) }}
+          </div>
+
+          <!-- Split reads -->
+          <div class="tab-pane fade" id="aligntrim-splits" role="tabpanel">
+            <p class="small text-muted mb-1">Split (supplementary) alignments by join type, shown as fragment-joins (distinct joins). A fragment with several joins is counted once per join, and align_trim does not report the number of fragments checked, so no percentages are given.</p>
+            <div class="table-responsive">
+              <table class="table table-sm small mt-2">
+                <thead>
+                  <tr>
+                    <th>Sample</th>
+                    {% for item in aligntrim.split_reads.key %}<th title="{{ item.definition }}">{{ item.name | replace("_", " ") }}</th>{% endfor %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in aligntrim.split_reads.rows %}
+                  <tr>
+                    <td class="text-nowrap">{{ row.sample }}</td>
+                    {% for cell in row.cells %}
+                    <td>{{ "{:,}".format(cell.fragments) }} ({{ "{:,}".format(cell.joins) }})</td>
+                    {% endfor %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <p class="small text-muted mb-0">A join is where a read's alignment stops and continues at another position, strand or reference (a split or supplementary alignment). Joins are grouped by their two breakpoints (in 10 bp windows) and orientation; a join seen in both mates of a pair counts once. The first number is fragment-joins (fragments showing that kind of join, summed over joins), the number in brackets is how many distinct joins were seen. Per-join detail, including breakpoint positions and orientation, is in <code>&lt;SAMPLE&gt;.split_reads.tsv</code>.</p>
+            {{ render_key(aligntrim.split_reads.key) }}
+          </div>
+
+          <!-- Overlaps -->
+          <div class="tab-pane fade" id="aligntrim-overlaps" role="tabpanel">
+            <p class="small text-muted mb-1">Overlaps between neighbouring amplicons (n/n+1): fragments removed as ambiguous, and the largest base frequency difference between the two amplicons. Blank cells were not compared.</p>
+            {% for plot in aligntrim.overlap_plots %}
+            <div class="aligntrim-plot" style="--plot-height: {{ plot.height }}px">{{ plot.html | safe }}</div>
+            {% else %}
+            <p class="small">No amplicon overlaps in this scheme.</p>
+            {% endfor %}
+            <p class="small text-muted mb-0">Each row is a sample and each column the overlap between amplicon n and n+1. Use the dropdown to switch metric: <code>ambiguous_fragments</code> is coloured on a log scale (lighter = more fragments), <code>max_freq_difference</code> on a fixed 0&ndash;1 scale. Hover over a cell for the exact value; per-overlap detail (median depths, positions) is in <code>&lt;SAMPLE&gt;.overlaps.tsv</code>.</p>
+            {{ render_key(aligntrim.overlap_key) }}
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div> <!-- 🔥 This closes .tab-content correctly -->
 
     <!-- ✅ Footer now OUTSIDE of .tab-content -->

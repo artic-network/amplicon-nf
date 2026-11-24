@@ -262,4 +262,10 @@ workflow ILLUMINA_ASSEMBLY {
     fastp_json                   = FASTP.out.json
     fastqc_raw_zip               = FASTQC_RAW.out.zip
     fastqc_trim_zip              = FASTQC_TRIM.out.zip
+    aligntrim_qc_tsvs            = ARTIC_ALIGNTRIM.out.qc_summary.mix(
+        ARTIC_ALIGNTRIM.out.qc_amplicons,
+        ARTIC_ALIGNTRIM.out.qc_primer_pairs,
+        ARTIC_ALIGNTRIM.out.qc_split_reads,
+        ARTIC_ALIGNTRIM.out.qc_overlaps,
+    )
 }
