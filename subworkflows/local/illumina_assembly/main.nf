@@ -64,13 +64,18 @@ workflow ILLUMINA_ASSEMBLY {
             }
         )
 
-    // No need to index a ref for each sample, just once per scheme
+    // No need to index a ref for each sample, just once per distinct reference. Keyed on the scheme AND the
+    // reference content: refselect schemes (e.g. artic-pan-ebola) give samples of one scheme different
+    // variant references, so keying on the scheme alone would align/call every sample against one variant.
+    ch_sample_ref_key = ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, scheme_ref ->
+        [meta, meta.subMap("scheme", "custom_scheme", "custom_scheme_name") + [ref_md5: scheme_ref.text.md5()]]
+    }
+
     ch_refs_only = ch_reads_and_scheme
-        .map { meta, _fastq_1, _fastq_2, _scheme_bed, scheme_ref ->
-            [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), scheme_ref]
-        }
+        .join(ch_sample_ref_key)
+        .map { _meta, _fastq_1, _fastq_2, _scheme_bed, scheme_ref, ref_key -> [ref_key, scheme_ref] }
         .groupTuple()
-        .map { meta, refs -> [meta, refs[0]] }
+        .map { ref_key, refs -> [ref_key, refs[0]] }
 
     // Replace IUPAC ambiguity codes in reference FASTA — freebayes does not support them
     SEQKIT_REPLACE_IUPAC(ch_refs_only)
@@ -83,11 +88,12 @@ workflow ILLUMINA_ASSEMBLY {
 
     // Propagate cleaned reference into ch_trimmed_fastq so all downstream tools (bwa-mem2, freebayes, bcftools) receive it
     ch_trimmed_fastq = ch_trimmed_fastq
-        .map { meta, fastq_1, fastq_2, scheme_bed, _old_ref ->
-            [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta, fastq_1, fastq_2, scheme_bed]
+        .join(ch_sample_ref_key)
+        .map { meta, fastq_1, fastq_2, scheme_bed, _old_ref, ref_key ->
+            [ref_key, meta, fastq_1, fastq_2, scheme_bed]
         }
         .combine(ch_refs_only, by: 0)
-        .map { _scheme_meta, meta, fastq_1, fastq_2, scheme_bed, cleaned_ref ->
+        .map { _ref_key, meta, fastq_1, fastq_2, scheme_bed, cleaned_ref ->
             [meta, fastq_1, fastq_2, scheme_bed, cleaned_ref]
         }
 
@@ -98,12 +104,10 @@ workflow ILLUMINA_ASSEMBLY {
     // Join the index with the per-sample metadata
     ch_rejoined_bwamem2_indices = BWAMEM2_INDEX.out.index
         .combine(
-            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref ->
-                [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta]
-            },
+            ch_sample_ref_key.map { meta, ref_key -> [ref_key, meta] },
             by: 0
         )
-        .map { _scheme_meta, bwamem2_index, meta ->
+        .map { _ref_key, bwamem2_index, meta ->
             [meta, bwamem2_index]
         }
 
@@ -146,12 +150,10 @@ workflow ILLUMINA_ASSEMBLY {
     // Join the fai with the per-sample metadata
     ch_rejoined_ref_fais = SAMTOOLS_FAIDX.out.fai
         .combine(
-            ch_reads_and_scheme.map { meta, _fastq_1, _fastq_2, _scheme_bed, _scheme_ref ->
-                [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), meta]
-            },
+            ch_sample_ref_key.map { meta, ref_key -> [ref_key, meta] },
             by: 0
         )
-        .map { _scheme_meta, scheme_ref_fai, meta ->
+        .map { _ref_key, scheme_ref_fai, meta ->
             [meta, scheme_ref_fai]
         }
 
@@ -260,4 +262,10 @@ workflow ILLUMINA_ASSEMBLY {
     fastp_json                   = FASTP.out.json
     fastqc_raw_zip               = FASTQC_RAW.out.zip
     fastqc_trim_zip              = FASTQC_TRIM.out.zip
+    aligntrim_qc_tsvs            = ARTIC_ALIGNTRIM.out.qc_summary.mix(
+        ARTIC_ALIGNTRIM.out.qc_amplicons,
+        ARTIC_ALIGNTRIM.out.qc_primer_pairs,
+        ARTIC_ALIGNTRIM.out.qc_split_reads,
+        ARTIC_ALIGNTRIM.out.qc_overlaps,
+    )
 }

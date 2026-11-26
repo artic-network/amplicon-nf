@@ -4,5 +4,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::artic=1.11.2
+  - bioconda::artic=1.12.0
   - conda-forge::gzip=1.14

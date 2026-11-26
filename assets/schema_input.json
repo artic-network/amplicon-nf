@@ -64,21 +64,21 @@
                 "type": "string",
                 "format": "directory-path",
                 "exists": true,
-                "errorMessage": "FastQ directory must exist and cannot contain spaces. It should contain the FASTQ files for the nanopore sample. e.g. '/path/to/run/fastq_pass/Barcode01/'"
+                "errorMessage": "FastQ directory must exist and cannot contain spaces. It should contain the FASTQ files for the nanopore sample. e.g. '/path/to/run/fastq_pass/Barcode01/'. To provide a single nanopore FASTQ file instead, use the 'fastq_1' column."
             },
             "fastq_1": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
+                "errorMessage": "FastQ file 'fastq_1' must exist, cannot contain spaces and must have extension '.fq', '.fastq', '.fq.gz' or '.fastq.gz'. For Illumina samples this is read 1, for Nanopore samples this is a single FASTQ file (an alternative to 'fastq_directory')."
             },
             "fastq_2": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^\\S+\\.f(ast)?q(\\.gz)?$",
+                "errorMessage": "FastQ file for reads 2 must exist, cannot contain spaces and must have extension '.fq', '.fastq', '.fq.gz' or '.fastq.gz'"
             }
         },
         "required": [

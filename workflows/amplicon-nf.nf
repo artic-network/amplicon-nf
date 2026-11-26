@@ -8,6 +8,8 @@ include { paramsSummaryMap                          } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                    } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { getPipelineVersion                        } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { nonDefaultParamsText                      } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 
 include { ONT_ASSEMBLY                              } from '../subworkflows/local/ont_assembly/main'
 include { ILLUMINA_ASSEMBLY                         } from '../subworkflows/local/illumina_assembly/main'
@@ -23,6 +25,10 @@ include { FIND_CONCATENATE                          } from '../modules/nf-core/f
 
 include { GENERATE_SAMPLE_REPORT                    } from '../modules/local/generate_sample_report/main'
 include { GENERATE_RUN_REPORT                       } from '../modules/local/generate_run_report/main'
+include { DEACON_FETCH                              } from '../modules/local/deacon/fetch/main'
+include { DEACON_FILTER                             } from '../modules/local/deacon/filter/main'
+include { PATHOPLEXUS_SAMPLE                        } from '../modules/local/pathoplexus/sample/main'
+include { PATHOPLEXUS_TEMPLATE                      } from '../modules/local/pathoplexus/template/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,6 +45,9 @@ workflow AMPLICON_NF {
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+
+    // Pipeline version with the exact commit (e.g. 0.12.0-g44f4001[-dirty]), recorded in the reports and Pathoplexus template
+    def pipeline_version = getPipelineVersion()
 
     ch_input = ch_samplesheet.branch { meta, _fastq_directory, _fastq_1, _fastq_2 ->
         nanopore: meta.platform == "nanopore"
@@ -78,23 +87,23 @@ workflow AMPLICON_NF {
             }
 
         // 
-        // ONT file fuzzy matching from read_directory
+        // ONT file fuzzy matching from read_directory, explicit fastq_directory / fastq_1 paths always take precedence over barcode matching
         //
         ch_nanopore_fuzzy_match = ch_input.nanopore
-            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                !fastq_dir && meta.barcode
+            .filter { meta, fastq_dir, fastq_1, _fastq_2 ->
+                !fastq_dir && !fastq_1 && meta.barcode
             }
             .map { meta, _fastq_dir, _fastq_1, _fastq_2 ->
                 [meta, file("${read_directory}/${meta.barcode}/", checkIfExists: true)]
             }
 
-        // Mix in the fuzzy matched Nanopore files with the well behaved samplesheet entries.
+        // Mix in the fuzzy matched Nanopore files with the well behaved samplesheet entries (a directory of FASTQs or a single FASTQ file).
         ch_nanopore_input = ch_input.nanopore
-            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                fastq_dir && !meta.barcode
+            .filter { _meta, fastq_dir, fastq_1, _fastq_2 ->
+                fastq_dir || fastq_1
             }
-            .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                [meta, fastq_dir]
+            .map { meta, fastq_dir, fastq_1, _fastq_2 ->
+                [meta, fastq_dir ?: fastq_1]
             }
             .mix(ch_nanopore_fuzzy_match)
 
@@ -110,11 +119,11 @@ workflow AMPLICON_NF {
     }
     else {
         ch_nanopore_input = ch_input.nanopore
-            .filter { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                fastq_dir && !meta.barcode
+            .filter { _meta, fastq_dir, fastq_1, _fastq_2 ->
+                fastq_dir || fastq_1
             }
-            .map { meta, fastq_dir, _fastq_1, _fastq_2 ->
-                [meta, fastq_dir]
+            .map { meta, fastq_dir, fastq_1, _fastq_2 ->
+                [meta, fastq_dir ?: fastq_1]
             }
 
         ch_illumina_input = ch_input.illumina
@@ -142,6 +151,40 @@ workflow AMPLICON_NF {
         }
         .filter { it != null }
 
+    //
+    // Host read removal with Deacon (before guppyplex / fastp) - on by default
+    //
+    // Deacon version for the Pathoplexus dehostingMethod field (empty when dehosting is skipped)
+    ch_deacon_version = channel.value('')
+    if (!params.skip_dehosting) {
+        if (file(params.dehosting_index).exists()) {
+            ch_deacon_index = file(params.dehosting_index)
+        }
+        else {
+            DEACON_FETCH(ch_store_directory, params.dehosting_index)
+            // Wait on the fetch, but point at the real store_dir path (not the fetch task's staged symlink)
+            ch_deacon_index = DEACON_FETCH.out.store_directory.map { _store_dir ->
+                file("${params.store_dir}/amplicon-nf/deacon/${params.dehosting_index}.idx", checkIfExists: true)
+            }
+        }
+
+        DEACON_FILTER(
+            ch_nanopore_input.mix(
+                ch_illumina_input.map { meta, fastq_1, fastq_2 -> [meta, [fastq_1, fastq_2]] }
+            ),
+            ch_deacon_index,
+        )
+
+        // ONT: single dehosted FASTQ -> guppyplex | Illumina: glob output is sorted, so [_R1, _R2]
+        ch_nanopore_input = DEACON_FILTER.out.fastq.filter { meta, _fastq -> meta.platform == "nanopore" }
+        ch_illumina_input = DEACON_FILTER.out.fastq
+            .filter { meta, _fastq -> meta.platform == "illumina" }
+            .map { meta, fastq -> [meta, fastq[0], fastq[1]] }
+
+        ch_deacon_version = DEACON_FILTER.out.versions_deacon
+            .first()
+            .map { _process, _tool, version -> version }
+    }
 
     //
     // Generate virus assemblies
@@ -253,6 +296,7 @@ workflow AMPLICON_NF {
         bootstrap_bundle_min_js,
         bootstrap_bundle_min_css,
         plotly_js,
+        pipeline_version,
     )
     ch_versions = ch_versions.mix(GENERATE_SAMPLE_REPORT.out.versions.first())
 
@@ -333,6 +377,11 @@ workflow AMPLICON_NF {
         .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
         .groupTuple()
 
+    ch_aligntrim_qc_tsvs_by_scheme = ONT_ASSEMBLY.out.aligntrim_qc_tsvs
+        .mix(ILLUMINA_ASSEMBLY.out.aligntrim_qc_tsvs)
+        .map { meta, tsv -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), tsv] }
+        .groupTuple()
+
     samplesheet_csv = file("${params.input}", checkIfExists: true)
 
     // massage optional inputs
@@ -345,10 +394,11 @@ workflow AMPLICON_NF {
         .join(ch_pre_norm_tsvs_by_scheme)
         .join(ch_amp_depth_tsvs_by_scheme)
         .join(ch_coverage_tsvs_by_scheme)
+        .join(ch_aligntrim_qc_tsvs_by_scheme)
         .join(ch_post_norm_opt, remainder: true)
         .join(ch_msas_opt, remainder: true)
         .join(ch_nextclade_opt, remainder: true)
-        .map { meta, bed, pre_norm, amp, cov, post_norm, msas, nc ->
+        .map { meta, bed, pre_norm, amp, cov, aligntrim_qc, post_norm, msas, nc ->
             [
                 meta,
                 bed,
@@ -356,6 +406,7 @@ workflow AMPLICON_NF {
                 post_norm ?: [],
                 amp,
                 cov,
+                aligntrim_qc,
                 msas ?: [],
                 nc ?: [],
                 samplesheet_csv,
@@ -369,8 +420,57 @@ workflow AMPLICON_NF {
         bootstrap_bundle_min_js,
         bootstrap_bundle_min_css,
         plotly_js,
+        pipeline_version,
     )
     ch_versions = ch_versions.mix(GENERATE_RUN_REPORT.out.versions.first())
+
+    //
+    // Pathoplexus submission template (metadata XLSX/TSV, FASTA, dehosted reads) per primer scheme - on by default
+    //
+    if (!params.skip_pathoplexus_template) {
+        if (params.skip_dehosting) {
+            log.warn("Pathoplexus template: --skip_dehosting is set, so no raw reads are prepared for Pathoplexus (raw_reads/ and files.rawReads are left out). Set --skip_pathoplexus_template to turn the Pathoplexus template off.")
+        }
+
+        // Reads as used for assembly (dehosted unless --skip_dehosting), their headers carry run information
+        ch_pp_reads = ch_nanopore_input
+            .map { meta, reads -> [meta.id, reads] }
+            .mix(ch_illumina_input.map { meta, fastq_1, fastq_2 -> [meta.id, [fastq_1, fastq_2]] })
+
+        ch_pp_qc_tsvs = GENERATE_SAMPLE_REPORT.out.sample_qc_tsv
+            .map { tsv -> [tsv.name.replace('_amplicon-nf_qc-report.tsv', ''), tsv] }
+
+        // Inner joins only: samples without a consensus (failed assembly) drop out here
+        ch_pp_sample_input = ch_reheadered_consensus_fasta
+            .map { meta, fasta -> [meta.id, meta, fasta] }
+            .join(ch_primer_scheme.map { meta, bed, _ref -> [meta.id, bed] })
+            .join(ch_pp_qc_tsvs)
+            .join(ch_pp_reads)
+            .map { _id, meta, fasta, bed, qc_tsv, reads -> [meta, fasta, bed, qc_tsv, reads] }
+
+        PATHOPLEXUS_SAMPLE(
+            ch_pp_sample_input,
+            pipeline_version,
+            nonDefaultParamsText(paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")),
+            ch_deacon_version,
+        )
+
+        PATHOPLEXUS_SAMPLE.out.sample
+            .filter { _meta, json, _fasta -> json.text.contains('"excluded": true') }
+            .subscribe { meta, _json, _fasta ->
+                log.warn("Pathoplexus template: sample ${meta.id} has no called consensus bases and was left out of the Pathoplexus template.")
+            }
+
+        ch_pp_template_input = PATHOPLEXUS_SAMPLE.out.sample
+            .map { meta, json, fasta -> [meta.subMap("scheme", "custom_scheme", "custom_scheme_name"), json, fasta] }
+            .groupTuple()
+
+        PATHOPLEXUS_TEMPLATE(
+            ch_pp_template_input,
+            file("${projectDir}/assets/pathoplexus_template.toml", checkIfExists: true),
+            pipeline_version,
+        )
+    }
 
     //
     // Collate and save software versions

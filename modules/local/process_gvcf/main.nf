@@ -22,4 +22,14 @@ process PROCESS_GVCF {
 
     script:
     template("process_gvcf.py")
+
+    stub:
+    """
+    touch variants.vcf consensus.vcf mask.txt
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        pysam: stub
+    END_VERSIONS
+    """
 }

@@ -8,6 +8,7 @@ import plotly.io as pio
 import pandas as pd
 
 import csv
+import math
 from importlib.metadata import version
 
 from primalbedtools.scheme import Scheme
@@ -198,9 +199,17 @@ def read_depth_plot(
             row=1,
             col=1,
         )
+        # Pin the log axis to start at depth 1, otherwise fractional binned means
+        # (e.g. 0.001) drag the autorange down several decades
+        max_depth = max(
+            [depth_plot_df["depth"].max() if not depth_plot_df.empty else 0]
+            + ([post_norm_plot_df["depth"].max()] if post_norm_plot_df is not None else [])
+        )
+        y_max = math.log10(max(max_depth, min_depth, 10)) + 0.1
         fig.update_yaxes(
             type="log",
             dtick=1,
+            range=[0, y_max],
             ticks="outside",
             tickcolor="black",
             showticklabels=True,
@@ -380,7 +389,8 @@ with open("${amp_depth_tsv}", "rt") as f:
         {
             "chrom": row["chrom"],
             "amplicon": row["amplicon"],
-            "mean_depth": float(row["mean_depth"]),
+            # align_trim >= 2.0 reports mean_fragment_depth (a read pair counts once)
+            "mean_depth": float(row.get("mean_fragment_depth", row.get("mean_depth"))),
         }
         for row in reader
     ]
@@ -427,11 +437,11 @@ else:
 
 payload = {
     "sample_id": "${meta.id}",
-    "pipeline_version": "${workflow.manifest.version}",
+    "pipeline_version": "${pipeline_version}",
     "primer_scheme_version": scheme_version_str,
     "sequencing_platform": "${meta.platform}",
     "tool_name": "amplicon-nf",
-    "tool_version": "${workflow.manifest.version}",
+    "tool_version": "${pipeline_version}",
     "citation_link": "https://doi.org/10.5281/zenodo.17522200",
     "contact_email": "s.a.j.wilkinson@bham.ac.uk",
     "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",
@@ -557,6 +567,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
             "post_norm_mean_depth",
             "total_reads",
             "total_amp_dropouts",
+            "amplicon_dropouts",
             "qc_result",
         ],
         delimiter="\t",
@@ -575,6 +586,7 @@ with open(f"{"${meta.id}"}_amplicon-nf_qc-report.tsv", "w", newline="") as f:
                 "post_norm_mean_depth": contig["post_norm_mean_depth"] if contig["post_norm_mean_depth"] is not None else "",
                 "total_reads": contig["total_reads"],
                 "total_amp_dropouts": contig["total_amplicon_dropouts"],
+                "amplicon_dropouts": ",".join(contig["amplicon_dropouts"]),
                 "qc_result": contig["qc_status"],
             }
         )

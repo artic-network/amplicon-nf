@@ -42,4 +42,10 @@ workflow ONT_ASSEMBLY {
     sorted_bam                   = ARTIC_MINION.out.sorted_bam
     primertrimmed_normalised_bam = ARTIC_MINION.out.primertrimmed_normalised_bam
     primer_scheme                = ARTIC_MINION.out.primer_scheme
+    aligntrim_qc_tsvs            = ARTIC_MINION.out.qc_summary.mix(
+        ARTIC_MINION.out.qc_amplicons,
+        ARTIC_MINION.out.qc_primer_pairs,
+        ARTIC_MINION.out.qc_split_reads,
+        ARTIC_MINION.out.qc_overlaps,
+    )
 }

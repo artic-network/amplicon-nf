@@ -14,6 +14,7 @@ process GENERATE_RUN_REPORT {
         path(post_norm_tsvs, stageAs: "post_norm_tsvs/*"),
         path(amp_depth_tsvs, stageAs: "amplicon_depth_tsvs/*"),
         path(coverage_tsvs, stageAs: "coverage_tsvs/*"),
+        path(aligntrim_qc_tsvs, stageAs: "aligntrim_qc/*"),
         path(msas, stageAs: "msas/*"),
         path(nextclade, stageAs: "nextclade_tsv/*"),
         path(samplesheet_csv)
@@ -22,6 +23,7 @@ process GENERATE_RUN_REPORT {
     path bootstrap_bundle_min_js
     path bootstrap_bundle_min_css
     path plotly_js
+    val pipeline_version // e.g. 0.12.0-g44f4001, see getPipelineVersion()
 
     output:
     path "*_amplicon-nf_run-report.html", emit: run_report_html
@@ -33,4 +35,20 @@ process GENERATE_RUN_REPORT {
 
     script:
     template("generate_run_report.py")
+
+    stub:
+    // Same naming as the template: scheme (or custom scheme name) with "/" replaced by "_"
+    def scheme_name = (meta.scheme ?: meta.custom_scheme_name ?: "Unknown Scheme Name").toString().replace("/", "_")
+    """
+    touch "${scheme_name}_amplicon-nf_run-report.html"
+    touch "${scheme_name}_qc_results.tsv"
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        plotly: stub
+        primalbedtools: stub
+        pandas: stub
+        jinja2: stub
+    END_VERSIONS
+    """
 }

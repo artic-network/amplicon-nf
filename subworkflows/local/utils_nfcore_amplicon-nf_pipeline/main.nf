@@ -69,9 +69,25 @@ workflow PIPELINE_INITIALISATION {
     Channel.fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map { meta, fastq_dir, fastq_1, fastq_2 ->
             if (meta.platform == "illumina") {
+                if (fastq_dir) {
+                    log.warn(
+                        "\nWARNING: Sample '${meta.id}' is an Illumina sample but has a 'fastq_directory' value, which will be IGNORED.\n" +
+                        "    The Illumina workflow does not support directories of FASTQ files, please provide paired reads in the 'fastq_1' and 'fastq_2' columns\n" +
+                        "    (or leave them empty and use --read_directory for fuzzy matching).\n"
+                    )
+                }
                 return [meta + [single_end: false], fastq_dir, fastq_1, fastq_2]
             }
             else {
+                if (fastq_dir && fastq_1) {
+                    error("\nERROR: SampleSheet Validation Failed\n------------------------------------\nNanopore sample '${meta.id}' provides both 'fastq_directory' and 'fastq_1'. Please provide EITHER a directory of FASTQ files in 'fastq_directory' OR a single FASTQ file in 'fastq_1', not both.\n")
+                }
+                if (fastq_2) {
+                    log.warn(
+                        "\nWARNING: Sample '${meta.id}' is a Nanopore sample but has a 'fastq_2' value, which will be IGNORED.\n" +
+                        "    Nanopore reads are single-end, please provide them as a directory in 'fastq_directory' or as a single file in 'fastq_1'.\n"
+                    )
+                }
                 return [meta + [single_end: true], fastq_dir, fastq_1, fastq_2]
             }
         }
@@ -252,4 +268,60 @@ def methodsDescriptionText(mqc_methods_yaml) {
     def description_html = engine.createTemplate(methods_text).make(meta)
 
     return description_html.toString()
+}
+
+//
+// Pipeline version qualified with the exact commit, e.g. 0.12.0-g44f4001, with -dirty appended when tracked files
+// have uncommitted changes. workflow.commitId is only set for `nextflow run artic-network/amplicon-nf`, so for runs
+// from a local clone the commit is read from projectDir/.git with JGit (bundled with Nextflow, no git binary needed).
+//
+def getPipelineVersion() {
+    def version = workflow.manifest.version
+    if (workflow.commitId) {
+        return "${version}-g${workflow.commitId.take(7)}"
+    }
+    // Only projectDir/.git itself, never an enclosing repository (e.g. a copy of the pipeline inside another repo)
+    if (workflow.projectDir.resolve('.git').exists()) {
+        try {
+            def git = org.eclipse.jgit.api.Git.open(workflow.projectDir.toFile())
+            def head = git.getRepository().resolve('HEAD')
+            def dirty = head != null && git.status().call().hasUncommittedChanges()
+            git.close()
+            if (head != null) {
+                return "${version}-g${head.name().take(7)}${dirty ? '-dirty' : ''}"
+            }
+        }
+        catch (Exception e) {
+            log.warn("Could not read the git commit of ${workflow.projectDir}: ${e.message}")
+        }
+    }
+    log.warn("Could not determine the amplicon-nf git commit, the pipeline version is recorded as ${version}-commit-unknown")
+    return "${version}-commit-unknown"
+}
+
+//
+// The pipeline parameters which differ from their defaults, for the (public) Pathoplexus `comment` field, e.g.
+// "amplicon-nf non-default parameters: --min_coverage_depth 30 --normalise_depth 500"
+// Only the analysis settings groups are included (no input / output paths, emails, hooks or Nextflow options) and
+// absolute paths are reduced to their file name.
+// NB: groups are matched on their nextflow_schema.json titles, update analysis_groups if a group is renamed.
+//
+def nonDefaultParamsText(summary_params) {
+    def analysis_groups = ['Pipeline Settings', 'Nanopore (ONT) Pipeline Settings', 'Illumina Pipeline Settings']
+
+    // Parameters with a default in the schema: a false / unset value only counts as non-default for these
+    def schema = new groovy.json.JsonSlurper().parse(workflow.projectDir.resolve('nextflow_schema.json').toFile())
+    def has_default = schema['$defs'].values().collectMany { group ->
+        (group.properties ?: [:]).findAll { _name, property -> property.containsKey('default') }.keySet()
+    }.toSet()
+
+    def args = analysis_groups.collectMany { group ->
+        (summary_params[group] ?: [:])
+            .findAll { name, value -> value != null && !(value == false && !(name in has_default)) }
+            .collect { name, value ->
+                def text = value.toString()
+                "--${name} ${text.startsWith('/') ? text.tokenize('/').last() : text}"
+            }
+    }
+    return "amplicon-nf non-default parameters: " + (args ? args.join(' ') : 'none (all defaults)')
 }

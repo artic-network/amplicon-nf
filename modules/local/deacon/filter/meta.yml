@@ -1,0 +1,73 @@
+name: "deacon_filter"
+description: Deplete host reads from single-end (Nanopore FASTQ directory or file) or paired-end (Illumina) reads with a Deacon minimizer index
+keywords:
+  - dehosting
+  - decontamination
+  - host depletion
+  - filter
+  - fastq
+tools:
+  - "deacon":
+      description: "Fast alignment-free sequence filter"
+      homepage: "https://github.com/bede/deacon"
+      documentation: "https://github.com/bede/deacon"
+      tool_dev_url: "https://github.com/bede/deacon"
+      doi: "10.1101/2025.06.09.658732"
+      licence: ["MIT"]
+      identifier: ""
+
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information, must include `platform` (nanopore | illumina)
+          e.g. `[ id:'sample1', platform:'nanopore' ]`
+    - reads:
+        type: file
+        description: |
+          Nanopore: a directory of FASTQ files (top-level `*.fastq*`, optionally gzipped) or a single FASTQ file.
+          Illumina: a list of two FASTQ files, [ fastq_1, fastq_2 ].
+        pattern: "*.{fastq,fq,fastq.gz,fq.gz}"
+  - index:
+      type: file
+      description: Deacon minimizer index
+      pattern: "*.idx"
+
+output:
+  fastq:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - "*.dehosted.fastq.gz":
+          type: file
+          description: |
+            Host-depleted reads. Nanopore: `<prefix>.dehosted.fastq.gz`.
+            Illumina: `<prefix>_R1.dehosted.fastq.gz` and `<prefix>_R2.dehosted.fastq.gz`.
+          pattern: "*.dehosted.fastq.gz"
+  versions_deacon:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - deacon:
+          type: string
+          description: The name of the tool
+      - deacon --version | head -n1 | sed "s/deacon //":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - deacon:
+          type: string
+          description: The name of the tool
+      - deacon --version | head -n1 | sed "s/deacon //":
+          type: eval
+          description: The expression to obtain the version of the tool
+
+authors:
+  - "@Biowilko"
+maintainers:
+  - "@Biowilko"
