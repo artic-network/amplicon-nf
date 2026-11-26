@@ -54,6 +54,11 @@ UPLOAD_READS_DIR = Path("raw_reads")  # header-stripped copies for upload
 MAX_RAW_READ_BYTES = 2 * 1024**3  # Pathoplexus per-file upload limit
 FILENAME_OK = "[A-Za-z0-9_.-]+"  # Pathoplexus raw read file name rule
 INSDC_ACCESSION = "(?:[A-Z]{1,2}[0-9]{5,8}|[A-Z]{2}_[0-9]{6,9})[.][0-9]+"
+# Pathoplexus accessions (e.g. PP_006XHKB.1) are also accepted as reference accessions (confirmed with the Pathoplexus team)
+PATHOPLEXUS_ACCESSION = "PP_[0-9A-Z]+[.][0-9]+"
+# A reference name must start with an accession, optionally followed by a suffix (e.g. KJ642613.1_masked);
+# names that are not accessions (e.g. "sequence", "reference", "chr1") are left out
+REFERENCE_ACCESSION = f"(?:{INSDC_ACCESSION}|{PATHOPLEXUS_ACCESSION})(?:[_|-].*)?"
 ILLUMINA_HEADERS_TO_SCAN = 1000
 
 # ONT flow cell ID -> flow cell type. Only the Flongle format is documented by ONT (ABC123);
@@ -441,7 +446,7 @@ if kept_qc:
         if dropout:
             issues.append("amplicon dropout")
 
-accessions = [r["chrom"] for r in kept if re.fullmatch(INSDC_ACCESSION, r["chrom"])]
+accessions = [r["chrom"] for r in kept if re.fullmatch(REFERENCE_ACCESSION, r["chrom"])]
 
 dehosting = ""
 if not SKIP_DEHOSTING:

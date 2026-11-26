@@ -580,7 +580,7 @@ name = "assemblyReferenceGenomeAccession"
 display_name = "Reference genome accession"
 tier = "optional"
 definition = "A persistent, unique identifier of a genome database entry."
-guidance = "Provide the INSDC accession number of the reference genome used for mapping/assembly."
+guidance = "Provide the INSDC or Pathoplexus accession number of the reference genome used for mapping/assembly."
 example = "NC_045512.2"
 
 [[fields]]
