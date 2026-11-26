@@ -154,6 +154,8 @@ workflow AMPLICON_NF {
     //
     // Host read removal with Deacon (before guppyplex / fastp) - on by default
     //
+    // Deacon version for the Pathoplexus dehostingMethod field (empty when dehosting is skipped)
+    ch_deacon_version = channel.value('')
     if (!params.skip_dehosting) {
         if (file(params.dehosting_index).exists()) {
             ch_deacon_index = file(params.dehosting_index)
@@ -178,6 +180,10 @@ workflow AMPLICON_NF {
         ch_illumina_input = DEACON_FILTER.out.fastq
             .filter { meta, _fastq -> meta.platform == "illumina" }
             .map { meta, fastq -> [meta, fastq[0], fastq[1]] }
+
+        ch_deacon_version = DEACON_FILTER.out.versions_deacon
+            .first()
+            .map { _process, _tool, version -> version }
     }
 
     //
@@ -446,6 +452,7 @@ workflow AMPLICON_NF {
             ch_pp_sample_input,
             pipeline_version,
             nonDefaultParamsText(paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")),
+            ch_deacon_version,
         )
 
         PATHOPLEXUS_SAMPLE.out.sample

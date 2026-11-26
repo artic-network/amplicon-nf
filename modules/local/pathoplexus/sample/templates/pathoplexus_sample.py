@@ -34,6 +34,7 @@ MIN_DEPTH = int("${params.min_coverage_depth}")
 QC_PASS_HIGH = float("${params.qc_pass_high_coverage}")
 SKIP_DEHOSTING = "${params.skip_dehosting}" == "true"
 DEHOSTING_INDEX = "${params.dehosting_index}"
+DEACON_VERSION = "${deacon_version}".strip()
 MIN_ONT_READ_QUALITY = "${params.min_ont_read_quality ?: ''}"
 MIN_ONT_READ_LENGTH = "${params.min_ont_read_length ?: ''}"
 MAX_ONT_READ_LENGTH = "${params.max_ont_read_length ?: ''}"
@@ -447,7 +448,7 @@ if not SKIP_DEHOSTING:
     index_name = os.path.basename(DEHOSTING_INDEX.rstrip("/"))
     if index_name.endswith(".idx"):
         index_name = index_name[: -len(".idx")]
-    dehosting = f"Deacon (index {index_name}) in {pipeline_label}"
+    dehosting = f"Deacon {DEACON_VERSION} (index {index_name})" if DEACON_VERSION else f"Deacon (index {index_name})"
 
 # AUTO: every field this module fills; anything else in the template config is left for the user
 AUTO = {

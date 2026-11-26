@@ -13,6 +13,7 @@ process PATHOPLEXUS_SAMPLE {
     tuple val(meta), path(consensus, stageAs: 'consensus/*'), path(bed, stageAs: 'scheme/*'), path(qc_tsv, stageAs: 'qc/*'), path(reads, stageAs: 'reads/*')
     val pipeline_version  // e.g. 0.12.0-g44f4001, see getPipelineVersion()
     val nondefault_params // free text for the `comment` field, see nonDefaultParamsText()
+    val deacon_version    // DEACON_FILTER's `deacon --version`, empty with --skip_dehosting
 
     output:
     tuple val(meta), path("${meta.id}.pathoplexus.json"), path("${meta.id}.pathoplexus.fasta"), emit: sample
