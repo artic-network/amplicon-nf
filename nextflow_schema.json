@@ -57,7 +57,7 @@
                     "description": "Run Nextclade for clade assignment, mutation calling, and sequence quality checks for genome consensus sequence. Name of Nextclade dataset to retrieve (eg: sars-cov-2) or path to predownloaded Nextclade dataset. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
                     "fa_icon": "fas fa-project-diagram"
                 },
-                "nextclade_tag":{
+                "nextclade_tag": {
                     "type": "string",
                     "title": "Nextclade dataset tag.",
                     "description": "Version tag of the dataset to download. If not specified, Nextclade will retrieve the latest version.",
@@ -140,7 +140,7 @@
                 },
                 "primer_match_threshold": {
                     "type": "integer",
-                    "default": 35,
+                    "default": 15,
                     "description": "Allow fuzzy primer position matching within this threshold.",
                     "help_text": "This controls how far outside of an amplicon boundary an alignment can be while still being considered a match to the primer. This is useful to control for instances where reads are not adapter / barcode trimmed (or incompletely trimmed) and these extra bases have some degree of homology with the reference leading to alignments extending beyond the amplicon boundary."
                 },

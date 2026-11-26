@@ -24,6 +24,7 @@ process ARTIC_MINION {
     tuple val(meta), path("${prefix}.overlaps.tsv"), emit: qc_overlaps
     tuple val(meta), path("${prefix}.consensus.fasta"), emit: fasta
     tuple val(meta), path("${prefix}.normalised.vcf.gz"), emit: vcf
+    tuple val(meta), path("${prefix}.fail.vcf"), emit: fail_vcf
     tuple val(meta), path("${prefix}.primer.bed"), path("${prefix}.reference.fasta"), emit: primer_scheme
     tuple val(meta), path("${prefix}.minion.log.txt"), emit: minion_log
     tuple val("${task.process}"), val('artic'), eval('artic -v 2>&1 | sed "s/^.*artic //; s/ .*$//"'), emit: versions_artic, topic: versions

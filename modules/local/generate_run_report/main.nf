@@ -34,4 +34,20 @@ process GENERATE_RUN_REPORT {
 
     script:
     template("generate_run_report.py")
+
+    stub:
+    // Same naming as the template: scheme (or custom scheme name) with "/" replaced by "_"
+    def scheme_name = (meta.scheme ?: meta.custom_scheme_name ?: "Unknown Scheme Name").toString().replace("/", "_")
+    """
+    touch "${scheme_name}_amplicon-nf_run-report.html"
+    touch "${scheme_name}_qc_results.tsv"
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        plotly: stub
+        primalbedtools: stub
+        pandas: stub
+        jinja2: stub
+    END_VERSIONS
+    """
 }

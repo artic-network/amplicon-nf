@@ -26,4 +26,18 @@ process GENERATE_SAMPLE_REPORT {
 
     script:
     template("generate_sample_report.py")
+
+    stub:
+    """
+    touch ${meta.id}_amplicon-nf_sample-report.html
+    touch ${meta.id}_amplicon-nf_qc-report.tsv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        plotly: stub
+        primalbedtools: stub
+        pandas: stub
+        jinja2: stub
+    END_VERSIONS
+    """
 }

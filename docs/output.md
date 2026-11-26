@@ -119,6 +119,9 @@ The alignment FASTA(s) contain(s) an alignment of all consensus FASTAs to the sc
 
 - `<SAMPLE>/`
   - `<SAMPLE>.vcf.gz`: The variant calls used to generate the consensus sequence in the FASTA.
+  - `<SAMPLE>.fail.vcf` (Nanopore) / `<SAMPLE>.fail.vcf.gz` (Illumina): Variants which were called but failed filtering, so their position is masked as `N` in the consensus sequence.
+    - Nanopore: the `artic minion` failed variants, written as Clair3 reported them (the `FILTER` column is not updated). A variant fails if its quality is below `--min_variant_quality`, its allele frequency is between `--min_mask_allele_frequency` and `--min_allele_frequency`, it is a low quality frameshift, or its depth is below `--min_coverage_depth`.
+    - Illumina: the mixed positions (`ConsensusTag=ambiguous`, see below), which are also included in `<SAMPLE>.vcf.gz`. With `--allow_iupac_codes` these positions are represented by IUPAC ambiguity codes rather than masked.
 
 </details>
 

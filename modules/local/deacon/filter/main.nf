@@ -27,28 +27,45 @@ process DEACON_FILTER {
     if (meta.platform == 'nanopore') {
         """
         if [ -d ${reads} ]; then
-            # Mirror guppyplex's input rules (top-level *.fastq*, skip *.temp) and stream everything through one deacon run
-            files=()
-            n_gz=0
-            for f in ${reads}/*.fastq*; do
-                case "\$f" in
-                    *.temp) ;;
-                    *.gz) files+=("\$f"); n_gz=\$((n_gz + 1)) ;;
-                    *) files+=("\$f") ;;
+            # Stream every top-level FASTQ file through one deacon run. Only names ending .fastq / .fq
+            # (optionally .gz, any case) are read, so sidecar files such as *.fastq.gz.deacon.json, *.temp,
+            # hidden files and sub-directories are skipped, as are empty files.
+            shopt -s nullglob nocasematch
+            gz=()
+            plain=()
+            for f in ${reads}/*; do
+                name="\${f##*/}"
+                [ -f "\$f" ] && [ -s "\$f" ] || continue
+                case "\$name" in
+                    .*) continue ;;
+                    *.fastq|*.fq|*.fastq.gz|*.fq.gz) ;;
+                    *) continue ;;
                 esac
+                # Classify by the gzip magic bytes (1f 8b) rather than the name, in case the two disagree
+                if [ "\$(head -c 2 "\$f" | od -An -tx1 | tr -d ' \\n')" = "1f8b" ]; then
+                    gz+=("\$f")
+                else
+                    plain+=("\$f")
+                fi
             done
+            shopt -u nocasematch
+
+            if [ \$(( \${#gz[@]} + \${#plain[@]} )) -eq 0 ]; then
+                echo "ERROR: no non-empty FASTQ files (.fastq, .fq, .fastq.gz, .fq.gz) found in '${reads}'" >&2
+                exit 1
+            fi
+            echo "Dehosting \${#gz[@]} gzipped and \${#plain[@]} uncompressed FASTQ file(s) from '${reads}'" >&2
+
             # deacon (>= 0.20) detects gzip on stdin and reads concatenated .gz files as one stream, so the
             # files are passed through compressed. One stream can't switch between gzip and plain text, so a
-            # directory mixing the two is decompressed file by file instead.
-            if [ \$n_gz -eq 0 ] || [ \$n_gz -eq \${#files[@]} ]; then
-                cat "\${files[@]}"
+            # directory mixing the two is decompressed instead. Empty arrays are never expanded (bash -u).
+            if [ \${#plain[@]} -eq 0 ]; then
+                cat "\${gz[@]}"
+            elif [ \${#gz[@]} -eq 0 ]; then
+                cat "\${plain[@]}"
             else
-                for f in "\${files[@]}"; do
-                    case "\$f" in
-                        *.gz) gzip -dc "\$f" ;;
-                        *) cat "\$f" ;;
-                    esac
-                done
+                gzip -dc "\${gz[@]}"
+                cat "\${plain[@]}"
             fi | deacon \\
                 filter \\
                 --deplete \\
