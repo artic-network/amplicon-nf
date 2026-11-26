@@ -8,6 +8,8 @@ include { paramsSummaryMap                          } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                    } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { getPipelineVersion                        } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
+include { nonDefaultParamsText                      } from '../subworkflows/local/utils_nfcore_amplicon-nf_pipeline'
 
 include { ONT_ASSEMBLY                              } from '../subworkflows/local/ont_assembly/main'
 include { ILLUMINA_ASSEMBLY                         } from '../subworkflows/local/illumina_assembly/main'
@@ -43,6 +45,9 @@ workflow AMPLICON_NF {
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+
+    // Pipeline version with the exact commit (e.g. 0.12.0-g44f4001[-dirty]), recorded in the reports and Pathoplexus template
+    def pipeline_version = getPipelineVersion()
 
     ch_input = ch_samplesheet.branch { meta, _fastq_directory, _fastq_1, _fastq_2 ->
         nanopore: meta.platform == "nanopore"
@@ -285,6 +290,7 @@ workflow AMPLICON_NF {
         bootstrap_bundle_min_js,
         bootstrap_bundle_min_css,
         plotly_js,
+        pipeline_version,
     )
     ch_versions = ch_versions.mix(GENERATE_SAMPLE_REPORT.out.versions.first())
 
@@ -408,6 +414,7 @@ workflow AMPLICON_NF {
         bootstrap_bundle_min_js,
         bootstrap_bundle_min_css,
         plotly_js,
+        pipeline_version,
     )
     ch_versions = ch_versions.mix(GENERATE_RUN_REPORT.out.versions.first())
 
@@ -435,7 +442,11 @@ workflow AMPLICON_NF {
             .join(ch_pp_reads)
             .map { _id, meta, fasta, bed, qc_tsv, reads -> [meta, fasta, bed, qc_tsv, reads] }
 
-        PATHOPLEXUS_SAMPLE(ch_pp_sample_input)
+        PATHOPLEXUS_SAMPLE(
+            ch_pp_sample_input,
+            pipeline_version,
+            nonDefaultParamsText(paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")),
+        )
 
         PATHOPLEXUS_SAMPLE.out.sample
             .filter { _meta, json, _fasta -> json.text.contains('"excluded": true') }
@@ -450,6 +461,7 @@ workflow AMPLICON_NF {
         PATHOPLEXUS_TEMPLATE(
             ch_pp_template_input,
             file("${projectDir}/assets/pathoplexus_template.toml", checkIfExists: true),
+            pipeline_version,
         )
     }
 

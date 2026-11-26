@@ -23,6 +23,7 @@ process GENERATE_RUN_REPORT {
     path bootstrap_bundle_min_js
     path bootstrap_bundle_min_css
     path plotly_js
+    val pipeline_version // e.g. 0.12.0-g44f4001, see getPipelineVersion()
 
     output:
     path "*_amplicon-nf_run-report.html", emit: run_report_html

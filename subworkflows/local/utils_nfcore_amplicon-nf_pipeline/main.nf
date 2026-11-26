@@ -269,3 +269,59 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
+
+//
+// Pipeline version qualified with the exact commit, e.g. 0.12.0-g44f4001, with -dirty appended when tracked files
+// have uncommitted changes. workflow.commitId is only set for `nextflow run artic-network/amplicon-nf`, so for runs
+// from a local clone the commit is read from projectDir/.git with JGit (bundled with Nextflow, no git binary needed).
+//
+def getPipelineVersion() {
+    def version = workflow.manifest.version
+    if (workflow.commitId) {
+        return "${version}-g${workflow.commitId.take(7)}"
+    }
+    // Only projectDir/.git itself, never an enclosing repository (e.g. a copy of the pipeline inside another repo)
+    if (workflow.projectDir.resolve('.git').exists()) {
+        try {
+            def git = org.eclipse.jgit.api.Git.open(workflow.projectDir.toFile())
+            def head = git.getRepository().resolve('HEAD')
+            def dirty = head != null && git.status().call().hasUncommittedChanges()
+            git.close()
+            if (head != null) {
+                return "${version}-g${head.name().take(7)}${dirty ? '-dirty' : ''}"
+            }
+        }
+        catch (Exception e) {
+            log.warn("Could not read the git commit of ${workflow.projectDir}: ${e.message}")
+        }
+    }
+    log.warn("Could not determine the amplicon-nf git commit, the pipeline version is recorded as ${version}-commit-unknown")
+    return "${version}-commit-unknown"
+}
+
+//
+// The pipeline parameters which differ from their defaults, for the (public) Pathoplexus `comment` field, e.g.
+// "amplicon-nf non-default parameters: --min_coverage_depth 30 --normalise_depth 500"
+// Only the analysis settings groups are included (no input / output paths, emails, hooks or Nextflow options) and
+// absolute paths are reduced to their file name.
+// NB: groups are matched on their nextflow_schema.json titles, update analysis_groups if a group is renamed.
+//
+def nonDefaultParamsText(summary_params) {
+    def analysis_groups = ['Pipeline Settings', 'Nanopore (ONT) Pipeline Settings', 'Illumina Pipeline Settings']
+
+    // Parameters with a default in the schema: a false / unset value only counts as non-default for these
+    def schema = new groovy.json.JsonSlurper().parse(workflow.projectDir.resolve('nextflow_schema.json').toFile())
+    def has_default = schema['$defs'].values().collectMany { group ->
+        (group.properties ?: [:]).findAll { _name, property -> property.containsKey('default') }.keySet()
+    }.toSet()
+
+    def args = analysis_groups.collectMany { group ->
+        (summary_params[group] ?: [:])
+            .findAll { name, value -> value != null && !(value == false && !(name in has_default)) }
+            .collect { name, value ->
+                def text = value.toString()
+                "--${name} ${text.startsWith('/') ? text.tokenize('/').last() : text}"
+            }
+    }
+    return "amplicon-nf non-default parameters: " + (args ? args.join(' ') : 'none (all defaults)')
+}

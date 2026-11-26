@@ -11,6 +11,8 @@ process PATHOPLEXUS_SAMPLE {
     // consensus: reheadered consensus FASTA | bed: per-sample primer.bed | qc_tsv: per-sample QC report TSV
     // reads: reads after the dehosting step (dehosted, or raw if dehosting was skipped)
     tuple val(meta), path(consensus, stageAs: 'consensus/*'), path(bed, stageAs: 'scheme/*'), path(qc_tsv, stageAs: 'qc/*'), path(reads, stageAs: 'reads/*')
+    val pipeline_version  // e.g. 0.12.0-g44f4001, see getPipelineVersion()
+    val nondefault_params // free text for the `comment` field, see nonDefaultParamsText()
 
     output:
     tuple val(meta), path("${meta.id}.pathoplexus.json"), path("${meta.id}.pathoplexus.fasta"), emit: sample
@@ -23,6 +25,8 @@ process PATHOPLEXUS_SAMPLE {
     task.ext.when == null || task.ext.when
 
     script:
+    // JSON-encoded so the text is always a valid Python string literal in the template, whatever characters it holds
+    nondefault_params_json = groovy.json.JsonOutput.toJson(nondefault_params)
     template("pathoplexus_sample.py")
 
     stub:

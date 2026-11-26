@@ -11,6 +11,7 @@ process PATHOPLEXUS_TEMPLATE {
     // jsons / fastas: PATHOPLEXUS_SAMPLE outputs for every sample of one primer scheme
     tuple val(meta), path(jsons, stageAs: 'samples/*'), path(fastas, stageAs: 'fastas/*')
     path template_config // assets/pathoplexus_template.toml
+    val pipeline_version // e.g. 0.12.0-g44f4001, see getPipelineVersion()
 
     output:
     tuple val(meta), path("${prefix}_pathoplexus_metadata.xlsx"), path("${prefix}_pathoplexus_metadata.tsv"), path("${prefix}_pathoplexus_sequences.fasta"), emit: upload

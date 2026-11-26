@@ -27,7 +27,7 @@ from openpyxl.worksheet.datavalidation import DataValidation
 PREFIX = "${prefix}"
 SCHEME_LABEL = "${meta.scheme ?: meta.custom_scheme_name}"
 PIPELINE_NAME = "${workflow.manifest.name}"
-PIPELINE_VERSION = "${workflow.manifest.version}"
+PIPELINE_VERSION = "${pipeline_version}"
 TEMPLATE_CONFIG = "${template_config}"
 TASK_PROCESS = "${task.process}"
 # -------------------------------------------------------------------------------------------

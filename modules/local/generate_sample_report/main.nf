@@ -15,6 +15,7 @@ process GENERATE_SAMPLE_REPORT {
     path bootstrap_bundle_min_js
     path bootstrap_bundle_min_css
     path plotly_js
+    val pipeline_version // e.g. 0.12.0-g44f4001, see getPipelineVersion()
 
     output:
     path "*_amplicon-nf_sample-report.html", emit: sample_report_html

@@ -27,10 +27,11 @@ PLATFORM = "${meta.platform}"
 SCHEME = "${meta.scheme ?: ''}"
 CUSTOM_SCHEME_NAME = "${meta.custom_scheme_name ?: ''}"
 PIPELINE_NAME = "${workflow.manifest.name}"
-PIPELINE_VERSION = "${workflow.manifest.version}"
+PIPELINE_VERSION = "${pipeline_version}"
+# JSON-encoded in main.nf, so this is already a quoted Python string literal
+NONDEFAULT_PARAMS = ${nondefault_params_json}
 MIN_DEPTH = int("${params.min_coverage_depth}")
 QC_PASS_HIGH = float("${params.qc_pass_high_coverage}")
-QC_PASS_MIN = float("${params.qc_pass_min_coverage}")
 SKIP_DEHOSTING = "${params.skip_dehosting}" == "true"
 DEHOSTING_INDEX = "${params.dehosting_index}"
 MIN_ONT_READ_QUALITY = "${params.min_ont_read_quality ?: ''}"
@@ -429,8 +430,8 @@ if kept_qc:
         dropout = dropout or bool(dropouts) or (to_float(q.get("total_amp_dropouts")) or 0) > 0
         prefix = f"{r['chrom']}: " if len(kept_qc) > 1 else ""
         details.append(
-            f"{prefix}{measure:.2f}% of reference at >={MIN_DEPTH}x ({label} depth; pass >={QC_PASS_HIGH:g}%, "
-            f"warning >={QC_PASS_MIN:g}%); mean depth {q.get('pre_norm_mean_depth', '')}x; "
+            f"{prefix}{measure:.2f}% of reference at >={MIN_DEPTH}x ({label} depth); "
+            f"mean depth {q.get('pre_norm_mean_depth', '')}x; "
             f"amplicon dropouts (<{MIN_DEPTH}x): {', '.join(dropouts) if dropouts else 'none'}"
         )
     if qc_result in ("warning", "fail"):
@@ -469,6 +470,7 @@ AUTO = {
     "qualityControlDetermination": QC_DETERMINATION.get(qc_result, ""),
     "qualityControlIssues": "; ".join(issues),
     "qualityControlDetails": " | ".join(details),
+    "comment": NONDEFAULT_PARAMS,
     "files.rawReads": "",
 }
 

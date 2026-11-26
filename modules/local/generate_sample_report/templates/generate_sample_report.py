@@ -437,11 +437,11 @@ else:
 
 payload = {
     "sample_id": "${meta.id}",
-    "pipeline_version": "${workflow.manifest.version}",
+    "pipeline_version": "${pipeline_version}",
     "primer_scheme_version": scheme_version_str,
     "sequencing_platform": "${meta.platform}",
     "tool_name": "amplicon-nf",
-    "tool_version": "${workflow.manifest.version}",
+    "tool_version": "${pipeline_version}",
     "citation_link": "https://doi.org/10.5281/zenodo.17522200",
     "contact_email": "s.a.j.wilkinson@bham.ac.uk",
     "funder_statement": "This pipeline has been created as part of the ARTIC network project funded by the Wellcome Trust (collaborator award – 313694/Z/24/Z and discretionary award – 206298/Z/17/Z) and is distributed as open source and open access. All non-code files are made available under a Creative Commons CC-BY licence unless otherwise specified. Please acknowledge or cite this repository or associated publications if used in derived work so we can provide our funders with evidence of impact in the field.",

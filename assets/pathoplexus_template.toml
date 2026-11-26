@@ -669,6 +669,13 @@ definition = "The details surrounding a low quality determination in a quality c
 example = "CT value of 39. Low viral load. Low DNA concentration after amplification."
 
 [[fields]]
+name = "comment"
+display_name = "Comment"
+tier = "optional"
+definition = "Any additional comments about the sample or sequence. Filled in by amplicon-nf with the pipeline parameters that differ from their defaults."
+example = "amplicon-nf non-default parameters: --min_coverage_depth 30 --normalise_depth 500"
+
+[[fields]]
 name = "files.rawReads"
 display_name = "Raw reads"
 tier = "optional"
