@@ -57,10 +57,10 @@ INSDC_ACCESSION = "(?:[A-Z]{1,2}[0-9]{5,8}|[A-Z]{2}_[0-9]{6,9})[.][0-9]+"
 ILLUMINA_HEADERS_TO_SCAN = 1000
 
 # ONT flow cell ID -> flow cell type. Only the Flongle format is documented by ONT (ABC123);
-# the F... (MinION/GridION) and P... (PromethION) prefixes are a widely observed convention.
+# the F... (MinION) and P... (PromethION) prefixes are a widely observed convention.
 ONT_FLOW_CELL_TYPES = [
     ("[A-Z]{3}[0-9]{3}", "Flongle"),
-    ("F[A-Z]{2}[0-9]{5}", "MinION/GridION"),
+    ("F[A-Z]{2}[0-9]{5}", "MinION"),
     ("P[A-Z]{2}[0-9]{5}", "PromethION"),
 ]
 
@@ -199,7 +199,7 @@ def flow_cell_type(flow_cell_id):
 
 
 def flow_cell_label(flow_cell_ids):
-    # "MinION/GridION flow cell FBH86191"; the type is only stated when all IDs share one known type
+    # "MinION flow cell FBH86191"; the type is only stated when all IDs share one known type
     types = sorted({flow_cell_type(x) or "unknown" for x in flow_cell_ids})
     type_text = f"{types[0]} " if len(types) == 1 and types[0] != "unknown" else ""
     return f"{type_text}flow cell{'s' if len(flow_cell_ids) > 1 else ''} {', '.join(flow_cell_ids)}"
@@ -370,7 +370,7 @@ if PLATFORM == "nanopore":
         platform_text += f" ({', '.join(chemistries)} chemistry)"
     runs = header_info["runs"]
     if len(runs) > 1:
-        # Each run with its own flow cell(s), e.g. "run 993a8f43 on MinION/GridION flow cell FBH86191"
+        # Each run with its own flow cell(s), e.g. "run 993a8f43 on MinION flow cell FBH86191"
         per_run = [f"run {r['run']}" + (f" on {flow_cell_label(r['flow_cells'])}" if r["flow_cells"] else "") for r in runs]
         platform_text += f", {len(runs)} sequencing runs ({', '.join(per_run)})"
     elif fc_ids:
